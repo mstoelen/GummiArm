@@ -1,0 +1,5 @@
+<launch>
+  <node name="arbotix" pkg="arbotix_python" type="arbotix_driver" output="screen">
+    <rosparam file="gummi.yaml" command="load" />
+  </node>
+</launch>

@@ -1,0 +1,19 @@
+port: /dev/ttyUSB3
+rate: 100
+read_rate: 100
+write_rate: 100
+sync_read: True
+sync_write: True
+sim: False
+joints: {
+    biceps: {type: "dynamixel", id: 1, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
+    triceps: {type: "dynamixel", id: 2, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
+    elbow_encoder: {type: "dynamixel", id: 3, max_angle: 150, min_angle: -150, max_speed: 500},
+    forearm_roll: {type: "dynamixel", id: 4, max_angle: 150, min_angle: -150, max_speed: 500},
+    wrist_flexor: {type: "dynamixel", id: 5, max_angle: 150, min_angle: -150, max_speed: 1000},
+    wrist_extensor: {type: "dynamixel", id: 6, max_angle: 150, min_angle: -150, max_speed: 1000},
+    hand: {type: "dynamixel", id: 7, max_angle: 150, min_angle: -150, max_speed: 500},
+    wrist_encoder: {type: "dynamixel", id: 8, max_angle: 150, min_angle: -150, max_speed: 500},
+    shoulder_roll: {type: "dynamixel", id: 9, max_angle: 180, min_angle: -180, max_speed: 1000, neutral: 2048, ticks: 4096},
+    shoulder_pitch_encoder: {type: "dynamixel", id: 10, max_angle: 180, min_angle: -180, max_speed: 500},
+}
