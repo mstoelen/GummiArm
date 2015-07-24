@@ -18,4 +18,7 @@ joints: {
     shoulder_pitch_encoder: {type: "dynamixel", id: 10, max_angle: 180, min_angle: -180, max_speed: 500},
     shoulder_adductor: {type: "dynamixel", id: 11, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
     shoulder_abductor: {type: "dynamixel", id: 12, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
+    shoulder_flexor: {type: "dynamixel", id: 13, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
+    shoulder_extensor: {type: "dynamixel", id: 14, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
+    shoulder_roll_encoder: {type: "dynamixel", id: 15, max_angle: 180, min_angle: -180, max_speed: 500}
 }
