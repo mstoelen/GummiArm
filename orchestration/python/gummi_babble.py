@@ -78,7 +78,7 @@ def main(args):
             ran = random.uniform(-1500, 1500) 
             v = v + ran
             if i==0: 
-                #Shoulder roll
+                #Upper arm roll
                 v = limitVelocity(v,1750)
             else:
                 v = limitVelocity(v,10000)

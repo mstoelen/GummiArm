@@ -10,17 +10,16 @@ from joint_angle import JointAngle
 from reflex import Reflex
 
 class Antagonist:
-    def __init__(self, signFlexor, signExtensor, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle):
+    def __init__(self, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle):
         self.signFlexor = signFlexor
         self.signExtensor = signExtensor
+        self.signJoint = signJoint
         self.nameFlexor = nameFlexor
         self.nameExtensor = nameExtensor
         self.nameEncoder = nameEncoder
         self.servoRange = servoRange
-        self.minAngle = minAngle
-        self.maxAngle = maxAngle
 
-        self.angle = JointAngle(nameEncoder, servoRange)
+        self.angle = JointAngle(nameEncoder, signEncoder, minAngle, maxAngle)
         self.stretchReflex = Reflex(stretchReflexGain, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
 
@@ -141,7 +140,7 @@ class Antagonist:
 
     def doClosedLoop(self):
         encoderAngle = self.angle.getEncoder()
-        dAngle = self.angle.getDesired()
+        dAngle = self.signJoint * self.angle.getDesired()
         error = dAngle - encoderAngle
         self.dEquilibrium = self.dEquilibrium + error * self.cGain
 

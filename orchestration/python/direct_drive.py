@@ -13,7 +13,7 @@ class DirectDrive:
         self.initPublishers()
         self.initVariables()
 
-        self.angle = JointAngle(name, servoRange)
+        self.angle = JointAngle(name, 1, -servoRange/2, servoRange/2)
 
     def initPublishers(self):
         self.pub = rospy.Publisher('/' + self.name + '/command', Float64, queue_size=5)
