@@ -73,7 +73,7 @@ class Antagonist:
     def servoWith(self, dVelocity, dStiffness, dGain):
         self.closedLoop = True
         self.velocity = True
-        self.angle.setDesiredVelocity(dVelocity)
+        self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.dStiffness = dStiffness  
         self.dGain = dGain
         self.timeLast = rospy.Time.now()

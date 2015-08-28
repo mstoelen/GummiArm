@@ -8,7 +8,7 @@ import time
 import pygame
 from pygame.locals import *
 
-from teleop import Teleop
+from gummi import Gummi
 
 def isAtJointLimit(angles, mins, maxs):
     atLimits = list()
@@ -54,12 +54,13 @@ def main(args):
     rospy.init_node('GummiBabble', anonymous=True)
     r = rospy.Rate(30)  
 
-    gummi = Teleop()
+    gummi = Gummi()
 
-    gummi.setMaxLoads(1.5, 1.65, 0.75)
+    gummi.setMaxLoads(2, 1.75, 2, 1)
+    gummi.manualSetStiffness(0.4, 0.4, 0.4, 0.4)
 
-    minLimits = [-30, -30, -30, -75, -45]
-    maxLimits = [30, 75, 34, 15, 45]
+    minLimits = [-30,-75,-30,-25,-75,-35]
+    maxLimits = [65,0,30,25,75,35]
 
     timeReverse = rospy.Time.now()
 
@@ -67,7 +68,7 @@ def main(args):
         gummi.goRestingPose()
         r.sleep()
 
-    velocities = [0, 0, 0, 0]
+    velocities = [0, 0, 0, 0, 0, 0]
     while not rospy.is_shutdown():
 
         angles = gummi.getJointAngles()
@@ -75,37 +76,36 @@ def main(args):
         #print(angles)
 
         for i,v in enumerate(velocities):
-            ran = random.uniform(-1500, 1500) 
+            ran = random.uniform(-1000, 1000)  
             v = v + ran
-            if i==0: 
+            if i==2: 
                 #Upper arm roll
-                v = limitVelocity(v,1750)
+                v = limitVelocity(v,1000)
             else:
-                v = limitVelocity(v,10000)
+                v = limitVelocity(v,7500)
             velocities[i] = v
         #print(velocities)
 
         reverse = False
         loads = gummi.getLoads()
         #print(loads)
-        for l in loads:
-            if abs(l) > 1:
-                reverse = True
+        for i,l in enumerate(loads):
+            if i is not 2:
+                if i is not 4:
+                    if abs(l) > 1:
+                        reverse = True
         
         if not reverse:
             atLimits = list()
             atLimits = isAtJointLimit(angles, minLimits, maxLimits)
             for i,l in enumerate(atLimits):
                 if l:
-                    if i == 0: #Shoulder pitch not actuated yet, blame other joints
-                        reverse = True
+                    if angles[i] <= minLimits[i]:
+                        corrected = 300
                     else:
-                        if angles[i] <= minLimits[i]:
-                            corrected = minLimits[i] - angles[i]
-                        else:
-                            corrected = maxLimits[i] - angles[i]
-                        velocities[i-1] = corrected * 500
-                        print("Moving joint " + str(i) + " away from joint limit!")
+                        corrected = -300
+                    velocities[i] = corrected
+                    print("Moving joint " + str(i+1) + " away from joint limit!")
 
         duration = rospy.Time.now() - timeReverse
         secondsSinceReverse = duration.to_sec()
