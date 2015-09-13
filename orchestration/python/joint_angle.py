@@ -55,3 +55,9 @@ class JointAngle:
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity
+
+    def getMin(self):
+        return self.minAngle
+
+    def getMax(self):
+        return self.maxAngle

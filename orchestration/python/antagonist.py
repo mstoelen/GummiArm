@@ -86,6 +86,14 @@ class Antagonist:
         self.dStiffness = dStiffness  
         self.doUpdate()
 
+    def passiveHold(self, dStiffness):
+        self.velocity = False
+        self.closedLoop = False
+        self.dStiffness = dStiffness
+        self.resetEquilibriumErrors()
+        self.stretchReflex.inhibit()
+        self.doUpdate()
+
     def setMaxLoad(self, maxLoad):
         self.maxLoad = maxLoad
 
@@ -221,13 +229,16 @@ class Antagonist:
 
     def createLoadRatio(self):
         encoderAngle = self.angle.getEncoder()
-        load = self.dEquilibrium - encoderAngle #TODO
+        minAngle = self.angle.getMin()
+        maxAngle = self.angle.getMax()
+        jointRange = maxAngle - minAngle
+        estimatedAngle = minAngle + (self.dEquilibrium/2)*(jointRange/2)
+        load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cStiffness)
         self.loadRatio = adjustedLoad/self.maxLoad
-        #print("loadRatio for " + self.nameEncoder + ": " + str(self.loadRatio))
 
     def getJointAngle(self):
-        return self.angle.getEncoder() #* self.signJoint
+        return self.angle.getEncoder()
 
     def getFlexorAngle(self):
         return self.flexorAngle.getEncoder()

@@ -50,8 +50,8 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.setMaxLoads(2, 1.75, 2, 1.25)
-    gummi.manualSetStiffness(0.8, 0.8, 0.8, 0.8)
+    gummi.setMaxLoads(1.0, 1.0, 1.85, 1.5)
+    gummi.manualSetStiffness(0.45, 0.6, 0.45, 0.3)
 
     minLimits = [-30,0,-30,-20,-75,-35]
     maxLimits = [65,75,30,20,75,35]
@@ -88,6 +88,7 @@ def main(args):
             if i is not 2:
                 if i is not 4:
                     if abs(l) > 1:
+                        print("Joint " + str(i+1) + " has load above 1: " + str(l) + ".") 
                         reverse = True
         
         if not reverse:
