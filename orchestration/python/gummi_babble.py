@@ -9,6 +9,7 @@ import pygame
 from pygame.locals import *
 
 from gummi import Gummi
+import helpers
 
 def isAtJointLimit(angles, mins, maxs):
     atLimits = list()
@@ -17,7 +18,7 @@ def isAtJointLimit(angles, mins, maxs):
             atLimits.append(True)
         else:
             if an >= ma:
-                atLimits.append(True)
+                atLimits.append(True),
             else:
                 atLimits.append(False)
     return atLimits
@@ -29,13 +30,6 @@ def limitVelocity(v,limit):
         if v <= -limit:
             return -limit
     return v
-
-def radToDeg(angles):
-    pi = 3.1416
-    for i,a in enumerate(angles):
-        a = a * 180/pi
-        angles[i] = a
-    return angles
 
 def reverseVelocities(vels):
     for i,v in enumerate(vels):
@@ -52,39 +46,40 @@ def main(args):
     pygame.display.update()
 
     rospy.init_node('GummiBabble', anonymous=True)
-    r = rospy.Rate(30)  
+    r = rospy.Rate(60)  
 
     gummi = Gummi()
 
-    gummi.setMaxLoads(2, 1.75, 2, 1)
-    gummi.manualSetStiffness(0.4, 0.4, 0.4, 0.4)
+    gummi.setMaxLoads(2, 1.75, 2, 1.25)
+    gummi.manualSetStiffness(0.8, 0.8, 0.8, 0.8)
 
-    minLimits = [-30,-75,-30,-25,-75,-35]
-    maxLimits = [65,0,30,25,75,35]
+    minLimits = [-30,0,-30,-20,-75,-35]
+    maxLimits = [65,75,30,20,75,35]
 
     timeReverse = rospy.Time.now()
 
-    for i in range(0, 300):
+    print('WARNING: Moving joints sequentially to equilibrium positions.')
+    gummi.doGradualStartup()
+
+    print('WARNING: Moving to resting pose, hold arm!')
+    rospy.sleep(3)
+    for i in range(0, 400):
         gummi.goRestingPose()
         r.sleep()
+
+    print("GummiArm is live!")
 
     velocities = [0, 0, 0, 0, 0, 0]
     while not rospy.is_shutdown():
 
         angles = gummi.getJointAngles()
-        angles = radToDeg(angles)
+        angles = helpers.radToDeg(angles)
         #print(angles)
 
         for i,v in enumerate(velocities):
-            ran = random.uniform(-1000, 1000)  
+            ran = random.uniform(-0.0005, 0.0005)  
             v = v + ran
-            if i==2: 
-                #Upper arm roll
-                v = limitVelocity(v,1000)
-            else:
-                v = limitVelocity(v,7500)
             velocities[i] = v
-        #print(velocities)
 
         reverse = False
         loads = gummi.getLoads()
@@ -101,9 +96,9 @@ def main(args):
             for i,l in enumerate(atLimits):
                 if l:
                     if angles[i] <= minLimits[i]:
-                        corrected = 300
+                        corrected = 0.001
                     else:
-                        corrected = -300
+                        corrected = -0.001
                     velocities[i] = corrected
                     print("Moving joint " + str(i+1) + " away from joint limit!")
 
@@ -119,6 +114,15 @@ def main(args):
         else:
             colour = (255, 0, 0)
 
+        for i,v in enumerate(velocities):
+            if i==2: 
+                #Upper arm roll
+                v = limitVelocity(v,0.001)
+            else:
+                v = limitVelocity(v,0.002)
+            velocities[i] = v
+
+        #print(velocities)
         gummi.manualServoWith(velocities)
 
         disp.fill(colour)

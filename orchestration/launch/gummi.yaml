@@ -14,7 +14,7 @@ joints: {
     wrist_extensor: {type: "dynamixel", id: 6, max_angle: 150, min_angle: -150, max_speed: 1000},
     hand: {type: "dynamixel", id: 7, max_angle: 150, min_angle: -150, max_speed: 500},
     wrist_encoder: {type: "dynamixel", id: 8, max_angle: 150, min_angle: -150, max_speed: 500},
-    upperarm_roll: {type: "dynamixel", id: 9, max_angle: 180, min_angle: -180, max_speed: 1000, neutral: 2048, ticks: 4096},
+    upperarm_roll: {type: "dynamixel", id: 9, max_angle: 180, min_angle: -180, max_speed: 250, neutral: 2048, ticks: 4096},
     shoulder_pitch_encoder: {type: "dynamixel", id: 10, max_angle: 180, min_angle: -180, max_speed: 500},
     shoulder_adductor: {type: "dynamixel", id: 12, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},
     shoulder_abductor: {type: "dynamixel", id: 11, max_angle: 180, min_angle: -180, max_speed: 1500, neutral: 2048, ticks: 4096},

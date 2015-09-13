@@ -29,8 +29,8 @@ class JointAngle:
             rospy.logerr("Encoder " + self.name + " not found in joint state received!\n")
             return (0, 0., 0., 0.)
 
-    def doVelocityIncrement(self, timeStep):
-        self.dAngle = self.dAngle + self.dVelocity * timeStep
+    def doVelocityIncrement(self):
+        self.dAngle = self.dAngle + self.dVelocity
         self.capDesired()
 
     def setDesired(self, angle):

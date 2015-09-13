@@ -33,27 +33,26 @@ class Gummi:
         self.wristStiff = 0
 
     def initJoints(self):
-        self.shoulderRoll = Antagonist(1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -1.0, 1.0)
-        self.shoulderPitch = Antagonist(-1, -1, -1, -1, "shoulder_abductor", "shoulder_adductor", "shoulder_pitch_encoder", 0, 2*self.pi, 0.0, 1.75)
-        self.upperarmRoll = DirectDrive("upperarm_roll", 1.75*self.pi)
-        self.elbow = Antagonist(1, -1, 1, -1, "biceps", "triceps", "elbow_encoder", 0, 2*self.pi, -0.75, 0.85)
+        self.shoulderRoll = Antagonist(1, 1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -0.2, 1.25)
+        self.shoulderPitch = Antagonist(-1, -1, -1, 1, 1, "shoulder_abductor", "shoulder_adductor", "shoulder_pitch_encoder", 0, 2*self.pi, 0, 1.75)
+        self.upperarmRoll = DirectDrive("upperarm_roll", self.pi)
+        self.elbow = Antagonist(-1, 1, -1, -1, 1, "biceps", "triceps", "elbow_encoder", 0, 2*self.pi, -0.75, 0.85)
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
-        self.wrist = Antagonist(-1, -1, 1, -1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -1.0, 1.0)
+        self.wrist = Antagonist(-1, -1, -1, -1, 1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -1.0, 1.0)
 
     def initPublishers(self):
-        self.jointStatePub = rospy.Publisher("/gummi/joint_states", JointState) 
+        self.jointStatePub = rospy.Publisher("/gummi/joint_states", JointState,  queue_size=10) 
 
     def initSubscribers(self):
         rospy.Subscriber('/gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        gain = 0.15
-        self.shoulderRoll.servoTo(msg.position[0], msg.effort[0], gain)
-        self.shoulderPitch.servoTo(msg.position[1], msg.effort[1], gain)
-        self.forearmRoll.servoTo(msg.position[2])
-        self.elbow.servoTo(msg.position[3], msg.effort[3], gain)
-        self.upperarmRoll.servoTo(msg.position[4])
-        self.wrist.servoTo(msg.position[5], msg.effort[5], gain)
+        self.shoulderRoll.servoTo(msg.position[0], msg.effort[0])
+        self.shoulderPitch.servoTo(msg.position[1], msg.effort[1])
+        self.upperarmRoll.servoTo(msg.position[2])
+        self.elbow.servoTo(msg.position[3], msg.effort[3])
+        self.forearmRoll.servoTo(msg.position[4])
+        self.wrist.servoTo(msg.position[5], msg.effort[5])
 
     def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
         self.shoulderRoll.setMaxLoad(maxLoadShoulderRoll)
@@ -62,13 +61,12 @@ class Gummi:
         self.wrist.setMaxLoad(maxloadWrist)
 
     def doUpdate(self):
-        gain = 0.15
-        self.shoulderRoll.servoWith(self.shoulderRollVel, self.shoulderRollStiff, gain)
-        self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchStiff, gain)
-        self.forearmRoll.servoWith(self.forearmRollVel)
-        self.elbow.servoWith(self.elbowVel, self.elbowStiff, gain)
+        self.shoulderRoll.servoWith(self.shoulderRollVel, self.shoulderRollStiff)
+        self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchStiff)
         self.upperarmRoll.servoWith(self.upperarmRollVel)
-        self.wrist.servoWith(self.wristVel, self.wristStiff, gain)
+        self.elbow.servoWith(self.elbowVel, self.elbowStiff)
+        self.forearmRoll.servoWith(self.forearmRollVel)
+        self.wrist.servoWith(self.wristVel, self.wristStiff)
         self.publishJointState()
 
     def publishJointState(self):
@@ -115,11 +113,26 @@ class Gummi:
         return loads
 
     def goRestingPose(self):
-        self.shoulderRoll.servoTo(0, 0.2, 0.1)
-        self.shoulderPitch.servoTo(0, 0.2, 0.1)
+        self.shoulderRoll.servoTo(0, self.shoulderRollStiff)
+        self.shoulderPitch.servoTo(0, self.shoulderPitchStiff)
         self.upperarmRoll.servoTo(0)
-        self.elbow.servoTo(0, 0.2, 0.1)
+        self.elbow.servoTo(0, self.elbowStiff)
         self.forearmRoll.servoTo(0)
-        self.wrist.servoTo(0, 0.2, 0.1)
- 
+        self.wrist.servoTo(0, self.wristStiff)
+
+    def doGradualStartup(self):
+        self.shoulderRoll.moveTo(-1.5, self.shoulderRollStiff)
+        rospy.sleep(0.5)
+        self.shoulderRoll.moveTo(-1.25, self.shoulderRollStiff)
+        rospy.sleep(2)
+        self.shoulderPitch.moveTo(0.5, self.shoulderPitchStiff)
+        rospy.sleep(2)
+        self.upperarmRoll.servoTo(0)
+        rospy.sleep(2)
+        self.elbow.moveTo(0, self.elbowStiff)
+        rospy.sleep(2)
+        self.forearmRoll.servoTo(0)
+        rospy.sleep(2)
+        self.wrist.moveTo(0, self.wristStiff)
+        rospy.sleep(2)
         

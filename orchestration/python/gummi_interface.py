@@ -11,15 +11,18 @@ from gummi import Gummi
 def main(args):
 
     rospy.init_node('GummiInterface', anonymous=True)
-    r = rospy.Rate(30)  
+    r = rospy.Rate(60)  
 
     gummi = Gummi()
 
     gummi.setMaxLoads(10, 10, 10, 10)
 
-    print("GummiArm to resting pose!")
-
-    for i in range(0, 100):
+    print('WARNING: Moving joints sequentially to equilibrium positions.')
+    gummi.doGradualStartup()
+    
+    print('WARNING: Moving to resting pose, hold arm!')
+    rospy.sleep(3)
+    for i in range(0, 400):
         gummi.goRestingPose()
         r.sleep()
 

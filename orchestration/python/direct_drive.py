@@ -20,7 +20,6 @@ class DirectDrive:
 
     def initVariables(self):
         self.velocity = False
-        self.timeLast = rospy.Time.now()
         self.noCommandYet = True
 
     def servoTo(self, dAngle):
@@ -32,7 +31,6 @@ class DirectDrive:
     def servoWith(self, dVelocity):
         self.velocity = True
         self.angle.setDesiredVelocity(dVelocity)
-        self.timeLast = rospy.Time.now()
         self.noCommandYet = False
         self.doUpdate()
 
@@ -41,12 +39,8 @@ class DirectDrive:
         self.pub.publish(dAngle)
 
     def doUpdate(self):
-        duration = rospy.Time.now() - self.timeLast
-        timeStep = duration.to_sec()
-        self.timeLast = rospy.Time.now()
-        
         if self.velocity:
-            self.angle.doVelocityIncrement(timeStep)
+            self.angle.doVelocityIncrement()
             
         if self.noCommandYet:
             self.angle.setDesired(self.encoderAngle)
