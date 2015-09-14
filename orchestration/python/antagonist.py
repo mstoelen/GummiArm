@@ -8,6 +8,7 @@ from std_msgs.msg import Float64
 
 from joint_angle import JointAngle
 from reflex import Reflex
+from recording import Recording
 
 class Antagonist:
     def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle):
@@ -25,6 +26,7 @@ class Antagonist:
         self.extensorAngle = JointAngle(nameExtensor, signExtensor, -1000, 1000)
         self.stretchReflex = Reflex(stretchReflexGain, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
+        self.recording = Recording()
 
         self.initPublishers()
         self.initVariables()
@@ -139,8 +141,13 @@ class Antagonist:
         equilibrium = self.dEquilibrium
         stiffness = self.cStiffness
 
-        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium  + 0.5*stiffness)
-        equilibriumExtensor = self.signExtensor*(0.5*equilibrium + 0.5*stiffness)
+        if abs(equilibrium) <= 1:
+            scaledStiffness = stiffness
+        else:
+            scaledStiffness = stiffness*(2-abs(equilibrium))
+
+        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium  + 0.5*scaledStiffness)
+        equilibriumExtensor = self.signExtensor*(0.5*equilibrium + 0.5*scaledStiffness)
         
         self.commandFlexor = equilibriumFlexor*self.servoRange/2
         self.commandExtensor = equilibriumExtensor*self.servoRange/2
@@ -248,3 +255,14 @@ class Antagonist:
 
     def getLoadRatio(self):
         return self.loadRatio
+
+    def prepareRecording(self, fileNameBase):
+        fileName = fileNameBase + "_" + self.nameEncoder + ".csv"
+        self.recording.prepare(fileName, ['time','equilibrium','stiffness','angle','flexor-angle','extensor-angle', 'load-ratio'])
+
+    def recordLine(self, delta):
+        encoderAngle = self.getJointAngle()
+        flexorAngle = self.getFlexorAngle()
+        extensorAngle = self.getExtensorAngle()
+        loadRatio = self.getLoadRatio()
+        self.recording.add([delta, self.dEquilibrium, self.cStiffness, encoderAngle, flexorAngle, extensorAngle, loadRatio])

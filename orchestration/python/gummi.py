@@ -31,6 +31,7 @@ class Gummi:
         self.shoulderPitchStiff = 0
         self.elbowStiff = 0
         self.wristStiff = 0
+        self.recordData = False
 
     def initJoints(self):
         self.shoulderRoll = Antagonist(1, 1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -0.2, 1.25)
@@ -56,6 +57,9 @@ class Gummi:
             self.wrist.passiveHold(abs(msg.effort[5]))
         else:
             self.wrist.servoTo(msg.position[5], abs(msg.effort[5]))
+        
+        if self.recordData:
+            self.addLineRecording()
 
     def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
         self.shoulderRoll.setMaxLoad(maxLoadShoulderRoll)
@@ -71,6 +75,9 @@ class Gummi:
         self.forearmRoll.servoWith(self.forearmRollVel)
         self.wrist.servoWith(self.wristVel, self.wristStiff)
         self.publishJointState()
+
+        if self.recordData:
+            self.addLineRecording()
 
     def publishJointState(self):
         msg = JointState()
@@ -138,4 +145,31 @@ class Gummi:
         rospy.sleep(2)
         self.wrist.moveTo(0, self.wristStiff)
         rospy.sleep(2)
+
+    def prepareRecording(self, fileNameBase):
+        self.shoulderRoll.prepareRecording(fileNameBase)
+        self.shoulderPitch.prepareRecording(fileNameBase)
+        self.upperarmRoll.prepareRecording(fileNameBase)
+        self.elbow.prepareRecording(fileNameBase)
+        self.forearmRoll.prepareRecording(fileNameBase)
+        self.wrist.prepareRecording(fileNameBase)
+        
+    def startRecording(self):
+        self.timeStartRecording = rospy.Time.now()
+        self.recordData = True
+
+    def stopRecording(self):
+        self.recordData = False
+
+    def addLineRecording(self):        
+        timeNow = rospy.Time.now()
+        duration = self.timeStartRecording - timeNow
+        delta = duration.to_sec()
+        self.shoulderRoll.recordLine(delta)
+        self.shoulderPitch.recordLine(delta)
+        self.upperarmRoll.recordLine(delta)
+        self.elbow.recordLine(delta)
+        self.forearmRoll.recordLine(delta)
+        self.wrist.recordLine(delta)
+    
         

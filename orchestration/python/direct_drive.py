@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import Float64
 
 from joint_angle import JointAngle
+from recording import Recording
 
 class DirectDrive:
     def __init__(self, name, servoRange):
@@ -14,6 +15,7 @@ class DirectDrive:
         self.initVariables()
 
         self.angle = JointAngle(name, 1, -servoRange/2, servoRange/2)
+        self.recording = Recording()
 
     def initPublishers(self):
         self.pub = rospy.Publisher('/' + self.name + '/command', Float64, queue_size=5)
@@ -49,3 +51,11 @@ class DirectDrive:
 
     def getJointAngle(self):
         return self.angle.getEncoder()
+
+    def prepareRecording(self, fileNameBase):
+        fileName = fileNameBase + "_" + self.name + ".csv"
+        self.recording.prepare(fileName, ['time','angle'])
+
+    def recordLine(self, delta):
+        angle = self.getJointAngle()
+        self.recording.add([delta, angle])
