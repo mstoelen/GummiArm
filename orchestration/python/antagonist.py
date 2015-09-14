@@ -172,7 +172,7 @@ class Antagonist:
         self.errorLast = error
 
         prop_term = error * self.pGainUse
-        vel_term = errorChange * self.vGain
+        vel_term = errorChange * self.vGainUse
         self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
     def doCompliance(self, contribution):
