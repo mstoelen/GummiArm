@@ -34,12 +34,12 @@ class Gummi:
         self.recordData = False
 
     def initJoints(self):
-        self.shoulderRoll = Antagonist(1, 1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -0.2, 1.25)
-        self.shoulderPitch = Antagonist(-1, -1, -1, 1, 1, "shoulder_abductor", "shoulder_adductor", "shoulder_pitch_encoder", 0, 2*self.pi, 0, 1.75)
+        self.shoulderRoll = Antagonist(1, 1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -0.2, 1.25, 0.4)
+        self.shoulderPitch = Antagonist(-1, -1, -1, 1, 1, "shoulder_abductor", "shoulder_adductor", "shoulder_pitch_encoder", 0, 2*self.pi, 0, 1.75, 0.7)
         self.upperarmRoll = DirectDrive("upperarm_roll", self.pi)
-        self.elbow = Antagonist(-1, 1, -1, -1, 1, "biceps", "triceps", "elbow_encoder", 0, 2*self.pi, -0.75, 0.85)
+        self.elbow = Antagonist(-1, 1, -1, -1, 1, "biceps", "triceps", "elbow_encoder", 0, 2*self.pi, -0.75, 0.85, 0.0)
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
-        self.wrist = Antagonist(-1, -1, -1, -1, 1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -1.0, 1.0)
+        self.wrist = Antagonist(-1, -1, -1, -1, 1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -1.0, 1.0, 0.0)
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("/gummi/joint_states", JointState,  queue_size=10) 
@@ -163,7 +163,7 @@ class Gummi:
 
     def addLineRecording(self):        
         timeNow = rospy.Time.now()
-        duration = self.timeStartRecording - timeNow
+        duration = timeNow - self.timeStartRecording
         delta = duration.to_sec()
         self.shoulderRoll.recordLine(delta)
         self.shoulderPitch.recordLine(delta)

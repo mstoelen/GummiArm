@@ -11,7 +11,7 @@ from reflex import Reflex
 from recording import Recording
 
 class Antagonist:
-    def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle):
+    def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
         self.signEquilibrium = signEquilibrium
         self.signFlexor = signFlexor
         self.signExtensor = signExtensor
@@ -20,6 +20,7 @@ class Antagonist:
         self.nameExtensor = nameExtensor
         self.nameEncoder = nameEncoder
         self.servoRange = servoRange
+        self.angleOffset = angleOffset
 
         self.angle = JointAngle(nameEncoder, signEncoder, minAngle, maxAngle)
         self.flexorAngle = JointAngle(nameFlexor, signFlexor, -1000, 1000)
@@ -239,10 +240,12 @@ class Antagonist:
         minAngle = self.angle.getMin()
         maxAngle = self.angle.getMax()
         jointRange = maxAngle - minAngle
-        estimatedAngle = minAngle + (self.dEquilibrium/2)*(jointRange/2)
+        estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
+        #print(self.nameEncoder + ", actual angle: " + str(encoderAngle) + " and estimated: " + str(estimatedAngle))
         load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cStiffness)
         self.loadRatio = adjustedLoad/self.maxLoad
+        #print(self.nameEncoder + ", load ratio: " + str(self.loadRatio) + ".")
 
     def getJointAngle(self):
         return self.angle.getEncoder()

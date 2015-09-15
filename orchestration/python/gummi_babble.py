@@ -33,7 +33,7 @@ def limitVelocity(v,limit):
 
 def reverseVelocities(vels):
     for i,v in enumerate(vels):
-        v = -v/2
+        v = -v/4
         vels[i] = v
     return vels
 
@@ -50,7 +50,6 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.setMaxLoads(1.0, 1.0, 1.85, 1.5)
     gummi.manualSetStiffness(0.45, 0.6, 0.45, 0.3)
 
     minLimits = [-30,0,-30,-20,-75,-35]
@@ -68,6 +67,7 @@ def main(args):
         r.sleep()
 
     print("GummiArm is live!")
+    gummi.setMaxLoads(0.6, 0.8, 0.75, 1.25)
 
     velocities = [0, 0, 0, 0, 0, 0]
     while not rospy.is_shutdown():
@@ -77,7 +77,7 @@ def main(args):
         #print(angles)
 
         for i,v in enumerate(velocities):
-            ran = random.uniform(-0.0005, 0.0005)  
+            ran = random.uniform(-0.0003, 0.0003)  
             v = v + ran
             velocities[i] = v
 
@@ -97,9 +97,9 @@ def main(args):
             for i,l in enumerate(atLimits):
                 if l:
                     if angles[i] <= minLimits[i]:
-                        corrected = 0.001
+                        corrected = 0.0002
                     else:
-                        corrected = -0.001
+                        corrected = -0.0002
                     velocities[i] = corrected
                     print("Moving joint " + str(i+1) + " away from joint limit!")
 
