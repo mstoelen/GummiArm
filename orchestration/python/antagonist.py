@@ -8,21 +8,26 @@ from std_msgs.msg import Float64
 
 from joint_angle import JointAngle
 from reflex import Reflex
+from recording import Recording
 
 class Antagonist:
-    def __init__(self, signFlexor, signExtensor, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle):
+    def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
+        self.signEquilibrium = signEquilibrium
         self.signFlexor = signFlexor
         self.signExtensor = signExtensor
+        self.signJoint = signJoint
         self.nameFlexor = nameFlexor
         self.nameExtensor = nameExtensor
         self.nameEncoder = nameEncoder
         self.servoRange = servoRange
-        self.minAngle = minAngle
-        self.maxAngle = maxAngle
+        self.angleOffset = angleOffset
 
-        self.angle = JointAngle(nameEncoder, servoRange)
+        self.angle = JointAngle(nameEncoder, signEncoder, minAngle, maxAngle)
+        self.flexorAngle = JointAngle(nameFlexor, signFlexor, -1000, 1000)
+        self.extensorAngle = JointAngle(nameExtensor, signExtensor, -1000, 1000)
         self.stretchReflex = Reflex(stretchReflexGain, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
+        self.recording = Recording()
 
         self.initPublishers()
         self.initVariables()
@@ -31,18 +36,25 @@ class Antagonist:
         self.commandFlexor = 0
         self.commandExtensor = 0
         self.dEquilibrium = 0
-        self.dGain = 0
-        self.cGain = 0
+
+        self.pGain = 6.0/60
+        self.vGain = 1.5/60
+        self.pGainUse = 0
+        self.vGainUse = 0
+        self.lGain = 0.03
+
         self.dStiffness = 0
         self.cStiffness = 0
         self.velocity = False
         self.closedLoop = False
         self.maxStiffness = 1
         self.meanError = 0
-        self.timeLast = rospy.Time.now()
         self.maxLoad = 10000
-        self.lGain = 0.03
         self.loadRatio = 0
+        self.errorLast = 0.0
+        #self.timeStep = 0.01
+        #self.timeLast = rospy.Time.now()
+        #self.firstTime = True
 
         self.equilibriumErrors = list()
         for i in range(0, 5):
@@ -52,11 +64,10 @@ class Antagonist:
         self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '/command', Float64, queue_size=5)
         self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '/command', Float64, queue_size=5)
 
-    def servoTo(self, dAngle, dStiffness, dGain):
+    def servoTo(self, dAngle, dStiffness):
         self.velocity = False
         self.closedLoop = True
         self.dStiffness = dStiffness  
-        self.dGain = dGain
         self.angle.setDesired(dAngle)
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
@@ -71,22 +82,31 @@ class Antagonist:
         self.stretchReflex.inhibit()
         self.doUpdate()
 
-    def servoWith(self, dVelocity, dStiffness, dGain):
+    def servoWith(self, dVelocity, dStiffness):
         self.closedLoop = True
         self.velocity = True
-        self.angle.setDesiredVelocity(dVelocity)
+        self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.dStiffness = dStiffness  
-        self.dGain = dGain
-        self.timeLast = rospy.Time.now()
+        self.doUpdate()
+
+    def passiveHold(self, dStiffness):
+        self.velocity = False
+        self.closedLoop = False
+        self.dStiffness = dStiffness
+        self.resetEquilibriumErrors()
+        self.stretchReflex.inhibit()
         self.doUpdate()
 
     def setMaxLoad(self, maxLoad):
         self.maxLoad = maxLoad
 
     def doUpdate(self):
-        duration = rospy.Time.now() - self.timeLast
-        timeStep = duration.to_sec()
-        self.timeLast = rospy.Time.now()
+        #if self.firstTime:
+        #    self.timeLast = rospy.Time.now()
+        #    self.firstTime = False
+        #duration = rospy.Time.now() - self.timeLast
+        #self.timeStep = duration.to_sec()
+        #self.timeLast = rospy.Time.now()
 
         self.createEquilibriumError()            
         self.createMeanError()
@@ -108,7 +128,7 @@ class Antagonist:
         self.scaleControlGain(scale)
         
         if self.velocity:
-            self.angle.doVelocityIncrement(timeStep)
+            self.angle.doVelocityIncrement()
         if self.closedLoop:
             self.doClosedLoop()
             
@@ -122,8 +142,13 @@ class Antagonist:
         equilibrium = self.dEquilibrium
         stiffness = self.cStiffness
 
-        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium + 0.5*stiffness)
-        equilibriumExtensor = self.signExtensor*(0.5*equilibrium + 0.5*stiffness)
+        if abs(equilibrium) <= 1:
+            scaledStiffness = stiffness
+        else:
+            scaledStiffness = stiffness*(2-abs(equilibrium))
+
+        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium  + 0.5*scaledStiffness)
+        equilibriumExtensor = self.signExtensor*(0.5*equilibrium + 0.5*scaledStiffness)
         
         self.commandFlexor = equilibriumFlexor*self.servoRange/2
         self.commandExtensor = equilibriumExtensor*self.servoRange/2
@@ -142,8 +167,14 @@ class Antagonist:
     def doClosedLoop(self):
         encoderAngle = self.angle.getEncoder()
         dAngle = self.angle.getDesired()
+
         error = dAngle - encoderAngle
-        self.dEquilibrium = self.dEquilibrium + error * self.cGain
+        errorChange = self.errorLast - error
+        self.errorLast = error
+
+        prop_term = error * self.pGainUse
+        vel_term = errorChange * self.vGainUse
+        self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
     def doCompliance(self, contribution):
         if abs(self.loadRatio) > 1:
@@ -197,19 +228,44 @@ class Antagonist:
         self.meanError = sum/(index - 1)
 
     def scaleControlGain(self, scale):
-        self.cGain = self.dGain * scale
-        if self.cGain < 0:
-            self.cGain = 0
+        self.pGainUse = self.pGain * scale
+        if self.pGainUse < 0:
+            self.pGainUse = 0
+        self.vGainUse = self.vGain * scale
+        if self.vGainUse < 0:
+            self.vGainUse = 0
 
     def createLoadRatio(self):
         encoderAngle = self.angle.getEncoder()
-        load = self.dEquilibrium - encoderAngle #TODO
+        minAngle = self.angle.getMin()
+        maxAngle = self.angle.getMax()
+        jointRange = maxAngle - minAngle
+        estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
+        #print(self.nameEncoder + ", actual angle: " + str(encoderAngle) + " and estimated: " + str(estimatedAngle))
+        load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cStiffness)
         self.loadRatio = adjustedLoad/self.maxLoad
-        #print("loadRatio for " + self.nameEncoder + ": " + str(self.loadRatio))
+        #print(self.nameEncoder + ", load ratio: " + str(self.loadRatio) + ".")
 
     def getJointAngle(self):
         return self.angle.getEncoder()
 
+    def getFlexorAngle(self):
+        return self.flexorAngle.getEncoder()
+
+    def getExtensorAngle(self):
+        return self.extensorAngle.getEncoder()
+
     def getLoadRatio(self):
         return self.loadRatio
+
+    def prepareRecording(self, fileNameBase):
+        fileName = fileNameBase + "_" + self.nameEncoder + ".csv"
+        self.recording.prepare(fileName, ['time','equilibrium','stiffness','angle','flexor-angle','extensor-angle', 'load-ratio'])
+
+    def recordLine(self, delta):
+        encoderAngle = self.getJointAngle()
+        flexorAngle = self.getFlexorAngle()
+        extensorAngle = self.getExtensorAngle()
+        loadRatio = self.getLoadRatio()
+        self.recording.add([delta, self.dEquilibrium, self.cStiffness, encoderAngle, flexorAngle, extensorAngle, loadRatio])

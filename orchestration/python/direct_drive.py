@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import Float64
 
 from joint_angle import JointAngle
+from recording import Recording
 
 class DirectDrive:
     def __init__(self, name, servoRange):
@@ -13,14 +14,14 @@ class DirectDrive:
         self.initPublishers()
         self.initVariables()
 
-        self.angle = JointAngle(name, servoRange)
+        self.angle = JointAngle(name, 1, -servoRange/2, servoRange/2)
+        self.recording = Recording()
 
     def initPublishers(self):
         self.pub = rospy.Publisher('/' + self.name + '/command', Float64, queue_size=5)
 
     def initVariables(self):
         self.velocity = False
-        self.timeLast = rospy.Time.now()
         self.noCommandYet = True
 
     def servoTo(self, dAngle):
@@ -32,7 +33,6 @@ class DirectDrive:
     def servoWith(self, dVelocity):
         self.velocity = True
         self.angle.setDesiredVelocity(dVelocity)
-        self.timeLast = rospy.Time.now()
         self.noCommandYet = False
         self.doUpdate()
 
@@ -41,12 +41,8 @@ class DirectDrive:
         self.pub.publish(dAngle)
 
     def doUpdate(self):
-        duration = rospy.Time.now() - self.timeLast
-        timeStep = duration.to_sec()
-        self.timeLast = rospy.Time.now()
-        
         if self.velocity:
-            self.angle.doVelocityIncrement(timeStep)
+            self.angle.doVelocityIncrement()
             
         if self.noCommandYet:
             self.angle.setDesired(self.encoderAngle)
@@ -55,3 +51,11 @@ class DirectDrive:
 
     def getJointAngle(self):
         return self.angle.getEncoder()
+
+    def prepareRecording(self, fileNameBase):
+        fileName = fileNameBase + "_" + self.name + ".csv"
+        self.recording.prepare(fileName, ['time','angle'])
+
+    def recordLine(self, delta):
+        angle = self.getJointAngle()
+        self.recording.add([delta, angle])

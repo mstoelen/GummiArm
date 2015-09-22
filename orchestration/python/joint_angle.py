@@ -5,9 +5,11 @@ import rospy
 from sensor_msgs.msg import JointState
 
 class JointAngle:
-    def __init__(self, name, servoRange):
+    def __init__(self, name, sign, minAngle, maxAngle):
         self.name = name
-        self.servoRange = servoRange
+        self.sign = sign
+        self.minAngle = minAngle
+        self.maxAngle = maxAngle
         self.initSubscriber()
         self.initVariables()
 
@@ -22,13 +24,13 @@ class JointAngle:
     def encoderCallback(self, msg):
         if self.name in msg.name:
             index = msg.name.index(self.name)            
-            self.encoderAngle = msg.position[index]
+            self.encoderAngle = msg.position[index] * self.sign
         else:
             rospy.logerr("Encoder " + self.name + " not found in joint state received!\n")
             return (0, 0., 0., 0.)
 
-    def doVelocityIncrement(self, timeStep):
-        self.dAngle = self.dAngle + self.dVelocity * timeStep
+    def doVelocityIncrement(self):
+        self.dAngle = self.dAngle + self.dVelocity
         self.capDesired()
 
     def setDesired(self, angle):
@@ -42,14 +44,20 @@ class JointAngle:
         return self.dAngle
 
     def capDesired(self):
-        if self.dAngle > self.servoRange/2:
-            self.dAngle = self.servoRange/2
+        if self.dAngle > self.maxAngle:
+            self.dAngle = self.maxAngle
         else:
-            if self.dAngle < -self.servoRange/2:
-                self.dAngle = -self.servoRange/2
+            if self.dAngle < self.minAngle:
+                self.dAngle = self.minAngle
 
     def getEncoder(self):
         return self.encoderAngle
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity
+
+    def getMin(self):
+        return self.minAngle
+
+    def getMax(self):
+        return self.maxAngle
