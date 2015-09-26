@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="gummi">
+
+ <link name="base_link" type="fixed">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.01"/>
+      <geometry>
+	<cylinder length="0.02" radius="0.065" />
+      </geometry>
+      <material name="">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0535"/>
+      <geometry>
+        <cylinder length="0.107" radius="0.065" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="shoulder">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.14" radius="0.07" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.1 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.14" radius="0.07" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="upperarm_preroll">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.06" radius="0.03" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.2 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="upperarm">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.08"/>
+      <geometry>
+	<cylinder length="0.16" radius="0.04" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.3 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="lowerarm_preroll">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.06" radius="0.03" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.4 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="lowerarm">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.055"/>
+      <geometry>
+	<cylinder length="0.11" radius="0.04" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.5 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="wrist">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.06" radius="0.02" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.6 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="coupling">
+    <visual>
+      <origin rpy="0.0 1.57080 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.005" radius="0.02" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.7 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <link name="tool">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+	<cylinder length="0.03" radius="0.04" />
+      </geometry>
+      <material name="">
+        <color rgba="0.0 0.8 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.02" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+  
+  <joint name="shoulder_roll" type="revolute">
+    <origin rpy="1.57079 0.0 0.0" xyz="0.0 0.0 0.107"/>
+    <parent link="base_link"/>
+    <child link="shoulder"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-0.2" upper="1.25" velocity="1.0"/>
+  </joint> 
+  <joint name="shoulder_pitch" type="revolute">
+    <origin rpy="0 -1.57079 0.0" xyz="0.0 0.0 0.129"/>
+    <parent link="shoulder"/>
+    <child link="upperarm_preroll"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="0.0" upper="1.75" velocity="1.0"/>
+  </joint>
+  <joint name="upperarm_roll" type="revolute">
+    <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.09 0.0"/>
+    <parent link="upperarm_preroll"/>
+    <child link="upperarm"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-1.57080" upper="1.57080" velocity="1.0"/>
+  </joint>
+  <joint name="elbow" type="revolute">
+    <origin rpy="0.0 1.57079 0.0" xyz="0.0 -0.0103 0.2035"/>
+    <parent link="upperarm"/>
+    <child link="lowerarm_preroll"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-0.75" upper="0.85" velocity="1.0"/>
+  </joint>
+  <joint name="lowerarm_roll" type="revolute">
+    <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.079 0.0"/>
+    <parent link="lowerarm_preroll"/>
+    <child link="lowerarm"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-2.7489" upper="2.7489" velocity="1.0"/>
+  </joint>
+  <joint name="wrist_pitch" type="revolute">
+    <origin rpy="-1.57079 0.0 0.0" xyz="0.0 0.0 0.15"/>
+    <parent link="lowerarm"/>
+    <child link="wrist"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-1.0" upper="1.0" velocity="1.0"/>
+  </joint>
+  <joint name="wrist_to_coupling" type="fixed">
+    <origin rpy="0.0 0.0 -1.57079" xyz="0.0 -0.0281 0.0"/>
+    <parent link="wrist"/>
+    <child link="coupling"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-1.57080" upper="1.57080" velocity="1.0"/>
+  </joint>
+  <joint name="coupling_to_tool" type="fixed">
+    <origin rpy="-1.57079 0.0 0.0" xyz="0.075 0.0 0.0"/>
+    <parent link="coupling"/>
+    <child link="tool"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-1.57080" upper="1.57080" velocity="1.0"/>
+  </joint>
+  
+</robot>

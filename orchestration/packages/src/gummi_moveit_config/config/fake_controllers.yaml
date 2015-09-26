@@ -1,0 +1,9 @@
+controller_list:
+  - name: fake_right_controller
+    joints:
+      - shoulder_roll
+      - shoulder_pitch
+      - upperarm_roll
+      - elbow
+      - lowerarm_roll
+      - wrist_pitch
