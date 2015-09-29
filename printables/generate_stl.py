@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-# Enters all subfolders in 'rootdir', opens all .FCStd files found, and exports the latest object created in each file as .stl
+# Description: Enters all subfolders in 'rootdir', opens all .FCStd files found, and exports the latest object created in each file as .stl
+# Usage: Run as macro script from FreeCAD (e.g. from 'Macro' menu).
 # Note: Tested on Mac OSX Yosemite only.
-
-freecadpath='/Applications/FreeCAD.app/Contents/lib' # point to FreeCAD lib folder
-import sys
-sys.path.append(freecadpath)
 
 import os
 import glob
