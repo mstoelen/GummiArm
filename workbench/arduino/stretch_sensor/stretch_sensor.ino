@@ -1,4 +1,4 @@
-#include "RunningAverage.h" //http://playground.arduino.cc/Main/RunningAverage
+#include "RunningAverage.h" /* http://playground.arduino.cc/Main/RunningAverage */
 #include <Servo.h>
 
 int sensor_pin = A0;
