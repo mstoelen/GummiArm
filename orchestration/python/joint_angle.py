@@ -2,7 +2,7 @@
 
 import rospy
 
-from sensor_msgs.msg import JointState
+from dynamixel_msgs.msg import JointState
 
 class JointAngle:
     def __init__(self, name, sign, minAngle, maxAngle):
@@ -12,22 +12,19 @@ class JointAngle:
         self.maxAngle = maxAngle
         self.initSubscriber()
         self.initVariables()
+        self.newState = False
 
     def initSubscriber(self):
-        rospy.Subscriber('/joint_states', JointState, self.encoderCallback)
+        rospy.Subscriber('/' + self.name + '_controller/state', JointState, self.encoderCallback)
 
     def initVariables(self):
         self.encoderAngle = 0
         self.dAngle = 0
         self.dVelocity = 0
 
-    def encoderCallback(self, msg):
-        if self.name in msg.name:
-            index = msg.name.index(self.name)            
-            self.encoderAngle = msg.position[index] * self.sign
-        else:
-            rospy.logerr("Encoder " + self.name + " not found in joint state received!\n")
-            return (0, 0., 0., 0.)
+    def encoderCallback(self, msg):           
+        self.encoderAngle = msg.current_pos * self.sign
+        self.newState = True
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
@@ -52,6 +49,7 @@ class JointAngle:
 
     def getEncoder(self):
         return self.encoderAngle
+        self.newState = False
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity
@@ -61,3 +59,6 @@ class JointAngle:
 
     def getMax(self):
         return self.maxAngle
+
+    def haveNewState(self):
+        return self.newState

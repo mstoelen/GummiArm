@@ -9,6 +9,7 @@ from std_msgs.msg import Float64
 from joint_angle import JointAngle
 from reflex import Reflex
 from recording import Recording
+from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
 class Antagonist:
     def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
@@ -31,6 +32,9 @@ class Antagonist:
 
         self.initPublishers()
         self.initVariables()
+        self.disableEncoderTorque()
+        self.setTorqueLimit(nameExtensor, 1)
+        self.setTorqueLimit(nameFlexor, 1)
 
     def initVariables(self):
         self.commandFlexor = 0
@@ -60,9 +64,27 @@ class Antagonist:
         for i in range(0, 5):
             self.equilibriumErrors.append(0.0)
 
+    def setTorqueLimit(self, name, limit):
+        service_name = '/' + name + '_controller/set_torque_limit'
+        rospy.wait_for_service(service_name)
+        try:
+            te = rospy.ServiceProxy(service_name, SetTorqueLimit)
+            te(limit)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+    def disableEncoderTorque(self):
+        service_name = '/' + self.nameEncoder + '_controller/torque_enable'
+        rospy.wait_for_service(service_name)
+        try:
+            te = rospy.ServiceProxy(service_name, TorqueEnable)
+            te(torque_enable = False)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
     def initPublishers(self):
-        self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '/command', Float64, queue_size=5)
-        self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '/command', Float64, queue_size=5)
+        self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '_controller/command', Float64, queue_size=5)
+        self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '_controller/command', Float64, queue_size=5)
 
     def servoTo(self, dAngle, dStiffness):
         self.velocity = False
@@ -165,16 +187,17 @@ class Antagonist:
         self.equilibriumErrors.pop(0)
 
     def doClosedLoop(self):
-        encoderAngle = self.angle.getEncoder()
-        dAngle = self.angle.getDesired()
-
-        error = dAngle - encoderAngle
-        errorChange = self.errorLast - error
-        self.errorLast = error
-
-        prop_term = error * self.pGainUse
-        vel_term = errorChange * self.vGainUse
-        self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
+        if self.angle.haveNewState():
+            encoderAngle = self.angle.getEncoder()
+            dAngle = self.angle.getDesired()
+            
+            error = dAngle - encoderAngle
+            errorChange = self.errorLast - error
+            self.errorLast = error
+            
+            prop_term = error * self.pGainUse
+            vel_term = errorChange * self.vGainUse
+            self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
     def doCompliance(self, contribution):
         if abs(self.loadRatio) > 1:

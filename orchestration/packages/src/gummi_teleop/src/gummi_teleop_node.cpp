@@ -48,6 +48,9 @@ private:
   const moveit::core::JointModelGroup* joint_model_group_;
   ros::Time timeOfLastJointState_;
   bool passive_wrist_;
+  bool stiff_arm_;
+  ros::Time time_last_button1_;
+  ros::Time time_last_button2_;
   
 };
 
@@ -66,6 +69,9 @@ GummiTeleop::GummiTeleop():
   button1_ = 0;
   button2_ = 0;
   passive_wrist_ = false;
+  stiff_arm_  = false;
+  time_last_button1_ = ros::Time::now();
+  time_last_button2_ = ros::Time::now();
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
@@ -81,7 +87,7 @@ GummiTeleop::GummiTeleop():
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.75);
+    joint_stiffnesses_.push_back(0.0);
   }
 
   for(int i = 0; i < num_joints_; i++) {
@@ -166,13 +172,13 @@ geometry_msgs::Twist GummiTeleop::scaleDesired(geometry_msgs::Twist desired)
 {
   geometry_msgs::Twist out;
 
-  out.linear.x = desired.linear.x * 0.04; // TODO: USE PARAMETERS ABOVE
-  out.linear.y = desired.linear.y * 0.04; // TODO: USE PARAMETERS ABOVE
-  out.linear.z = desired.linear.z * 0.04; // TODO: USE PARAMETERS ABOVE
+  out.linear.x = desired.linear.x * 0.075; // TODO: USE PARAMETERS ABOVE
+  out.linear.y = desired.linear.y * 0.075; // TODO: USE PARAMETERS ABOVE
+  out.linear.z = desired.linear.z * 0.075; // TODO: USE PARAMETERS ABOVE
   
-  out.angular.x = desired.angular.x * 0.07; // TODO: USE PARAMETERS ABOVE
-  out.angular.y = desired.angular.y * 0.07; // TODO: USE PARAMETERS ABOVE
-  out.angular.z = desired.angular.z * 0.07; // TODO: USE PARAMETERS ABOVE
+  out.angular.x = desired.angular.x * 0.25; // TODO: USE PARAMETERS ABOVE
+  out.angular.y = desired.angular.y * 0.2; // TODO: USE PARAMETERS ABOVE
+  out.angular.z = desired.angular.z * 0.1; // TODO: USE PARAMETERS ABOVE
 
   return out;
 }
@@ -213,17 +219,46 @@ void GummiTeleop::publishJointPositions()
 
  void GummiTeleop::processButtonPress() {
 
-   std_msgs::Float64 message;
-   if(button1_) {
-     passive_wrist_ = true;
-     printf("Switching to passive wrist.\n");
-     joint_stiffnesses_.at(5) = 0.25;
+  ros::Time now = ros::Time::now();
+
+  if(button1_) {
+    ros::Duration diff = now - time_last_button1_;
+    double time_passed = diff.toSec();
+    if(time_passed > 1.0) {
+       if(passive_wrist_) {
+	 passive_wrist_ = false;
+	 printf("Switching to active (and stiff) wrist.\n");
+	 joint_stiffnesses_.at(5) = 0.5;
+       }
+       else {
+	 passive_wrist_ = true;
+	 printf("Switching to passive (and loose) wrist.\n");
+	 joint_stiffnesses_.at(5) = 0.001;
+       }
+     }
+     time_last_button1_ = ros::Time::now();
    }
    else {
      if(button2_) {
-       passive_wrist_ = false;
-       printf("Switching to active wrist.\n");
-       joint_stiffnesses_.at(5) = 0.75;
+       ros::Duration diff = now - time_last_button2_;
+       double time_passed = diff.toSec();
+       if(time_passed > 1.0) {
+	 if(stiff_arm_) {
+	   stiff_arm_ = false;
+	   printf("Setting all joint to loose.\n");
+	   for(int i = 0; i < num_joints_; i++) {
+	     joint_stiffnesses_.at(i) = 0.0;
+	   }
+	 }
+	 else {
+	   stiff_arm_ = true;
+	   printf("Setting all joint to stiff.\n");
+	   for(int i = 0; i < num_joints_; i++) {
+	     joint_stiffnesses_.at(i) = 0.5;
+	   }
+	 }
+       }
+       time_last_button2_ = ros::Time::now();
      }
    }
 
