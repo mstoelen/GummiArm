@@ -205,9 +205,9 @@ class Antagonist:
             encoderAngle = self.angle.getEncoder()
             self.angle.setDesiredToEncoder()
             if self.loadRatio > 0:
-                self.dEquilibrium = self.dEquilibrium - contribution * self.lGain 
+                self.dEquilibrium = self.dEquilibrium - contribution * self.lGain * self.signEquilibrium
             else: 
-                self.dEquilibrium = self.dEquilibrium + contribution * self.lGain 
+                self.dEquilibrium = self.dEquilibrium + contribution * self.lGain * self.signEquilibrium
 
     def capEquilibrium(self):
         if self.dEquilibrium > 2:

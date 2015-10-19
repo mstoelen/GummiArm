@@ -48,15 +48,15 @@ class Gummi:
         rospy.Subscriber('/gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        self.shoulderRoll.servoTo(msg.position[0], abs(msg.effort[0]))
-        self.shoulderPitch.servoTo(msg.position[1], abs(msg.effort[1]))
-        self.upperarmRoll.servoTo(msg.position[2])
-        self.elbow.servoTo(msg.position[3], abs(msg.effort[3]))
-        self.forearmRoll.servoTo(msg.position[4])
+        self.shoulderRoll.servoWith(msg.velocity[0], abs(msg.effort[0]))
+        self.shoulderPitch.servoWith(msg.velocity[1], abs(msg.effort[1]))
+        self.upperarmRoll.servoWith(msg.velocity[2])
+        self.elbow.servoWith(msg.velocity[3], abs(msg.effort[3]))
+        self.forearmRoll.servoWith(msg.velocity[4])
         if msg.effort[5] < 0:
             self.wrist.passiveHold(abs(msg.effort[5]))
         else:
-            self.wrist.servoTo(msg.position[5], abs(msg.effort[5]))
+            self.wrist.servoWith(msg.velocity[5], abs(msg.effort[5]))
         
         if self.recordData:
             self.addLineRecording()
