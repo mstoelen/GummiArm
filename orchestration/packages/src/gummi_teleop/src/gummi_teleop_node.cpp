@@ -36,7 +36,7 @@ private:
   void printJointStateIn(sensor_msgs::JointState joint_state_in);
   bool checkIfConnectedToRobot();
   void processButtonPress();
-  double limitJointVelocity(double vel);
+  double limitJointVelocity(double vel, double max);
 
   ros::NodeHandle nh_;
 
@@ -102,7 +102,7 @@ GummiTeleop::GummiTeleop():
   zero_vel_.angular.x = 0.0;
   zero_vel_.angular.y = 0.0;
   zero_vel_.angular.z = 0.0;
-  max_joint_vel_ = 0.0175;
+  max_joint_vel_ = 0.015;
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
@@ -237,6 +237,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
   KDL::Twist T_current;
   KDL::JntArray q_current(num_joints_);
   KDL::JntArray qdot(num_joints_);
+  double time_step = 0.01; // TODO
 
   T_current.vel.x(0.0);
   T_current.vel.y(0.0);
@@ -264,7 +265,10 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     assert(false);
   }
 
-  T_desired = F_current * T_desired;
+  KDL::Frame F_at_hand = F_current;
+  F_at_hand.M = KDL::Rotation::Identity();
+
+  T_desired = F_at_hand * T_desired;
 
   if(integrate_cartesian_pose_) {
     if(!have_started_integrating_) {
@@ -272,7 +276,6 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       have_started_integrating_ = true;
     }
     else {
-      double time_step = 0.01; // TODO
       KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
 					   T_desired.rot.y() * time_step,
 					   T_desired.rot.z() * time_step),
@@ -295,7 +298,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     }
   }
   else {
-    T_current = T_desired;
+    T_current = T_desired * 0.00075; // TODO
     have_started_integrating_ = false;
   }
 
@@ -305,10 +308,24 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     assert(false);
   }
 
+  double max_current_joint_vel = 0.0;
   for(unsigned int i=0; i<num_joints_; i++) {
-    desired_joint_velocities_.at(i) = limitJointVelocity(qdot(i)); 
+    if(std::abs(qdot(i)) > max_joint_vel_) {
+      max_current_joint_vel = std::abs(qdot(i));
+    }
   }
-  
+
+  if(max_current_joint_vel > max_joint_vel_) {
+    printf("Warning: Limiting joint velocities.\n");
+    for(unsigned int i=0; i<num_joints_; i++) {
+      desired_joint_velocities_.at(i) = limitJointVelocity(qdot(i), max_current_joint_vel); 
+    }
+  }
+  else {
+    for(unsigned int i=0; i<num_joints_; i++) {
+      desired_joint_velocities_.at(i) = qdot(i);
+    }
+  }
   
 }
 
@@ -431,21 +448,8 @@ bool GummiTeleop::isZero(geometry_msgs::Twist vel) {
   return false;
 }
 
-double GummiTeleop::limitJointVelocity(double vel) {
-  if(vel > max_joint_vel_) {
-    printf("Warning: Capping positive joint velocity at %f.\n", max_joint_vel_);
-    return max_joint_vel_;
-  }
-  else {
-    if(vel < -max_joint_vel_) {
-      printf("Warning: Capping negative joint velocity at %f.\n", -max_joint_vel_);
-      return -max_joint_vel_;
-
-    }
-    else {
-      return vel;
-    }
-  }
+double GummiTeleop::limitJointVelocity(double vel, double max_current_vel) {
+  return vel * max_joint_vel_/max_current_vel;
 }
 
 int main(int argc, char** argv)

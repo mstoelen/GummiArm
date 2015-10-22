@@ -41,8 +41,8 @@ class Antagonist:
         self.commandExtensor = 0
         self.dEquilibrium = 0
 
-        self.pGain = 6.0/60
-        self.vGain = 1.5/60
+        self.pGain = 6.0/60.0
+        self.vGain = 1.5/60.0
         self.pGainUse = 0
         self.vGainUse = 0
         self.lGain = 0.03
@@ -140,6 +140,7 @@ class Antagonist:
 
         scale = 1
         self.cStiffness = self.dStiffness
+
         if compliance > 0.1:
             self.doCompliance(compliance)
             scale = 1 - (compliance * 0.5)
@@ -147,6 +148,7 @@ class Antagonist:
         else:
             scale = 1 - (reflex * 0.5)
             self.cStiffness = self.dStiffness + reflex
+        
         self.scaleControlGain(scale)
         
         if self.velocity:
@@ -187,17 +189,16 @@ class Antagonist:
         self.equilibriumErrors.pop(0)
 
     def doClosedLoop(self):
-        if self.angle.haveNewState():
-            encoderAngle = self.angle.getEncoder()
-            dAngle = self.angle.getDesired()
-            
-            error = dAngle - encoderAngle
-            errorChange = self.errorLast - error
-            self.errorLast = error
-            
-            prop_term = error * self.pGainUse
-            vel_term = errorChange * self.vGainUse
-            self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
+        encoderAngle = self.angle.getEncoder()
+        dAngle = self.angle.getDesired()
+        
+        error = dAngle - encoderAngle
+        errorChange = self.errorLast - error
+        self.errorLast = error
+        
+        prop_term = error * self.pGainUse
+        vel_term = errorChange * self.vGainUse
+        self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
     def doCompliance(self, contribution):
         if abs(self.loadRatio) > 1:

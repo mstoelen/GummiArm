@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import rospy
+from collections import deque
+import numpy as np
 
 from dynamixel_msgs.msg import JointState
 
@@ -18,13 +20,19 @@ class JointAngle:
         rospy.Subscriber('/' + self.name + '_controller/state', JointState, self.encoderCallback)
 
     def initVariables(self):
+        self.encoderAngles = deque()
         self.encoderAngle = 0
         self.dAngle = 0
         self.dVelocity = 0
 
     def encoderCallback(self, msg):           
-        self.encoderAngle = msg.current_pos * self.sign
-        self.newState = True
+        angle = msg.current_pos * self.sign
+        self.encoderAngles.appendleft(angle)
+        if len(self.encoderAngles) > 3:
+            self.encoderAngles.pop()
+            #TODO: Median for removing spikes seen in encoders. Better solution?
+            self.encoderAngle = np.median(self.encoderAngles) 
+            self.newState = True
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
