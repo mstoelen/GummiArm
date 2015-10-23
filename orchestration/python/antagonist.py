@@ -56,9 +56,7 @@ class Antagonist:
         self.maxLoad = 10000
         self.loadRatio = 0
         self.errorLast = 0.0
-        #self.timeStep = 0.01
-        #self.timeLast = rospy.Time.now()
-        #self.firstTime = True
+        self.dEqVelGain = 1.0 # TODO: calibration based on joint range
 
         self.equilibriumErrors = list()
         for i in range(0, 5):
@@ -104,6 +102,14 @@ class Antagonist:
         self.stretchReflex.inhibit()
         self.doUpdate()
 
+    def moveWith(self, dEquilibriumVel, dStiffness):
+        self.velocity = False
+        self.closedLoop = False
+        self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelGain;
+        self.dStiffness = dStiffness
+        self.angle.setDesiredToEncoder()
+        self.doUpdate()
+
     def servoWith(self, dVelocity, dStiffness):
         self.closedLoop = True
         self.velocity = True
@@ -123,13 +129,6 @@ class Antagonist:
         self.maxLoad = maxLoad
 
     def doUpdate(self):
-        #if self.firstTime:
-        #    self.timeLast = rospy.Time.now()
-        #    self.firstTime = False
-        #duration = rospy.Time.now() - self.timeLast
-        #self.timeStep = duration.to_sec()
-        #self.timeLast = rospy.Time.now()
-
         self.createEquilibriumError()            
         self.createMeanError()
         reflex = self.stretchReflex.getContribution(self.meanError)
@@ -265,11 +264,9 @@ class Antagonist:
         maxAngle = self.angle.getMax()
         jointRange = maxAngle - minAngle
         estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
-        #print(self.nameEncoder + ", actual angle: " + str(encoderAngle) + " and estimated: " + str(estimatedAngle))
         load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cStiffness)
         self.loadRatio = adjustedLoad/self.maxLoad
-        #print(self.nameEncoder + ", load ratio: " + str(self.loadRatio) + ".")
 
     def getJointAngle(self):
         return self.angle.getEncoder()

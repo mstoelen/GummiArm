@@ -50,9 +50,9 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.manualSetStiffness(0.45, 0.6, 0.45, 0.3)
+    gummi.setStiffness(0.45, 0.6, 0.45, 0.3)
 
-    minLimits = [-30,0,-30,-20,-75,-35]
+    minLimits = [-30,5,-30,-20,-75,-35]
     maxLimits = [65,75,30,20,75,35]
 
     timeReverse = rospy.Time.now()
@@ -124,7 +124,8 @@ def main(args):
             velocities[i] = v
 
         #print(velocities)
-        gummi.manualServoWith(velocities)
+        gummi.setVelocity(velocities)
+        gummi.doUpdate()
 
         disp.fill(colour)
         pygame.display.update()

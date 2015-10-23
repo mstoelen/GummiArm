@@ -47,7 +47,7 @@ private:
   ros::Subscriber desired_sub_, joint_state_sub_, button_sub_;
   std::vector<std::string> joint_names_;
   std::vector<double> current_joint_positions_;
-  bool receivedJointPositions_;
+  bool received_joint_positions_;
   bool button1_, button2_;
   std::vector<double> joint_stiffnesses_;
 
@@ -56,6 +56,7 @@ private:
   const moveit::core::JointModelGroup* joint_model_group_;
   ros::Time timeOfLastJointState_;
   bool passive_wrist_;
+  bool equilibrium_control_;
   bool stiff_arm_;
   ros::Time time_last_button1_;
   ros::Time time_last_button2_;
@@ -85,16 +86,17 @@ GummiTeleop::GummiTeleop():
   nh_.param("scale_linear", l_scale_, l_scale_);
   num_joints_ = 6; // TODO: INPUT PARAMETER
   debug_mode_ = 0; // TODO: INPUT PARAMETER
-  receivedJointPositions_ = false;
+  control_gain_ = 0.1; // TODO: INPUT PARAMETER
+  max_joint_vel_ = 0.025; // TODO: INPUT PARAMETER
+  received_joint_positions_ = false;
   button1_ = 0;
   button2_ = 0;
   passive_wrist_ = false;
+  equilibrium_control_ = false;
   stiff_arm_  = false;
   time_last_button1_ = ros::Time::now();
   time_last_button2_ = ros::Time::now();
-  integrate_cartesian_pose_ = true;
   have_started_integrating_ = false;
-  control_gain_ = 0.1; // TODO: INPUT PARAMETER
   zero_counter_ = 0;
   zero_vel_.linear.x = 0.0;
   zero_vel_.linear.y = 0.0;
@@ -102,7 +104,6 @@ GummiTeleop::GummiTeleop():
   zero_vel_.angular.x = 0.0;
   zero_vel_.angular.y = 0.0;
   zero_vel_.angular.z = 0.0;
-  max_joint_vel_ = 0.015;
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
@@ -126,7 +127,7 @@ GummiTeleop::GummiTeleop():
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.0);
+    joint_stiffnesses_.push_back(0.0001);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
   }
@@ -149,12 +150,12 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
   bool connected = checkIfConnectedToRobot();
   if(connected) {
 
-    if(!receivedJointPositions_) {
+    if(!received_joint_positions_) {
 
       ros::Duration(2.0).sleep();
 
       printf("Received initial pose OK, starting robot control!\n");
-      receivedJointPositions_ = true;
+      received_joint_positions_ = true;
 
     }
     else {
@@ -178,7 +179,8 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
   }
   else {
     printf("Warning: not connected to robot, not sending command.\n");
-    receivedJointPositions_ = false;
+    received_joint_positions_ = false;
+    have_started_integrating_ = false;
   }
   
 }
@@ -270,36 +272,30 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
 
   T_desired = F_at_hand * T_desired;
 
-  if(integrate_cartesian_pose_) {
-    if(!have_started_integrating_) {
-      F_integrated_ = F_current;
-      have_started_integrating_ = true;
-    }
-    else {
-      KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
-					   T_desired.rot.y() * time_step,
-					   T_desired.rot.z() * time_step),
-			KDL::Vector(T_desired.vel.x() * time_step,
-				    T_desired.vel.y() * time_step,
-				    T_desired.vel.z() * time_step));
-      
-      // Calculate desired pose
-      KDL::Frame F_desired;
-      F_desired = F_step*F_integrated_; 
-      
-      KDL::Twist T_error;
-      T_error = diff(F_current, F_desired);
-      
-      for(unsigned int i=0; i<num_joints_; i++) {
-	T_current(i) = T_error(i) * control_gain_;
-      }  
-
-      F_integrated_ = F_current;
-    }
+  if(!have_started_integrating_) {
+    F_integrated_ = F_current;
+    have_started_integrating_ = true;
   }
   else {
-    T_current = T_desired * 0.00075; // TODO
-    have_started_integrating_ = false;
+    KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
+					 T_desired.rot.y() * time_step,
+					 T_desired.rot.z() * time_step),
+		      KDL::Vector(T_desired.vel.x() * time_step,
+				  T_desired.vel.y() * time_step,
+				  T_desired.vel.z() * time_step));
+    
+    // Calculate desired pose
+    KDL::Frame F_desired;
+    F_desired = F_step*F_integrated_; 
+    
+    KDL::Twist T_error;
+    T_error = diff(F_current, F_desired);
+    
+    for(unsigned int i=0; i<num_joints_; i++) {
+      T_current(i) = T_error(i) * control_gain_;
+    }  
+    
+    F_integrated_ = F_current;
   }
 
   int ret_ik = ik_solver_->CartToJnt(q_current,T_current, qdot);
@@ -340,7 +336,7 @@ void GummiTeleop::publishJointVelocities()
   message.velocity = desired_joint_velocities_;
 
   if(passive_wrist_) {
-    message.effort[5] = -message.effort[5];
+    message.effort[5] = -999;
   }
 
   joint_cmd_pub_.publish(message);
@@ -356,15 +352,20 @@ void GummiTeleop::publishJointVelocities()
     ros::Duration diff = now - time_last_button1_;
     double time_passed = diff.toSec();
     if(time_passed > 1.0) {
-       if(passive_wrist_) {
-	 passive_wrist_ = false;
-	 printf("Switching to active (and stiff) wrist.\n");
-	 joint_stiffnesses_.at(5) = 0.35;
+       if(!equilibrium_control_) {
+	 for(int i = 0; i < num_joints_; i++) {
+	   joint_stiffnesses_.at(i) = -std::abs(joint_stiffnesses_.at(i));
+	 }
+	 equilibrium_control_ = true;
+	 printf("Switching to equilibrium control.\n");
        }
        else {
-	 passive_wrist_ = true;
-	 printf("Switching to passive (and loose) wrist.\n");
-	 joint_stiffnesses_.at(5) = 0.001;
+	 for(int i = 0; i < num_joints_; i++) {
+	   joint_stiffnesses_.at(i) = std::abs(joint_stiffnesses_.at(i));
+	 }
+	 equilibrium_control_ = false;
+	 have_started_integrating_ = false;
+	 printf("Switching to position control.\n");
        }
      }
      time_last_button1_ = ros::Time::now();
@@ -374,20 +375,25 @@ void GummiTeleop::publishJointVelocities()
        ros::Duration diff = now - time_last_button2_;
        double time_passed = diff.toSec();
        if(time_passed > 1.0) {
-	 if(stiff_arm_) {
-	   stiff_arm_ = false;
-	   printf("Setting all joint to loose.\n");
-	   for(int i = 0; i < num_joints_; i++) {
-	     joint_stiffnesses_.at(i) = 0;
+	 if(!equilibrium_control_) {
+	   if(stiff_arm_) {
+	     stiff_arm_ = false;
+	     printf("Setting all joint to loose.\n");
+	     for(int i = 0; i < num_joints_; i++) {
+	       joint_stiffnesses_.at(i) = 0.0001;
+	     }
+	   }
+	   else {
+	     stiff_arm_ = true;
+	     printf("Setting all joint to stiff.\n");
+	     for(int i = 0; i < (num_joints_-1); i++) { // TODO: Not wrist for now
+	       joint_stiffnesses_.at(i) = 0.6;
+	     }
+	     joint_stiffnesses_.at(5) = 0.3;
 	   }
 	 }
 	 else {
-	   stiff_arm_ = true;
-	   printf("Setting all joint to stiff.\n");
-	   for(int i = 0; i < (num_joints_-1); i++) { // TODO: Not wrist for now
-	     joint_stiffnesses_.at(i) = 0.6;
-	   }
-	   joint_stiffnesses_.at(5) = 0.3;
+	   printf("WARNING: Cannot change stiffness while in equilibrium control.\n");
 	 }
        }
        time_last_button2_ = ros::Time::now();
