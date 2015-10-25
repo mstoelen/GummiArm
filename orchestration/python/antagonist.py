@@ -35,6 +35,7 @@ class Antagonist:
         self.disableEncoderTorque()
         self.setTorqueLimit(nameExtensor, 1)
         self.setTorqueLimit(nameFlexor, 1)
+        self.calculateEqVelCalibration()
 
     def initVariables(self):
         self.commandFlexor = 0
@@ -56,11 +57,17 @@ class Antagonist:
         self.maxLoad = 10000
         self.loadRatio = 0
         self.errorLast = 0.0
-        self.dEqVelGain = 1.0 # TODO: calibration based on joint range
+        self.dEqVelCalibration = 1.0
 
         self.equilibriumErrors = list()
         for i in range(0, 5):
             self.equilibriumErrors.append(0.0)
+
+    def calculateEqVelCalibration(self):
+        joint_range = self.angle.getMax() - self.angle.getMin()
+        eq_range = 2 * 2.0
+        self.dEqVelCalibration = eq_range/joint_range;
+        print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
 
     def setTorqueLimit(self, name, limit):
         service_name = '/' + name + '_controller/set_torque_limit'
@@ -105,7 +112,7 @@ class Antagonist:
     def moveWith(self, dEquilibriumVel, dStiffness):
         self.velocity = False
         self.closedLoop = False
-        self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelGain;
+        self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
         self.dStiffness = dStiffness
         self.angle.setDesiredToEncoder()
         self.doUpdate()

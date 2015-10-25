@@ -87,7 +87,7 @@ GummiTeleop::GummiTeleop():
   num_joints_ = 6; // TODO: INPUT PARAMETER
   debug_mode_ = 0; // TODO: INPUT PARAMETER
   control_gain_ = 0.1; // TODO: INPUT PARAMETER
-  max_joint_vel_ = 0.025; // TODO: INPUT PARAMETER
+  max_joint_vel_ = 0.04; // TODO: INPUT PARAMETER
   received_joint_positions_ = false;
   button1_ = 0;
   button2_ = 0;
@@ -127,7 +127,7 @@ GummiTeleop::GummiTeleop():
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.0001);
+    joint_stiffnesses_.push_back(0.1);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
   }
@@ -380,16 +380,15 @@ void GummiTeleop::publishJointVelocities()
 	     stiff_arm_ = false;
 	     printf("Setting all joint to loose.\n");
 	     for(int i = 0; i < num_joints_; i++) {
-	       joint_stiffnesses_.at(i) = 0.0001;
+	       joint_stiffnesses_.at(i) = 0.1;
 	     }
 	   }
 	   else {
 	     stiff_arm_ = true;
 	     printf("Setting all joint to stiff.\n");
-	     for(int i = 0; i < (num_joints_-1); i++) { // TODO: Not wrist for now
-	       joint_stiffnesses_.at(i) = 0.6;
+	     for(int i = 0; i < (num_joints_); i++) {
+	       joint_stiffnesses_.at(i) = 0.75;
 	     }
-	     joint_stiffnesses_.at(5) = 0.3;
 	   }
 	 }
 	 else {
