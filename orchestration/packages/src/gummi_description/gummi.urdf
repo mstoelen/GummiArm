@@ -18,11 +18,6 @@
         <cylinder length="0.107" radius="0.065" />
       </geometry>
     </collision>
-    <inertial>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-      <mass value="1"/>
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
-    </inertial>
   </link>
 
   <link name="shoulder">
@@ -214,7 +209,7 @@
     <parent link="base_link"/>
     <child link="shoulder"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.2" upper="1.25" velocity="1.0"/>
+    <limit effort="0" lower="-0.55" upper="1.4" velocity="1.0"/>
   </joint> 
   <joint name="shoulder_pitch" type="revolute">
     <origin rpy="0 -1.57079 0.0" xyz="0.0 0.0 0.129"/>
@@ -235,7 +230,7 @@
     <parent link="upperarm"/>
     <child link="lowerarm_preroll"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.75" upper="0.85" velocity="1.0"/>
+    <limit effort="0" lower="-0.85" upper="0.85" velocity="1.0"/>
   </joint>
   <joint name="lowerarm_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.079 0.0"/>
