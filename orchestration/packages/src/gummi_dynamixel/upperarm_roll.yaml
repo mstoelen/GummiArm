@@ -1,0 +1,12 @@
+upperarm_roll_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: upperarm_roll
+    joint_speed: 1.5
+    motor:
+        id: 9
+        init: 2048
+        min: 0
+        max: 4095

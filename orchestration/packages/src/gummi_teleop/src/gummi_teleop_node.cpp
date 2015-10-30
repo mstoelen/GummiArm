@@ -222,9 +222,9 @@ geometry_msgs::Twist GummiTeleop::scaleDesired(geometry_msgs::Twist desired)
 {
   geometry_msgs::Twist out;
 
-  out.linear.x = desired.linear.x * 5; // TODO: USE PARAMETERS ABOVE
-  out.linear.y = desired.linear.y * 5; // TODO: USE PARAMETERS ABOVE
-  out.linear.z = desired.linear.z * 5; // TODO: USE PARAMETERS ABOVE
+  out.linear.x = desired.linear.x * 4; // TODO: USE PARAMETERS ABOVE
+  out.linear.y = desired.linear.y * 4; // TODO: USE PARAMETERS ABOVE
+  out.linear.z = desired.linear.z * 4; // TODO: USE PARAMETERS ABOVE
   
   out.angular.x = desired.angular.x * 10; // TODO: USE PARAMETERS ABOVE
   out.angular.y = desired.angular.y * 10; // TODO: USE PARAMETERS ABOVE

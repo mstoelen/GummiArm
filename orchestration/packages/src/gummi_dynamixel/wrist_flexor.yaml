@@ -1,0 +1,12 @@
+wrist_flexor_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: wrist_flexor
+    joint_speed: 10
+    motor:
+        id: 5
+        init: 512
+        min: 0
+        max: 1023
