@@ -42,8 +42,8 @@ class Antagonist:
         self.commandExtensor = 0
         self.dEquilibrium = 0
 
-        self.pGain = 6.0/60.0
-        self.vGain = 1.5/60.0
+        self.pGain = 4.0/60.0
+        self.vGain = 1.0/60.0
         self.pGainUse = 0
         self.vGainUse = 0
         self.lGain = 0.03
