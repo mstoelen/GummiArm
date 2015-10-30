@@ -67,6 +67,7 @@ private:
   std::vector<double> desired_joint_velocities_;
   int zero_counter_;
   geometry_msgs::Twist zero_vel_;
+  geometry_msgs::Twist last_vel_;
   double max_joint_vel_;
   double min_joint_vel_;
 
@@ -104,6 +105,7 @@ GummiTeleop::GummiTeleop():
   zero_vel_.angular.x = 0.0;
   zero_vel_.angular.y = 0.0;
   zero_vel_.angular.z = 0.0;
+  last_vel_ = zero_vel_; 
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
@@ -164,15 +166,19 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
 	zero_counter_++;
 	if(zero_counter_ > 10) {
 	  vel = zero_vel_;
-	  calculateDesiredJointVelocity(vel);
+	}
+	else {
+	  vel = last_vel_;
 	}
       }
       else {
-	calculateDesiredJointVelocity(vel);
 	zero_counter_ = 0;
       }
+      calculateDesiredJointVelocity(vel);
 
       publishJointVelocities();
+
+      last_vel_ = vel;
 
     }
     
