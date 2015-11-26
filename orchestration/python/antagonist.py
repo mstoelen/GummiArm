@@ -9,6 +9,7 @@ from std_msgs.msg import Float64
 from joint_angle import JointAngle
 from reflex import Reflex
 from recording import Recording
+from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
 class Antagonist:
     def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
@@ -31,14 +32,18 @@ class Antagonist:
 
         self.initPublishers()
         self.initVariables()
+        self.disableEncoderTorque()
+        self.setTorqueLimit(nameExtensor, 1)
+        self.setTorqueLimit(nameFlexor, 1)
+        self.calculateEqVelCalibration()
 
     def initVariables(self):
         self.commandFlexor = 0
         self.commandExtensor = 0
         self.dEquilibrium = 0
 
-        self.pGain = 6.0/60
-        self.vGain = 1.5/60
+        self.pGain = 4.0/60.0
+        self.vGain = 1.0/60.0
         self.pGainUse = 0
         self.vGainUse = 0
         self.lGain = 0.03
@@ -52,17 +57,39 @@ class Antagonist:
         self.maxLoad = 10000
         self.loadRatio = 0
         self.errorLast = 0.0
-        #self.timeStep = 0.01
-        #self.timeLast = rospy.Time.now()
-        #self.firstTime = True
+        self.dEqVelCalibration = 1.0
 
         self.equilibriumErrors = list()
         for i in range(0, 5):
             self.equilibriumErrors.append(0.0)
 
+    def calculateEqVelCalibration(self):
+        joint_range = self.angle.getMax() - self.angle.getMin()
+        eq_range = 2 * 2.0
+        self.dEqVelCalibration = eq_range/joint_range;
+        print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
+
+    def setTorqueLimit(self, name, limit):
+        service_name = '/' + name + '_controller/set_torque_limit'
+        rospy.wait_for_service(service_name)
+        try:
+            te = rospy.ServiceProxy(service_name, SetTorqueLimit)
+            te(limit)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+    def disableEncoderTorque(self):
+        service_name = '/' + self.nameEncoder + '_controller/torque_enable'
+        rospy.wait_for_service(service_name)
+        try:
+            te = rospy.ServiceProxy(service_name, TorqueEnable)
+            te(torque_enable = False)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
     def initPublishers(self):
-        self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '/command', Float64, queue_size=5)
-        self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '/command', Float64, queue_size=5)
+        self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '_controller/command', Float64, queue_size=5)
+        self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '_controller/command', Float64, queue_size=5)
 
     def servoTo(self, dAngle, dStiffness):
         self.velocity = False
@@ -80,6 +107,14 @@ class Antagonist:
         self.dStiffness = dStiffness
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
+        self.doUpdate()
+
+    def moveWith(self, dEquilibriumVel, dStiffness):
+        self.velocity = False
+        self.closedLoop = False
+        self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
+        self.dStiffness = dStiffness
+        self.angle.setDesiredToEncoder()
         self.doUpdate()
 
     def servoWith(self, dVelocity, dStiffness):
@@ -101,13 +136,6 @@ class Antagonist:
         self.maxLoad = maxLoad
 
     def doUpdate(self):
-        #if self.firstTime:
-        #    self.timeLast = rospy.Time.now()
-        #    self.firstTime = False
-        #duration = rospy.Time.now() - self.timeLast
-        #self.timeStep = duration.to_sec()
-        #self.timeLast = rospy.Time.now()
-
         self.createEquilibriumError()            
         self.createMeanError()
         reflex = self.stretchReflex.getContribution(self.meanError)
@@ -118,6 +146,7 @@ class Antagonist:
 
         scale = 1
         self.cStiffness = self.dStiffness
+
         if compliance > 0.1:
             self.doCompliance(compliance)
             scale = 1 - (compliance * 0.5)
@@ -125,6 +154,7 @@ class Antagonist:
         else:
             scale = 1 - (reflex * 0.5)
             self.cStiffness = self.dStiffness + reflex
+        
         self.scaleControlGain(scale)
         
         if self.velocity:
@@ -167,11 +197,11 @@ class Antagonist:
     def doClosedLoop(self):
         encoderAngle = self.angle.getEncoder()
         dAngle = self.angle.getDesired()
-
+        
         error = dAngle - encoderAngle
         errorChange = self.errorLast - error
         self.errorLast = error
-
+        
         prop_term = error * self.pGainUse
         vel_term = errorChange * self.vGainUse
         self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
@@ -182,9 +212,9 @@ class Antagonist:
             encoderAngle = self.angle.getEncoder()
             self.angle.setDesiredToEncoder()
             if self.loadRatio > 0:
-                self.dEquilibrium = self.dEquilibrium - contribution * self.lGain 
+                self.dEquilibrium = self.dEquilibrium - contribution * self.lGain * self.signEquilibrium
             else: 
-                self.dEquilibrium = self.dEquilibrium + contribution * self.lGain 
+                self.dEquilibrium = self.dEquilibrium + contribution * self.lGain * self.signEquilibrium
 
     def capEquilibrium(self):
         if self.dEquilibrium > 2:
@@ -241,11 +271,9 @@ class Antagonist:
         maxAngle = self.angle.getMax()
         jointRange = maxAngle - minAngle
         estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
-        #print(self.nameEncoder + ", actual angle: " + str(encoderAngle) + " and estimated: " + str(estimatedAngle))
         load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cStiffness)
         self.loadRatio = adjustedLoad/self.maxLoad
-        #print(self.nameEncoder + ", load ratio: " + str(self.loadRatio) + ".")
 
     def getJointAngle(self):
         return self.angle.getEncoder()

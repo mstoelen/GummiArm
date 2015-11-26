@@ -31,7 +31,6 @@ def main(args):
 
     for i in range(0, 400):
         gummi.goRestingPose()
-
         r.sleep()
 
     print("GummiArm is live!")

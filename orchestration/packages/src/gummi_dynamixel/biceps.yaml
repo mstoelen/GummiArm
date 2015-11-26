@@ -1,0 +1,12 @@
+biceps_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: biceps
+    joint_speed: 10.0
+    motor:
+        id: 1
+        init: 2048
+        min: 0
+        max: 4095

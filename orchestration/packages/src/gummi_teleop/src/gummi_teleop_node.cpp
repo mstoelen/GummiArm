@@ -8,6 +8,13 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 
+#include <kdl_parser/kdl_parser.hpp>
+
+#include <kdl/chain.hpp>
+#include <kdl/chainfksolverpos_recursive.hpp>
+#include <kdl/chainiksolvervel_pinv.hpp>
+#include <kdl/frames.hpp>
+
 #include <angles/angles.h>
 
 class GummiTeleop
@@ -22,13 +29,14 @@ private:
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& joint_state_in);
   void buttonCallback(const sensor_msgs::Joy::ConstPtr& joy_in);
   geometry_msgs::Twist scaleDesired(geometry_msgs::Twist desired);
-  void calculateDesiredJointPosition(geometry_msgs::Twist desired);
-  void publishJointPositions();
+  void calculateDesiredJointVelocity(geometry_msgs::Twist desired);
+  bool isZero(geometry_msgs::Twist vel);
+  void publishJointVelocities();
   void printDesired(geometry_msgs::Twist desired);
   void printJointStateIn(sensor_msgs::JointState joint_state_in);
   bool checkIfConnectedToRobot();
-  void updateInternalJointState();
   void processButtonPress();
+  double limitJointVelocity(double vel, double max);
 
   ros::NodeHandle nh_;
 
@@ -39,7 +47,7 @@ private:
   ros::Subscriber desired_sub_, joint_state_sub_, button_sub_;
   std::vector<std::string> joint_names_;
   std::vector<double> current_joint_positions_;
-  bool receivedJointPositions_;
+  bool received_joint_positions_;
   bool button1_, button2_;
   std::vector<double> joint_stiffnesses_;
 
@@ -48,7 +56,24 @@ private:
   const moveit::core::JointModelGroup* joint_model_group_;
   ros::Time timeOfLastJointState_;
   bool passive_wrist_;
-  
+  bool equilibrium_control_;
+  bool stiff_arm_;
+  ros::Time time_last_button1_;
+  ros::Time time_last_button2_;
+  bool integrate_cartesian_pose_;
+  bool have_started_integrating_;
+  KDL::Frame F_integrated_;
+  double control_gain_;
+  std::vector<double> desired_joint_velocities_;
+  int zero_counter_;
+  geometry_msgs::Twist zero_vel_;
+  geometry_msgs::Twist last_vel_;
+  double max_joint_vel_;
+  double min_joint_vel_;
+
+  KDL::ChainFkSolverPos_recursive* fk_solver_;
+  KDL::ChainIkSolverVel_pinv* ik_solver_;
+
 };
 
 GummiTeleop::GummiTeleop():
@@ -62,29 +87,50 @@ GummiTeleop::GummiTeleop():
   nh_.param("scale_linear", l_scale_, l_scale_);
   num_joints_ = 6; // TODO: INPUT PARAMETER
   debug_mode_ = 0; // TODO: INPUT PARAMETER
-  receivedJointPositions_ = false;
+  control_gain_ = 0.1; // TODO: INPUT PARAMETER
+  max_joint_vel_ = 0.04; // TODO: INPUT PARAMETER
+  received_joint_positions_ = false;
   button1_ = 0;
   button2_ = 0;
   passive_wrist_ = false;
+  equilibrium_control_ = false;
+  stiff_arm_  = false;
+  time_last_button1_ = ros::Time::now();
+  time_last_button2_ = ros::Time::now();
+  have_started_integrating_ = false;
+  zero_counter_ = 0;
+  zero_vel_.linear.x = 0.0;
+  zero_vel_.linear.y = 0.0;
+  zero_vel_.linear.z = 0.0;
+  zero_vel_.angular.x = 0.0;
+  zero_vel_.angular.y = 0.0;
+  zero_vel_.angular.z = 0.0;
+  last_vel_ = zero_vel_; 
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
   ROS_INFO("Model frame: %s", kinematic_model_->getModelFrame().c_str());  
 
-  moveit::core::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model_));
-  kinematic_state_ = kinematic_state;
-  kinematic_state_->setToDefaultValues(); 
-  joint_model_group_ = kinematic_model_->getJointModelGroup("right");
+  KDL::Tree kdl_tree;
+  KDL::Chain chain;
+  ros::NodeHandle node;
+  std::string robot_desc_string;
+  node.param("robot_description", robot_desc_string, std::string());
+  if (!kdl_parser::treeFromString(robot_desc_string, kdl_tree)){
+    ROS_ERROR("Failed to construct kdl tree");
+  }
+
+  kdl_tree.getChain("base_link", "tool", chain);
+  fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
+  ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
 
   const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames(); 
   joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.75);
-  }
-
-  for(int i = 0; i < num_joints_; i++) {
+    joint_stiffnesses_.push_back(0.1);
+    desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
   }
 
@@ -99,32 +145,48 @@ GummiTeleop::GummiTeleop():
 
 void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
 {
+ 
   if(debug_mode_) printDesired(*desired);
   geometry_msgs::Twist vel = scaleDesired(*desired);
 
   bool connected = checkIfConnectedToRobot();
   if(connected) {
 
-    if(!receivedJointPositions_) {
+    if(!received_joint_positions_) {
 
       ros::Duration(2.0).sleep();
 
-      updateInternalJointState();
       printf("Received initial pose OK, starting robot control!\n");
-      receivedJointPositions_ = true;
+      received_joint_positions_ = true;
 
     }
     else {
       
-      calculateDesiredJointPosition(vel);
-      publishJointPositions();
+      if(isZero(vel)) {
+	zero_counter_++;
+	if(zero_counter_ > 10) {
+	  vel = zero_vel_;
+	}
+	else {
+	  vel = last_vel_;
+	}
+      }
+      else {
+	zero_counter_ = 0;
+      }
+      calculateDesiredJointVelocity(vel);
+
+      publishJointVelocities();
+
+      last_vel_ = vel;
 
     }
     
   }
   else {
     printf("Warning: not connected to robot, not sending command.\n");
-    receivedJointPositions_ = false;
+    received_joint_positions_ = false;
+    have_started_integrating_ = false;
   }
   
 }
@@ -166,64 +228,180 @@ geometry_msgs::Twist GummiTeleop::scaleDesired(geometry_msgs::Twist desired)
 {
   geometry_msgs::Twist out;
 
-  out.linear.x = desired.linear.x * 0.04; // TODO: USE PARAMETERS ABOVE
-  out.linear.y = desired.linear.y * 0.04; // TODO: USE PARAMETERS ABOVE
-  out.linear.z = desired.linear.z * 0.04; // TODO: USE PARAMETERS ABOVE
+  out.linear.x = desired.linear.x * 4; // TODO: USE PARAMETERS ABOVE
+  out.linear.y = desired.linear.y * 4; // TODO: USE PARAMETERS ABOVE
+  out.linear.z = desired.linear.z * 4; // TODO: USE PARAMETERS ABOVE
   
-  out.angular.x = desired.angular.x * 0.07; // TODO: USE PARAMETERS ABOVE
-  out.angular.y = desired.angular.y * 0.07; // TODO: USE PARAMETERS ABOVE
-  out.angular.z = desired.angular.z * 0.07; // TODO: USE PARAMETERS ABOVE
+  out.angular.x = desired.angular.x * 15; // TODO: USE PARAMETERS ABOVE
+  out.angular.y = desired.angular.y * 15; // TODO: USE PARAMETERS ABOVE
+  out.angular.z = desired.angular.z * 15; // TODO: USE PARAMETERS ABOVE
 
   return out;
 }
 
-void GummiTeleop::calculateDesiredJointPosition(geometry_msgs::Twist desired)
+void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
 {
 
-  if(kinematic_state_->setFromDiffIK(joint_model_group_, desired, "tool", 0.05)) {
-   
+  KDL::Twist T_current;
+  KDL::JntArray q_current(num_joints_);
+  KDL::JntArray qdot(num_joints_);
+  double time_step = 0.01; // TODO
+
+  T_current.vel.x(0.0);
+  T_current.vel.y(0.0);
+  T_current.vel.z(0.0);
+  T_current.rot.x(0.0);
+  T_current.rot.y(0.0);
+  T_current.rot.z(0.0);
+
+  for(int i = 0; i < num_joints_; i++) {
+    q_current(i) = current_joint_positions_.at(i);
+  }
+
+  KDL::Vector pos_vel(desired.linear.x,
+		      desired.linear.y,
+		      desired.linear.z);
+  KDL::Vector rot_vel(desired.angular.x,
+		      desired.angular.y,
+		      desired.angular.z);
+  KDL::Twist T_desired = KDL::Twist(pos_vel, rot_vel);
+
+  KDL::Frame F_current;
+  int ret_fk = fk_solver_->JntToCart(q_current,F_current);
+  if(ret_fk < 0) {
+    printf("FK not solved!\n");
+    assert(false);
+  }
+
+  KDL::Frame F_at_hand = F_current;
+  F_at_hand.M = KDL::Rotation::Identity();
+
+  T_desired = F_at_hand * T_desired;
+
+  if(!have_started_integrating_) {
+    F_integrated_ = F_current;
+    have_started_integrating_ = true;
   }
   else {
-    printf("Diff IK not solved!\n"); // TODO: A BETTER SOLUTION?
+    KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
+					 T_desired.rot.y() * time_step,
+					 T_desired.rot.z() * time_step),
+		      KDL::Vector(T_desired.vel.x() * time_step,
+				  T_desired.vel.y() * time_step,
+				  T_desired.vel.z() * time_step));
+    
+    // Calculate desired pose
+    KDL::Frame F_desired;
+    F_desired = F_step*F_integrated_; 
+    
+    KDL::Twist T_error;
+    T_error = diff(F_current, F_desired);
+    
+    for(unsigned int i=0; i<num_joints_; i++) {
+      T_current(i) = T_error(i) * control_gain_;
+    }  
+    
+    F_integrated_ = F_current;
+  }
+
+  int ret_ik = ik_solver_->CartToJnt(q_current,T_current, qdot);
+  if(ret_ik < 0) {
+    printf("Diff IK not solved!\n");
     assert(false);
+  }
+
+  double max_current_joint_vel = 0.0;
+  for(unsigned int i=0; i<num_joints_; i++) {
+    if(std::abs(qdot(i)) > max_joint_vel_) {
+      max_current_joint_vel = std::abs(qdot(i));
+    }
+  }
+
+  if(max_current_joint_vel > max_joint_vel_) {
+    printf("Warning: Limiting joint velocities.\n");
+    for(unsigned int i=0; i<num_joints_; i++) {
+      desired_joint_velocities_.at(i) = limitJointVelocity(qdot(i), max_current_joint_vel); 
+    }
+  }
+  else {
+    for(unsigned int i=0; i<num_joints_; i++) {
+      desired_joint_velocities_.at(i) = qdot(i);
+    }
   }
   
 }
 
-void GummiTeleop::publishJointPositions()
+void GummiTeleop::publishJointVelocities()
 {
 
   sensor_msgs::JointState message;
   std::vector<double> positions;
-  for(int i = 0; i < num_joints_; i++) {
-    positions.push_back(kinematic_state_->getVariablePosition(joint_names_.at(i)));
-  }
 
   message.name = joint_names_;
   message.effort = joint_stiffnesses_;
-  message.position = positions;
+  message.velocity = desired_joint_velocities_;
 
   if(passive_wrist_) {
-    message.effort[5] = -message.effort[5];
+    message.effort[5] = -999;
   }
 
   joint_cmd_pub_.publish(message);
+
 }
 
 
  void GummiTeleop::processButtonPress() {
 
-   std_msgs::Float64 message;
-   if(button1_) {
-     passive_wrist_ = true;
-     printf("Switching to passive wrist.\n");
-     joint_stiffnesses_.at(5) = 0.25;
+  ros::Time now = ros::Time::now();
+
+  if(button1_) {
+    ros::Duration diff = now - time_last_button1_;
+    double time_passed = diff.toSec();
+    if(time_passed > 1.0) {
+       if(!equilibrium_control_) {
+	 for(int i = 0; i < num_joints_; i++) {
+	   joint_stiffnesses_.at(i) = -std::abs(joint_stiffnesses_.at(i));
+	 }
+	 equilibrium_control_ = true;
+	 printf("Switching to equilibrium control.\n");
+       }
+       else {
+	 for(int i = 0; i < num_joints_; i++) {
+	   joint_stiffnesses_.at(i) = std::abs(joint_stiffnesses_.at(i));
+	 }
+	 equilibrium_control_ = false;
+	 have_started_integrating_ = false;
+	 printf("Switching to position control.\n");
+       }
+     }
+     time_last_button1_ = ros::Time::now();
    }
    else {
      if(button2_) {
-       passive_wrist_ = false;
-       printf("Switching to active wrist.\n");
-       joint_stiffnesses_.at(5) = 0.75;
+       ros::Duration diff = now - time_last_button2_;
+       double time_passed = diff.toSec();
+       if(time_passed > 1.0) {
+	 if(!equilibrium_control_) {
+	   if(stiff_arm_) {
+	     stiff_arm_ = false;
+	     printf("Setting all joint to loose.\n");
+	     for(int i = 0; i < num_joints_; i++) {
+	       joint_stiffnesses_.at(i) = 0.1;
+	     }
+	   }
+	   else {
+	     stiff_arm_ = true;
+	     printf("Setting all joint to stiff.\n");
+	     for(int i = 0; i < (num_joints_); i++) {
+	       joint_stiffnesses_.at(i) = 0.75;
+	     }
+	   }
+	 }
+	 else {
+	   printf("WARNING: Cannot change stiffness while in equilibrium control.\n");
+	 }
+       }
+       time_last_button2_ = ros::Time::now();
      }
    }
 
@@ -266,13 +444,23 @@ bool GummiTeleop::checkIfConnectedToRobot()
 
 }
 
-void GummiTeleop::updateInternalJointState()
-{
-  for(int i = 0; i < num_joints_; i++) {
-    std::string name = joint_names_.at(i);
-    double position = current_joint_positions_.at(i);
-    kinematic_state_->setVariablePosition(name, position);
+bool GummiTeleop::isZero(geometry_msgs::Twist vel) {
+  if((vel.linear.x == 0.0) &&
+     (vel.linear.y == 0.0) &&
+     (vel.linear.z == 0.0) &&
+     (vel.angular.x == 0.0) &&
+     (vel.angular.y == 0.0) &&
+     (vel.angular.z == 0.0)) {
+
+    return true;
+
   }
+
+  return false;
+}
+
+double GummiTeleop::limitJointVelocity(double vel, double max_current_vel) {
+  return vel * max_joint_vel_/max_current_vel;
 }
 
 int main(int argc, char** argv)
@@ -282,3 +470,4 @@ int main(int argc, char** argv)
 
   ros::spin();
 }
+

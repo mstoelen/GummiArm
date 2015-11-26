@@ -1,0 +1,12 @@
+shoulder_abductor_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: shoulder_abductor
+    joint_speed: 10
+    motor:
+        id: 11
+        init: 2048
+        min: 0
+        max: 4095

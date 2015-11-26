@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 import rospy
+from collections import deque
+import numpy as np
+import math
 
-from sensor_msgs.msg import JointState
+from dynamixel_msgs.msg import JointState
 
 class JointAngle:
     def __init__(self, name, sign, minAngle, maxAngle):
@@ -12,22 +15,28 @@ class JointAngle:
         self.maxAngle = maxAngle
         self.initSubscriber()
         self.initVariables()
+        self.newState = False
 
     def initSubscriber(self):
-        rospy.Subscriber('/joint_states', JointState, self.encoderCallback)
+        rospy.Subscriber('/' + self.name + '_controller/state', JointState, self.encoderCallback)
 
     def initVariables(self):
+        self.encoderAngles = deque()
         self.encoderAngle = 0
         self.dAngle = 0
         self.dVelocity = 0
 
-    def encoderCallback(self, msg):
-        if self.name in msg.name:
-            index = msg.name.index(self.name)            
-            self.encoderAngle = msg.position[index] * self.sign
+    def encoderCallback(self, msg):           
+        angle = msg.current_pos * self.sign
+        if abs(angle) <=  math.pi:
+            self.encoderAngles.appendleft(angle)
+            if len(self.encoderAngles) > 3:
+                self.encoderAngles.pop()
+                #TODO: Median for removing spikes seen in encoders. Better solution?
+                self.encoderAngle = np.median(self.encoderAngles) 
+                self.newState = True
         else:
-            rospy.logerr("Encoder " + self.name + " not found in joint state received!\n")
-            return (0, 0., 0., 0.)
+            print("WARNING: Recieved encoder value of " + str(angle) + ", ignoring.")
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
@@ -52,6 +61,7 @@ class JointAngle:
 
     def getEncoder(self):
         return self.encoderAngle
+        self.newState = False
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity
@@ -61,3 +71,6 @@ class JointAngle:
 
     def getMax(self):
         return self.maxAngle
+
+    def haveNewState(self):
+        return self.newState
