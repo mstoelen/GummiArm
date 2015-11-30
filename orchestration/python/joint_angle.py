@@ -18,7 +18,7 @@ class JointAngle:
         self.newState = False
 
     def initSubscriber(self):
-        rospy.Subscriber('/' + self.name + '_controller/state', JointState, self.encoderCallback)
+        rospy.Subscriber(self.name + '_controller/state', JointState, self.encoderCallback)
 
     def initVariables(self):
         self.encoderAngles = deque()

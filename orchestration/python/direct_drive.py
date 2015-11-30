@@ -18,7 +18,7 @@ class DirectDrive:
         self.recording = Recording()
 
     def initPublishers(self):
-        self.pub = rospy.Publisher('/' + self.name + '_controller/command', Float64, queue_size=5)
+        self.pub = rospy.Publisher(self.name + '_controller/command', Float64, queue_size=5)
 
     def initVariables(self):
         self.velocity = False

@@ -7,7 +7,6 @@ project(gummi_teleop)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  spacenav_node
   moveit_core
   moveit_ros_planning_interface
 )

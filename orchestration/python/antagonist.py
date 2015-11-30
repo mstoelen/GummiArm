@@ -70,7 +70,7 @@ class Antagonist:
         print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
 
     def setTorqueLimit(self, name, limit):
-        service_name = '/' + name + '_controller/set_torque_limit'
+        service_name = name + '_controller/set_torque_limit'
         rospy.wait_for_service(service_name)
         try:
             te = rospy.ServiceProxy(service_name, SetTorqueLimit)
@@ -79,7 +79,7 @@ class Antagonist:
             print "Service call failed: %s"%e
 
     def disableEncoderTorque(self):
-        service_name = '/' + self.nameEncoder + '_controller/torque_enable'
+        service_name = self.nameEncoder + '_controller/torque_enable'
         rospy.wait_for_service(service_name)
         try:
             te = rospy.ServiceProxy(service_name, TorqueEnable)
@@ -88,8 +88,8 @@ class Antagonist:
             print "Service call failed: %s"%e
 
     def initPublishers(self):
-        self.pubExtensor = rospy.Publisher('/' + self.nameExtensor + '_controller/command', Float64, queue_size=5)
-        self.pubFlexor = rospy.Publisher('/' + self.nameFlexor + '_controller/command', Float64, queue_size=5)
+        self.pubExtensor = rospy.Publisher(self.nameExtensor + '_controller/command', Float64, queue_size=5)
+        self.pubFlexor = rospy.Publisher(self.nameFlexor + '_controller/command', Float64, queue_size=5)
 
     def servoTo(self, dAngle, dStiffness):
         self.velocity = False

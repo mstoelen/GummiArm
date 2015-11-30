@@ -42,10 +42,10 @@ class Gummi:
         self.wrist = Antagonist(-1, -1, -1, -1, 1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -0.9, 0.9, 0.0)
 
     def initPublishers(self):
-        self.jointStatePub = rospy.Publisher("/gummi/joint_states", JointState,  queue_size=10) 
+        self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
 
     def initSubscribers(self):
-        rospy.Subscriber('/gummi/joint_commands', JointState, self.cmdCallback)
+        rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
         self.setVelocity(msg.velocity)
