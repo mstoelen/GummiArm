@@ -37,6 +37,7 @@ private:
   bool checkIfConnectedToRobot();
   void processButtonPress();
   double limitJointVelocity(double vel, double max);
+  void findAndSetParameters(ros::NodeHandle node);
 
   ros::NodeHandle nh_;
 
@@ -85,10 +86,6 @@ GummiTeleop::GummiTeleop():
   nh_.param("axis_angular", angular_, angular_);
   nh_.param("scale_angular", a_scale_, a_scale_);
   nh_.param("scale_linear", l_scale_, l_scale_);
-  num_joints_ = 6; // TODO: INPUT PARAMETER
-  debug_mode_ = 0; // TODO: INPUT PARAMETER
-  control_gain_ = 0.1; // TODO: INPUT PARAMETER
-  max_joint_vel_ = 0.04; // TODO: INPUT PARAMETER
   received_joint_positions_ = false;
   button1_ = 0;
   button2_ = 0;
@@ -114,6 +111,9 @@ GummiTeleop::GummiTeleop():
   KDL::Tree kdl_tree;
   KDL::Chain chain;
   ros::NodeHandle node;
+
+  findAndSetParameters(node);
+
   std::string robot_desc_string;
   node.param("robot_description", robot_desc_string, std::string());
   if (!kdl_parser::treeFromString(robot_desc_string, kdl_tree)){
@@ -141,6 +141,14 @@ GummiTeleop::GummiTeleop():
   desired_sub_ = nh_.subscribe<geometry_msgs::Twist>("teleop/cmd_vel", 10, &GummiTeleop::desiredCallback,this);
   button_sub_ = nh_.subscribe<sensor_msgs::Joy>("teleop/buttons", 10, &GummiTeleop::buttonCallback,this);
 
+}
+
+void GummiTeleop::findAndSetParameters(ros::NodeHandle node)
+{
+  node.param("teleop/num_joints", num_joints_, 6);
+  node.param("teleop/debug_mode", debug_mode_, 0);
+  node.param("teleop/control_gain", control_gain_ , 0.1);
+  node.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
 }
 
 void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)

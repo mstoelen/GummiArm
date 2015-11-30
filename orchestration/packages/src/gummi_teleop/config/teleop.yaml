@@ -1,0 +1,4 @@
+num_joints: 6
+debug_mode: 0
+control_gain: 0.1
+max_joint_vel: 0.04
