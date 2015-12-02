@@ -1,0 +1,5 @@
+<launch>	
+  <node name="gummi" pkg="gummi_interface" type="gummi_arm.py" output="screen">	
+	<rosparam file="$(find gummi_interface)/config/gummi.yaml" command="load" />					  
+  </node>
+</launch>
