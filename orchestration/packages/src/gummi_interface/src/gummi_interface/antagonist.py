@@ -13,15 +13,15 @@ from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
 class Antagonist:
     def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
-        self.signEquilibrium = signEquilibrium
-        self.signFlexor = signFlexor
-        self.signExtensor = signExtensor
-        self.signJoint = signJoint
-        self.nameFlexor = nameFlexor
-        self.nameExtensor = nameExtensor
-        self.nameEncoder = nameEncoder
-        self.servoRange = servoRange
-        self.angleOffset = angleOffset
+        self.signEquilibrium = rospy.get_param('gummi/signEquilibrium')
+        self.signFlexor = rospy.get_param('gummi/signFlexor')
+        self.signExtensor = rospy.get_param('gummi/signExtensor')
+        self.signJoint = rospy.get_param('gummi/signJoint')
+        self.nameFlexor = rospy.get_param('gummi/nameFlexor')
+        self.nameExtensor = rospy.get_param('gummi/nameExtensor')
+        self.nameEncoder = rospy.get_param('gummi/nameEncoder')
+        self.servoRange = rospy.get_param('gummi/servoRange')
+        self.angleOffset = rospy.get_param('gummi/angleOffset')
 
         self.angle = JointAngle(nameEncoder, signEncoder, minAngle, maxAngle)
         self.flexorAngle = JointAngle(nameFlexor, signFlexor, -1000, 1000)
