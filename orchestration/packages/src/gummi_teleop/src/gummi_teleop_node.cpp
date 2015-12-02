@@ -37,12 +37,11 @@ private:
   bool checkIfConnectedToRobot();
   void processButtonPress();
   double limitJointVelocity(double vel, double max);
-  void findAndSetParameters(ros::NodeHandle node);
+  void findAndSetParameters();
 
   ros::NodeHandle nh_;
 
-  int linear_, angular_, num_joints_, debug_mode_;
-  double l_scale_, a_scale_;
+  int num_joints_, debug_mode_;
   ros::Publisher joint_cmd_pub_;
   ros::Publisher gripper_pub_;
   ros::Subscriber desired_sub_, joint_state_sub_, button_sub_;
@@ -71,21 +70,17 @@ private:
   geometry_msgs::Twist last_vel_;
   double max_joint_vel_;
   double min_joint_vel_;
+  int scale_translation_;
+  int scale_rotation_;
 
   KDL::ChainFkSolverPos_recursive* fk_solver_;
   KDL::ChainIkSolverVel_pinv* ik_solver_;
 
 };
 
-GummiTeleop::GummiTeleop():
-  linear_(1),
-  angular_(2)
+GummiTeleop::GummiTeleop()
 {
 
-  nh_.param("axis_linear", linear_, linear_);
-  nh_.param("axis_angular", angular_, angular_);
-  nh_.param("scale_angular", a_scale_, a_scale_);
-  nh_.param("scale_linear", l_scale_, l_scale_);
   received_joint_positions_ = false;
   button1_ = 0;
   button2_ = 0;
@@ -104,18 +99,17 @@ GummiTeleop::GummiTeleop():
   zero_vel_.angular.z = 0.0;
   last_vel_ = zero_vel_; 
 
+  findAndSetParameters();
+
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
   kinematic_model_ = robot_model_loader.getModel();
   ROS_INFO("Model frame: %s", kinematic_model_->getModelFrame().c_str());  
 
   KDL::Tree kdl_tree;
   KDL::Chain chain;
-  ros::NodeHandle node;
-
-  findAndSetParameters(node);
 
   std::string robot_desc_string;
-  node.param("robot_description", robot_desc_string, std::string());
+  nh_.param("robot_description", robot_desc_string, std::string());
   if (!kdl_parser::treeFromString(robot_desc_string, kdl_tree)){
     ROS_ERROR("Failed to construct kdl tree");
   }
@@ -143,12 +137,14 @@ GummiTeleop::GummiTeleop():
 
 }
 
-void GummiTeleop::findAndSetParameters(ros::NodeHandle node)
+void GummiTeleop::findAndSetParameters()
 {
-  node.param("teleop/num_joints", num_joints_, 6);
-  node.param("teleop/debug_mode", debug_mode_, 0);
-  node.param("teleop/control_gain", control_gain_ , 0.1);
-  node.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
+  nh_.param("teleop/num_joints", num_joints_, 6);
+  nh_.param("teleop/debug_mode", debug_mode_, 0);
+  nh_.param("teleop/control_gain", control_gain_ , 0.1);
+  nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
+  nh_.param("teleop/scale_translation", scale_translation_, 4);
+  nh_.param("teleop/scale_rotation", scale_rotation_, 15);
 }
 
 void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
@@ -236,13 +232,13 @@ geometry_msgs::Twist GummiTeleop::scaleDesired(geometry_msgs::Twist desired)
 {
   geometry_msgs::Twist out;
 
-  out.linear.x = desired.linear.x * 4; // TODO: USE PARAMETERS ABOVE
-  out.linear.y = desired.linear.y * 4; // TODO: USE PARAMETERS ABOVE
-  out.linear.z = desired.linear.z * 4; // TODO: USE PARAMETERS ABOVE
+  out.linear.x = desired.linear.x * scale_translation_;
+  out.linear.y = desired.linear.y * scale_translation_;
+  out.linear.z = desired.linear.z * scale_translation_;
   
-  out.angular.x = desired.angular.x * 15; // TODO: USE PARAMETERS ABOVE
-  out.angular.y = desired.angular.y * 15; // TODO: USE PARAMETERS ABOVE
-  out.angular.z = desired.angular.z * 15; // TODO: USE PARAMETERS ABOVE
+  out.angular.x = desired.angular.x * scale_rotation_;
+  out.angular.y = desired.angular.y * scale_rotation_;
+  out.angular.z = desired.angular.z * scale_rotation_;
 
   return out;
 }
