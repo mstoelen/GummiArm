@@ -1,10 +1,2 @@
-signEquilibrium: -1
-signFlexor: 1
-signExtensor: -1
-signEncoder: -1
-signJoint: 1
-nameFlexor: "biceps"
-nameExtensor: "triceps"
-nameEncoder: "elbow_encoder"
-servoRange: 6.2832
-angleOffset: 0
+recording: 1
+name_base_recording: "test"

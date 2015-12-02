@@ -12,29 +12,34 @@ from recording import Recording
 from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
 class Antagonist:
-    def __init__(self, signEquilibrium, signFlexor, signExtensor, signEncoder, signJoint, nameFlexor, nameExtensor, nameEncoder, stretchReflexGain, servoRange, minAngle, maxAngle, angleOffset):
-        self.signEquilibrium = rospy.get_param('gummi/signEquilibrium')
-        self.signFlexor = rospy.get_param('gummi/signFlexor')
-        self.signExtensor = rospy.get_param('gummi/signExtensor')
-        self.signJoint = rospy.get_param('gummi/signJoint')
-        self.nameFlexor = rospy.get_param('gummi/nameFlexor')
-        self.nameExtensor = rospy.get_param('gummi/nameExtensor')
-        self.nameEncoder = rospy.get_param('gummi/nameEncoder')
-        self.servoRange = rospy.get_param('gummi/servoRange')
-        self.angleOffset = rospy.get_param('gummi/angleOffset')
+    def __init__(self, name):
+        self.name = name
 
-        self.angle = JointAngle(nameEncoder, signEncoder, minAngle, maxAngle)
-        self.flexorAngle = JointAngle(nameFlexor, signFlexor, -1000, 1000)
-        self.extensorAngle = JointAngle(nameExtensor, signExtensor, -1000, 1000)
-        self.stretchReflex = Reflex(stretchReflexGain, 0.02, 0.01)
+        self.signEquilibrium = rospy.get_param("~" + self.name + "/signEquilibrium")
+        self.signFlexor = rospy.get_param("~" + self.name + "/signFlexor")
+        self.signExtensor = rospy.get_param("~" + self.name + "/signExtensor")
+        self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
+        self.signJoint = rospy.get_param("~" + self.name + "/signJoint")
+        self.nameFlexor = rospy.get_param("~" + self.name + "/nameFlexor")
+        self.nameExtensor = rospy.get_param("~" + self.name + "/nameExtensor")
+        self.nameEncoder = rospy.get_param("~" + self.name + "/nameEncoder")
+        self.servoRange = rospy.get_param("~" + self.name + "/servoRange")
+        self.minAngle = rospy.get_param("~" + self.name + "/minAngle")
+        self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
+        self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
+
+        self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle)
+        self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000)
+        self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000)
+        self.stretchReflex = Reflex(0, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
         self.recording = Recording()
 
         self.initPublishers()
         self.initVariables()
         self.disableEncoderTorque()
-        self.setTorqueLimit(nameExtensor, 1)
-        self.setTorqueLimit(nameFlexor, 1)
+        self.setTorqueLimit(self.nameExtensor, 1)
+        self.setTorqueLimit(self.nameFlexor, 1)
         self.calculateEqVelCalibration()
 
     def initVariables(self):
@@ -70,7 +75,7 @@ class Antagonist:
         print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
 
     def setTorqueLimit(self, name, limit):
-        service_name = name + '_controller/set_torque_limit'
+        service_name = name + "_controller/set_torque_limit"
         rospy.wait_for_service(service_name)
         try:
             te = rospy.ServiceProxy(service_name, SetTorqueLimit)
@@ -79,7 +84,7 @@ class Antagonist:
             print "Service call failed: %s"%e
 
     def disableEncoderTorque(self):
-        service_name = self.nameEncoder + '_controller/torque_enable'
+        service_name = self.nameEncoder + "_controller/torque_enable"
         rospy.wait_for_service(service_name)
         try:
             te = rospy.ServiceProxy(service_name, TorqueEnable)
@@ -88,8 +93,8 @@ class Antagonist:
             print "Service call failed: %s"%e
 
     def initPublishers(self):
-        self.pubExtensor = rospy.Publisher(self.nameExtensor + '_controller/command', Float64, queue_size=5)
-        self.pubFlexor = rospy.Publisher(self.nameFlexor + '_controller/command', Float64, queue_size=5)
+        self.pubExtensor = rospy.Publisher(self.nameExtensor + "_controller/command", Float64, queue_size=5)
+        self.pubFlexor = rospy.Publisher(self.nameFlexor + "_controller/command", Float64, queue_size=5)
 
     def servoTo(self, dAngle, dStiffness):
         self.velocity = False
@@ -289,7 +294,7 @@ class Antagonist:
 
     def prepareRecording(self, fileNameBase):
         fileName = fileNameBase + "_" + self.nameEncoder + ".csv"
-        self.recording.prepare(fileName, ['time','equilibrium','stiffness','angle','flexor-angle','extensor-angle', 'load-ratio'])
+        self.recording.prepare(fileName, ["time","equilibrium","stiffness","angle","flexor-angle","extensor-angle", "load-ratio"])
 
     def recordLine(self, delta):
         encoderAngle = self.getJointAngle()

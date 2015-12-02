@@ -11,12 +11,12 @@ from gummi_interface.gummi import Gummi
 def main(args):
 
     record = False
-    if len(args) > 1:
+    if rospy.get_param("gummi/recording") == 1:
         record = True
-        fileNameBase = args[1]
-        print("WARNING: Will record first 20 seconds in files with base " + fileNameBase + ".")
+        fileNameBase = rospy.get_param("gummi/name_base_recording")
+        print("WARNING: Will record in files with base: " + fileNameBase + ".")
 
-    rospy.init_node('GummiInterface', anonymous=True)
+    rospy.init_node('GummiArm', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()

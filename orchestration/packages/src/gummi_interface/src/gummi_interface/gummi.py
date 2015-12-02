@@ -34,12 +34,12 @@ class Gummi:
         self.recordData = False
 
     def initJoints(self):
-        self.shoulderRoll = Antagonist(1, 1, -1, 1, 1, "shoulder_flexor", "shoulder_extensor", "shoulder_roll_encoder", 0, 2*self.pi, -0.55, 1.4, 0.4)
-        self.shoulderPitch = Antagonist(-1, -1, -1, 1, 1, "shoulder_abductor", "shoulder_adductor", "shoulder_pitch_encoder", 0, 2*self.pi, 0, 1.75, 0.7)
+        self.shoulderRoll = Antagonist("shoulder_roll")
+        self.shoulderPitch = Antagonist("shoulder_pitch")
         self.upperarmRoll = DirectDrive("upperarm_roll", self.pi)
-        self.elbow = Antagonist(-1, 1, -1, -1, 1, "biceps", "triceps", "elbow_encoder", 0, 2*self.pi, -0.85, 0.85, 0.0)
+        self.elbow = Antagonist("elbow")
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
-        self.wrist = Antagonist(-1, -1, -1, -1, 1, "wrist_flexor", "wrist_extensor", "wrist_encoder", 0, 1.75*self.pi, -0.9, 0.9, 0.0)
+        self.wrist = Antagonist("wrist")
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 

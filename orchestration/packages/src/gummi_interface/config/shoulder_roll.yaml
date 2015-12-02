@@ -1,0 +1,12 @@
+signEquilibrium: 1
+signFlexor: 1
+signExtensor: -1
+signEncoder: 1
+signJoint: 1
+nameFlexor: "shoulder_flexor"
+nameExtensor: "shoulder_extensor"
+nameEncoder: "shoulder_roll_encoder"
+servoRange: 6.2832
+minAngle: -0.55
+maxAngle: 1.4
+angleOffset: 0.4
