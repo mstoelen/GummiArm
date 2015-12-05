@@ -30,7 +30,7 @@ class JointAngle:
         angle = msg.current_pos * self.sign
         if abs(angle) <=  math.pi:
             self.encoderAngles.appendleft(angle)
-            if len(self.encoderAngles) > 3:
+            if len(self.encoderAngles) > 5:
                 self.encoderAngles.pop()
                 #TODO: Median for removing spikes seen in encoders. Better solution?
                 self.encoderAngle = np.median(self.encoderAngles) 

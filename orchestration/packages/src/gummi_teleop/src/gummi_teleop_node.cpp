@@ -38,6 +38,7 @@ private:
   void processButtonPress();
   double limitJointVelocity(double vel, double max);
   void findAndSetParameters();
+  void doUpdate();
 
   ros::NodeHandle nh_;
 
@@ -68,6 +69,7 @@ private:
   int zero_counter_;
   geometry_msgs::Twist zero_vel_;
   geometry_msgs::Twist last_vel_;
+  geometry_msgs::Twist desired_vel_;
   double max_joint_vel_;
   double min_joint_vel_;
   int scale_translation_;
@@ -98,6 +100,7 @@ GummiTeleop::GummiTeleop()
   zero_vel_.angular.y = 0.0;
   zero_vel_.angular.z = 0.0;
   last_vel_ = zero_vel_; 
+  desired_vel_ = zero_vel_;
 
   findAndSetParameters();
 
@@ -147,11 +150,8 @@ void GummiTeleop::findAndSetParameters()
   nh_.param("teleop/scale_rotation", scale_rotation_, 15);
 }
 
-void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
+void GummiTeleop::doUpdate()
 {
- 
-  if(debug_mode_) printDesired(*desired);
-  geometry_msgs::Twist vel = scaleDesired(*desired);
 
   bool connected = checkIfConnectedToRobot();
   if(connected) {
@@ -166,6 +166,8 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
     }
     else {
       
+      geometry_msgs::Twist vel = desired_vel_;
+
       if(isZero(vel)) {
 	zero_counter_++;
 	if(zero_counter_ > 10) {
@@ -178,8 +180,8 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
       else {
 	zero_counter_ = 0;
       }
-      calculateDesiredJointVelocity(vel);
 
+      calculateDesiredJointVelocity(vel);
       publishJointVelocities();
 
       last_vel_ = vel;
@@ -195,8 +197,17 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
   
 }
 
+void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
+{
+ 
+  if(debug_mode_) printDesired(*desired);
+  desired_vel_ = scaleDesired(*desired);
+
+}
+
 void GummiTeleop::jointStateCallback(const sensor_msgs::JointState::ConstPtr& joint_state_in)
 {
+
   sensor_msgs::JointState in = *joint_state_in;
   if(debug_mode_) printJointStateIn(in);
 
@@ -217,6 +228,9 @@ void GummiTeleop::jointStateCallback(const sensor_msgs::JointState::ConstPtr& jo
   }
 
   timeOfLastJointState_ = ros::Time::now();
+
+  doUpdate();
+
 }
 
 void GummiTeleop::buttonCallback(const sensor_msgs::Joy::ConstPtr& joy_in)
@@ -332,6 +346,8 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       desired_joint_velocities_.at(i) = qdot(i);
     }
   }
+
+  ros::Duration(0.01).sleep();
   
 }
 
@@ -473,5 +489,6 @@ int main(int argc, char** argv)
   GummiTeleop gummi_teleop;
 
   ros::spin();
+
 }
 

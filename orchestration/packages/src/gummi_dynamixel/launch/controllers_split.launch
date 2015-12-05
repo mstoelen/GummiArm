@@ -1,0 +1,101 @@
+<launch>
+    <rosparam file="$(find gummi_dynamixel)/config/biceps.yaml" command="load"/>
+    <node name="biceps_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                biceps_controller"
+          output="screen"/>
+
+
+    <rosparam file="$(find gummi_dynamixel)/config/triceps.yaml" command="load"/>
+    <node name="triceps_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                triceps_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/elbow_encoder.yaml" command="load"/>
+    <node name="elbow_encoder_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                elbow_encoder_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/forearm_roll.yaml" command="load"/>
+    <node name="forearm_roll_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                forearm_roll_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/wrist_flexor.yaml" command="load"/>
+    <node name="wrist_flexor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                wrist_flexor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/wrist_extensor.yaml" command="load"/>
+    <node name="wrist_extensor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                wrist_extensor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/wrist_encoder.yaml" command="load"/>
+    <node name="wrist_encoder_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                wrist_encoder_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/upperarm_roll.yaml" command="load"/>
+    <node name="upperarm_roll_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                upperarm_roll_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_abductor.yaml" command="load"/>
+    <node name="shoulder_abductor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_abductor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_adductor.yaml" command="load"/>
+    <node name="shoulder_adductor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_adductor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_pitch_encoder.yaml" command="load"/>
+    <node name="shoulder_pitch_encoder_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_arm
+                shoulder_pitch_encoder_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_flexor.yaml" command="load"/>
+    <node name="shoulder_flexor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_flexor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_extensor.yaml" command="load"/>
+    <node name="shoulder_extensor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_extensor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_roll_encoder.yaml" command="load"/>
+    <node name="shoulder_roll_encoder_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_roll_encoder_controller"
+          output="screen"/>
+
+</launch>
