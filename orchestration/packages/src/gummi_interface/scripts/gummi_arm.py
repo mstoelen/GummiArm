@@ -17,7 +17,7 @@ def main(args):
         print("WARNING: Will record in files with base: " + fileNameBase + ".")
 
     rospy.init_node('GummiArm', anonymous=True)
-    r = rospy.Rate(60)  
+    r = rospy.Rate(100)  
 
     gummi = Gummi()
 
