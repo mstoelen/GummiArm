@@ -10,3 +10,6 @@ servoRange: 6.2832
 minAngle: -0.55
 maxAngle: 1.4
 angleOffset: 0.4
+gains:
+    P: 0.025
+    D: 0.006

@@ -6,6 +6,7 @@ import rospy
 
 from std_msgs.msg import Float64
 
+from helpers import fetchParam
 from joint_angle import JointAngle
 from reflex import Reflex
 from recording import Recording
@@ -15,7 +16,7 @@ class Antagonist:
     def __init__(self, name):
         self.name = name
 
-        self.signEquilibrium = rospy.get_param("~" + self.name + "/signEquilibrium")
+        self.signEquilibrium =  fetchParam("~" + self.name + "/signEquilibrium", 1)
         self.signFlexor = rospy.get_param("~" + self.name + "/signFlexor")
         self.signExtensor = rospy.get_param("~" + self.name + "/signExtensor")
         self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
@@ -27,6 +28,8 @@ class Antagonist:
         self.minAngle = rospy.get_param("~" + self.name + "/minAngle")
         self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
         self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
+        self.pGain = rospy.get_param("~" + self.name + "/gains/P")
+        self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle)
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000)
@@ -47,8 +50,6 @@ class Antagonist:
         self.commandExtensor = 0
         self.dEquilibrium = 0
 
-        self.pGain = 1.5/60.0
-        self.vGain = 0.35/60.0
         self.pGainUse = 0
         self.vGainUse = 0
         self.lGain = 0.03

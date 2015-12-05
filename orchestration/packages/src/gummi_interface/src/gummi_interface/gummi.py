@@ -40,6 +40,7 @@ class Gummi:
         self.elbow = Antagonist("elbow")
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
         self.wrist = Antagonist("wrist")
+        self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
@@ -137,20 +138,20 @@ class Gummi:
         self.wrist.servoTo(0, self.wristStiff)
 
     def doGradualStartup(self):
-        self.shoulderRoll.moveTo(-1.5, self.shoulderRollStiff)
-        rospy.sleep(0.5)
         self.shoulderRoll.moveTo(-1.25, self.shoulderRollStiff)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.shoulderPitch.moveTo(0.5, self.shoulderPitchStiff)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.upperarmRoll.servoTo(0)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.elbow.moveTo(0, self.elbowStiff)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.forearmRoll.servoTo(0)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.wrist.moveTo(0, self.wristStiff)
-        rospy.sleep(2)
+        rospy.sleep(1)
+        self.headYaw.servoTo(0)
+        rospy.sleep(1)
 
     def prepareRecording(self, fileNameBase):
         self.shoulderRoll.prepareRecording(fileNameBase)
