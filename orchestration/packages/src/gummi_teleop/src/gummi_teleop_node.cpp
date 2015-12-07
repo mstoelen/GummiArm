@@ -72,8 +72,8 @@ private:
   geometry_msgs::Twist desired_vel_;
   double max_joint_vel_;
   double min_joint_vel_;
-  int scale_translation_;
-  int scale_rotation_;
+  double scale_translation_;
+  double scale_rotation_;
 
   KDL::ChainFkSolverPos_recursive* fk_solver_;
   KDL::ChainIkSolverVel_pinv* ik_solver_;
@@ -146,8 +146,8 @@ void GummiTeleop::findAndSetParameters()
   nh_.param("teleop/debug_mode", debug_mode_, 0);
   nh_.param("teleop/control_gain", control_gain_ , 0.1);
   nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
-  nh_.param("teleop/scale_translation", scale_translation_, 4);
-  nh_.param("teleop/scale_rotation", scale_rotation_, 15);
+  nh_.param("teleop/scale_translation", scale_translation_, 0.5);
+  nh_.param("teleop/scale_rotation", scale_rotation_, 1.0);
 }
 
 void GummiTeleop::doUpdate()
@@ -315,9 +315,19 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     KDL::Twist T_error;
     T_error = diff(F_current, F_desired);
     
+    if(debug_mode_) {
+      printf("Debug: T_error x %6.3f.\n",T_error.vel.x());
+      printf("Debug: T_error y %6.3f.\n",T_error.vel.y());
+      printf("Debug: T_error z %6.3f.\n",T_error.vel.z());
+      printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
+      printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
+      printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
+
+    }
+    
     for(unsigned int i=0; i<num_joints_; i++) {
       T_current(i) = T_error(i) * control_gain_;
-    }  
+    } 
     
     F_integrated_ = F_current;
   }

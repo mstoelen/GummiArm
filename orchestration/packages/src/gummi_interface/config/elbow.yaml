@@ -11,5 +11,5 @@ minAngle: -0.85
 maxAngle: 0.85
 angleOffset: 0
 gains:
-    P: 0.04
+    P: 0.025
     D: 0.015

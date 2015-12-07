@@ -127,6 +127,7 @@ class Antagonist:
         self.closedLoop = True
         self.velocity = True
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
+        self.angle.doVelocityIncrement()
         self.dStiffness = dStiffness  
         self.doUpdate()
 
@@ -163,8 +164,6 @@ class Antagonist:
         
         self.scaleControlGain(scale)
         
-        if self.velocity:
-            self.angle.doVelocityIncrement()
         if self.closedLoop:
             self.doClosedLoop()
             
