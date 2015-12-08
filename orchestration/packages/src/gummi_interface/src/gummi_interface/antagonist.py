@@ -25,6 +25,7 @@ class Antagonist:
         self.nameExtensor = rospy.get_param("~" + self.name + "/nameExtensor")
         self.nameEncoder = rospy.get_param("~" + self.name + "/nameEncoder")
         self.servoRange = rospy.get_param("~" + self.name + "/servoRange")
+        self.servoOffset = rospy.get_param("~" + self.name + "/servoOffset")
         self.minAngle = rospy.get_param("~" + self.name + "/minAngle")
         self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
         self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
@@ -177,16 +178,17 @@ class Antagonist:
         equilibrium = self.dEquilibrium
         stiffness = self.cStiffness
 
-        if abs(equilibrium) <= 1:
-            scaledStiffness = stiffness
-        else:
-            scaledStiffness = stiffness*(2-abs(equilibrium))
+        scaledStiffness = stiffness # TODO
+        #if abs(equilibrium) <= 1:
+        #    scaledStiffness = stiffness
+        #else:
+        #    scaledStiffness = stiffness*(2-abs(equilibrium))
 
-        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium  + 0.5*scaledStiffness)
-        equilibriumExtensor = self.signExtensor*(0.5*equilibrium + 0.5*scaledStiffness)
+        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledStiffness*pi)
+        equilibriumExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledStiffness*pi)
         
-        self.commandFlexor = equilibriumFlexor*self.servoRange/2
-        self.commandExtensor = equilibriumExtensor*self.servoRange/2
+        self.commandFlexor = equilibriumFlexor + self.servoOffset
+        self.commandExtensor = equilibriumExtensor + self.servoOffset
 
     def resetEquilibriumErrors(self):
         for error in self.equilibriumErrors:

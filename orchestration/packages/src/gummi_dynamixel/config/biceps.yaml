@@ -7,6 +7,6 @@ biceps_controller:
     joint_speed: 10.0
     motor:
         id: 1
-        init: 2048
+        init: 6143
         min: 0
-        max: 4095
+        max: 12287

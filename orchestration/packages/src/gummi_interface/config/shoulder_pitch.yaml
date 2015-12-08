@@ -7,6 +7,7 @@ nameFlexor: "shoulder_abductor"
 nameExtensor: "shoulder_adductor"
 nameEncoder: "shoulder_pitch_encoder"
 servoRange: 6.2832
+servoOffset: 0
 minAngle: 0
 maxAngle: 1.75
 angleOffset: 0.7

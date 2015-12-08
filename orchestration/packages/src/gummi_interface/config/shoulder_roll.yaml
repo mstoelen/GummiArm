@@ -6,10 +6,11 @@ signJoint: 1
 nameFlexor: "shoulder_flexor"
 nameExtensor: "shoulder_extensor"
 nameEncoder: "shoulder_roll_encoder"
-servoRange: 6.2832
-minAngle: -0.55
-maxAngle: 1.4
-angleOffset: 0.4
+servoRange: 12.5664
+servoOffset: 0
+minAngle: -1.4
+maxAngle: 2.4
+angleOffset: 1.05
 gains:
     P: 0.03
     D: 0.015

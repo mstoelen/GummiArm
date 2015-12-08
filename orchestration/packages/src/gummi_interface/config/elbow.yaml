@@ -7,6 +7,7 @@ nameFlexor: "biceps"
 nameExtensor: "triceps"
 nameEncoder: "elbow_encoder"
 servoRange: 6.2832
+servoOffset: 0
 minAngle: -0.85
 maxAngle: 0.85
 angleOffset: 0
