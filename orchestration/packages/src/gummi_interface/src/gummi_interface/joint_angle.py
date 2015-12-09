@@ -25,18 +25,20 @@ class JointAngle:
         self.encoderAngle = 0
         self.dAngle = 0
         self.dVelocity = 0
+        self.lastAngle = 0
 
     def encoderCallback(self, msg):           
         angle = msg.current_pos * self.sign
-        if abs(angle) <=  math.pi:
-            self.encoderAngles.appendleft(angle)
-            if len(self.encoderAngles) > 5:
-                self.encoderAngles.pop()
-                #TODO: Median for removing spikes seen in encoders. Better solution?
-                self.encoderAngle = np.median(self.encoderAngles) 
+        if abs(angle) <=  math.pi * 4:
+            diff = angle-self.lastAngle
+            if abs(diff) < 0.5:
+                self.encoderAngle = angle
                 self.newState = True
+            else:
+                print("WARNING: Encoder value of " + str(angle) + " too different from last (" + str(self.lastAngle) + ") for " + self.name  + ", ignoring.")
         else:
-            print("WARNING: Recieved encoder value of " + str(angle) + ", ignoring.")
+            print("WARNING: Recieved encoder value of " + str(angle) + " for " + self.name  + ", ignoring.")
+        self.lastAngle = angle
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
