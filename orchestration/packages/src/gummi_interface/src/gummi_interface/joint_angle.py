@@ -8,14 +8,15 @@ import math
 from dynamixel_msgs.msg import JointState
 
 class JointAngle:
-    def __init__(self, name, sign, minAngle, maxAngle):
+    def __init__(self, name, sign, minAngle, maxAngle, encoderFlag):
         self.name = name
         self.sign = sign
         self.minAngle = minAngle
         self.maxAngle = maxAngle
+        self.encoderFlag = encoderFlag
         self.initSubscriber()
         self.initVariables()
-        self.newState = False
+        self.msgTime = rospy.Time.from_sec(0.0)
 
     def initSubscriber(self):
         rospy.Subscriber(self.name + '_controller/state', JointState, self.encoderCallback)
@@ -27,18 +28,20 @@ class JointAngle:
         self.dVelocity = 0
         self.lastAngle = 0
 
-    def encoderCallback(self, msg):           
+    def encoderCallback(self, msg):
         angle = msg.current_pos * self.sign
+        self.msgTime = rospy.Time(msg.header.stamp.secs, msg.header.stamp.nsecs)
         if abs(angle) <=  math.pi * 4:
-            diff = angle-self.lastAngle
-            if abs(diff) < 0.5:
-                self.encoderAngle = angle
-                self.newState = True
+            if self.encoderFlag and msg.goal_pos == angle:
+                print("WARNING: Encoder oddity, exactly same angle " + str(angle) + " and goal " + str(msg.goal_pos)  + " for " + self.name + ", ignoring.")
             else:
-                print("WARNING: Encoder value of " + str(angle) + " too different from last (" + str(self.lastAngle) + ") for " + self.name  + ", ignoring.")
+                self.encoderAngles.appendleft(angle)
+
+                if len(self.encoderAngles) > 3:
+                    self.encoderAngles.pop()
+                    self.encoderAngle = np.median(self.encoderAngles) 
         else:
-            print("WARNING: Recieved encoder value of " + str(angle) + " for " + self.name  + ", ignoring.")
-        self.lastAngle = angle
+            print("WARNING: Recieved value of " + str(angle) + " for " + self.name  + ", ignoring.")
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
@@ -63,7 +66,6 @@ class JointAngle:
 
     def getEncoder(self):
         return self.encoderAngle
-        self.newState = False
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity
@@ -74,5 +76,5 @@ class JointAngle:
     def getMax(self):
         return self.maxAngle
 
-    def haveNewState(self):
-        return self.newState
+    def getMsgTime(self):
+        return self.msgTime

@@ -14,7 +14,7 @@ class DirectDrive:
         self.initPublishers()
         self.initVariables()
 
-        self.angle = JointAngle(name, 1, -servoRange/2, servoRange/2)
+        self.angle = JointAngle(name, 1, -servoRange/2, servoRange/2, False)
         self.recording = Recording()
 
     def initPublishers(self):

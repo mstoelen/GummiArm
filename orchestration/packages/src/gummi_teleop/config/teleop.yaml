@@ -1,6 +1,6 @@
 num_joints: 6
 debug_mode: 0
 control_gain: 0.022
-max_joint_vel: 0.04
+max_joint_vel: 0.03
 scale_translation: 18.0
 scale_rotation: 36.0

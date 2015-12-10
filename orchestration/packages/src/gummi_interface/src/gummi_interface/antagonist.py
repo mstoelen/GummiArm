@@ -32,9 +32,9 @@ class Antagonist:
         self.pGain = rospy.get_param("~" + self.name + "/gains/P")
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
-        self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle)
-        self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000)
-        self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000)
+        self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
+        self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
+        self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.stretchReflex = Reflex(0, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
         self.recording = Recording()
@@ -144,35 +144,42 @@ class Antagonist:
         self.maxLoad = maxLoad
 
     def doUpdate(self):
-        self.createEquilibriumError()            
-        self.createMeanError()
-        reflex = self.stretchReflex.getContribution(self.meanError)
+        msgTime = self.angle.getMsgTime()
+        currentTime = rospy.get_rostime()
+        delay = currentTime - msgTime
 
-        self.createLoadRatio()
-        excessLoad = abs(self.loadRatio) - 1
-        compliance = self.compliance.getContribution(excessLoad)
-
-        scale = 1
-        self.cStiffness = self.dStiffness
-
-        if compliance > 0.1:
-            self.doCompliance(compliance)
-            scale = 1 - (compliance * 0.5)
-            self.stretchReflex.inhibit()
+        if delay.to_sec() > 0.25:
+            print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            scale = 1 - (reflex * 0.5)
-            self.cStiffness = self.dStiffness + reflex
-        
-        self.scaleControlGain(scale)
-        
-        if self.closedLoop:
-            self.doClosedLoop()
+            self.createEquilibriumError()            
+            self.createMeanError()
+            reflex = self.stretchReflex.getContribution(self.meanError)
             
-        self.capEquilibrium()
-        self.defineMaxStiffness()
-        self.capStiffness()
-        self.createCommand()
-        self.publishCommand()
+            self.createLoadRatio()
+            excessLoad = abs(self.loadRatio) - 1
+            compliance = self.compliance.getContribution(excessLoad)
+            
+            scale = 1
+            self.cStiffness = self.dStiffness
+            
+            if compliance > 0.1:
+                self.doCompliance(compliance)
+                scale = 1 - (compliance * 0.5)
+                self.stretchReflex.inhibit()
+            else:
+                scale = 1 - (reflex * 0.5)
+                self.cStiffness = self.dStiffness + reflex
+                
+            self.scaleControlGain(scale)
+                
+            if self.closedLoop:
+                self.doClosedLoop()
+                
+            self.capEquilibrium()
+            self.defineMaxStiffness()
+            self.capStiffness()
+            self.createCommand()
+            self.publishCommand()
 
     def createCommand(self):
         equilibrium = self.dEquilibrium
