@@ -1,5 +1,5 @@
 # GummiArm
-Repository for the GummiArm robot manipulator project. 
+Repository for the GummiArm robot project: http://mstoelen.github.io/GummiArm/
 
 Videos: https://plus.google.com/collection/oGXbV
 
