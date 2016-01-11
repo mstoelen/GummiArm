@@ -60,7 +60,7 @@
     <node name="shoulder_abductor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
                 --port gummi_port_body
-                shoulder_abductor_controller"
+          	shoulder_abductor_controller"
           output="screen"/>
 
     <rosparam file="$(find gummi_dynamixel)/config/shoulder_adductor.yaml" command="load"/>
@@ -68,6 +68,20 @@
           args="--manager=dxl_manager
                 --port gummi_port_body
                 shoulder_adductor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/horizontal_abductor.yaml" command="load"/>
+    <node name="horizontal_abductor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                horizontal_abductor_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/horizontal_adductor.yaml" command="load"/>
+    <node name="horizontal_adductor_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                horizontal_adductor_controller"
           output="screen"/>
 
     <rosparam file="$(find gummi_dynamixel)/config/shoulder_pitch_encoder.yaml" command="load"/>
@@ -96,6 +110,13 @@
           args="--manager=dxl_manager
                 --port gummi_port_body
                 shoulder_roll_encoder_controller"
+          output="screen"/>
+
+    <rosparam file="$(find gummi_dynamixel)/config/shoulder_yaw_encoder.yaml" command="load"/>
+    <node name="shoulder_yaw_encoder_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port gummi_port_body
+                shoulder_yaw_encoder_controller"
           output="screen"/>
 
     <rosparam file="$(find gummi_dynamixel)/config/head_yaw.yaml" command="load"/>

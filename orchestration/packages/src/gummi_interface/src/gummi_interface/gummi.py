@@ -29,6 +29,7 @@ class Gummi:
         self.wristVel = 0
         self.shoulderRollStiff = 0
         self.shoulderPitchStiff = 0
+        self.shoulderYawStiff = 0
         self.elbowStiff = 0
         self.wristStiff = 0
         self.recordData = False
@@ -36,6 +37,7 @@ class Gummi:
     def initJoints(self):
         self.shoulderRoll = Antagonist("shoulder_roll")
         self.shoulderPitch = Antagonist("shoulder_pitch")
+        self.shoulderYaw = Antagonist("shoulder_yaw")
         self.upperarmRoll = DirectDrive("upperarm_roll", self.pi)
         self.elbow = Antagonist("elbow")
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
@@ -138,6 +140,8 @@ class Gummi:
         self.wrist.servoTo(0, self.wristStiff)
 
     def doGradualStartup(self):
+        self.shoulderYaw.moveTo(0.0, self.shoulderYawStiff)
+        rospy.sleep(1)
         self.shoulderRoll.moveTo(-1.25, self.shoulderRollStiff)
         rospy.sleep(1)
         self.shoulderPitch.moveTo(0.5, self.shoulderPitchStiff)

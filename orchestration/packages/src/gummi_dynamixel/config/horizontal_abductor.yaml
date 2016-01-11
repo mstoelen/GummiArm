@@ -1,0 +1,12 @@
+horizontal_abductor_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: horizontal_abductor
+    joint_speed: 10
+    motor:
+        id: 16
+        init: 6143
+        min: 0
+        max: 12287
