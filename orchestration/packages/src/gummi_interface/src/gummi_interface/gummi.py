@@ -23,13 +23,14 @@ class Gummi:
         self.jointNames = ("shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist")
         self.shoulderRollVel = 0
         self.shoulderPitchVel = 0
+        self.shoulderYawVel = 0
         self.upperarmRollVel = 0
         self.elbowVel = 0
         self.forearmRollVel = 0
         self.wristVel = 0
         self.shoulderRollStiff = 0
         self.shoulderPitchStiff = 0
-        self.shoulderYawStiff = 0
+        self.shoulderYawStiff = 0.0
         self.elbowStiff = 0
         self.wristStiff = 0
         self.recordData = False
@@ -55,9 +56,10 @@ class Gummi:
         self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[3], msg.effort[5])
         self.doUpdate()
 
-    def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
+    def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadShoulderYaw, maxLoadElbow, maxloadWrist):
         self.shoulderRoll.setMaxLoad(maxLoadShoulderRoll)
         self.shoulderPitch.setMaxLoad(maxLoadShoulderPitch)
+        self.shoulderYaw.setMaxLoad(maxLoadShoulderYaw)
         self.elbow.setMaxLoad(maxLoadElbow)
         self.wrist.setMaxLoad(maxloadWrist)
 
@@ -70,6 +72,10 @@ class Gummi:
             self.shoulderPitch.moveWith(self.shoulderPitchVel, abs(self.shoulderPitchStiff))
         else:
             self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchStiff)
+        if self.shoulderYawStiff < 0:
+            self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawStiff))
+        else:
+            self.shoulderYaw.servoWith(self.shoulderYawVel, self.shoulderYawStiff)
         self.upperarmRoll.servoWith(self.upperarmRollVel)
         if self.elbowStiff < 0:
             self.elbow.moveWith(self.elbowVel, abs(self.elbowStiff))
@@ -140,7 +146,7 @@ class Gummi:
         self.wrist.servoTo(0, self.wristStiff)
 
     def doGradualStartup(self):
-        self.shoulderYaw.moveTo(0.0, self.shoulderYawStiff)
+        self.shoulderYaw.moveTo(-0.1, self.shoulderYawStiff)
         rospy.sleep(1)
         self.shoulderRoll.moveTo(-1.25, self.shoulderRollStiff)
         rospy.sleep(1)
