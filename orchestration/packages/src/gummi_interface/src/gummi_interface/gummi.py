@@ -20,7 +20,7 @@ class Gummi:
         self.initSubscribers()
 
     def initVariables(self):
-        self.jointNames = ("shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist")
+        self.jointNames = ("shoulder_roll", "shoulder_pitch", "shoulder_yaw", "upperarm_roll", "elbow", "forearm_roll", "wrist")
         self.shoulderRollVel = 0
         self.shoulderPitchVel = 0
         self.shoulderYawVel = 0
@@ -53,7 +53,7 @@ class Gummi:
 
     def cmdCallback(self, msg):
         self.setVelocity(msg.velocity)
-        self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[3], msg.effort[5])
+        self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
         self.doUpdate()
 
     def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadShoulderYaw, maxLoadElbow, maxloadWrist):
@@ -107,6 +107,7 @@ class Gummi:
         angles = list()
         angles.append(self.shoulderRoll.getJointAngle())
         angles.append(self.shoulderPitch.getJointAngle())
+        angles.append(self.shoulderYaw.getJointAngle())
         angles.append(self.upperarmRoll.getJointAngle())
         angles.append(self.elbow.getJointAngle())
         angles.append(self.forearmRoll.getJointAngle())
@@ -116,14 +117,16 @@ class Gummi:
     def setVelocity(self, velocities):
         self.shoulderRollVel = velocities[0]
         self.shoulderPitchVel = velocities[1]
-        self.upperarmRollVel = velocities[2]
-        self.elbowVel = velocities[3]
-        self.forearmRollVel = velocities[4]
-        self.wristVel = velocities[5]
+        self.shoulderYawVel = velocities[2]
+        self.upperarmRollVel = velocities[3]
+        self.elbowVel = velocities[4]
+        self.forearmRollVel = velocities[5]
+        self.wristVel = velocities[6]
 
-    def setStiffness(self, shoulderRoll, shoulderPitch, elbow, wrist):
+    def setStiffness(self, shoulderRoll, shoulderPitch, shoulderYaw, elbow, wrist):
         self.shoulderRollStiff = shoulderRoll
         self.shoulderPitchStiff = shoulderPitch
+        self.shoulderYawStiff = shoulderYaw
         self.elbowStiff = elbow
         self.wristStiff = wrist
 
@@ -131,6 +134,7 @@ class Gummi:
         loads = list()
         loads.append(self.shoulderRoll.getLoadRatio())
         loads.append(self.shoulderPitch.getLoadRatio())
+        loads.append(self.shoulderYaw.getLoadRatio())
         loads.append(1234)
         loads.append(self.elbow.getLoadRatio())
         loads.append(1234)
@@ -140,6 +144,7 @@ class Gummi:
     def goRestingPose(self):
         self.shoulderRoll.servoTo(0, self.shoulderRollStiff)
         self.shoulderPitch.servoTo(0, self.shoulderPitchStiff)
+        self.shoulderYaw.servoTo(0, self.shoulderYawStiff)
         self.upperarmRoll.servoTo(0)
         self.elbow.servoTo(0, self.elbowStiff)
         self.forearmRoll.servoTo(0)
@@ -166,6 +171,7 @@ class Gummi:
     def prepareRecording(self, fileNameBase):
         self.shoulderRoll.prepareRecording(fileNameBase)
         self.shoulderPitch.prepareRecording(fileNameBase)
+        self.shoulderYaw.prepareRecording(fileNameBase)
         self.upperarmRoll.prepareRecording(fileNameBase)
         self.elbow.prepareRecording(fileNameBase)
         self.forearmRoll.prepareRecording(fileNameBase)
@@ -184,6 +190,7 @@ class Gummi:
         delta = duration.to_sec()
         self.shoulderRoll.recordLine(delta)
         self.shoulderPitch.recordLine(delta)
+        self.shoulderYaw.recordLine(delta)
         self.upperarmRoll.recordLine(delta)
         self.elbow.recordLine(delta)
         self.forearmRoll.recordLine(delta)

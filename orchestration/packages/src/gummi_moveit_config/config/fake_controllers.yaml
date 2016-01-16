@@ -1,6 +1,7 @@
 controller_list:
-  - name: fake_right_controller
+  - name: fake_right_arm_controller
     joints:
+      - shoulder_yaw
       - shoulder_roll
       - shoulder_pitch
       - upperarm_roll

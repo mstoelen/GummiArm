@@ -12,7 +12,8 @@
 
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
-#include <kdl/chainiksolvervel_pinv.hpp>
+//#include <kdl/chainiksolvervel_pinv.hpp>
+#include <kdl/chainiksolvervel_pinv_nso.hpp>
 #include <kdl/frames.hpp>
 
 #include <angles/angles.h>
@@ -76,7 +77,10 @@ private:
   double scale_rotation_;
 
   KDL::ChainFkSolverPos_recursive* fk_solver_;
-  KDL::ChainIkSolverVel_pinv* ik_solver_;
+  KDL::ChainIkSolverVel_pinv_nso* ik_solver_;
+  //KDL::ChainIkSolverVel_pinv* ik_solver_;
+  KDL::JntArray* opt_pos_;
+  KDL::JntArray* weights_;
 
 };
 
@@ -118,17 +122,38 @@ GummiTeleop::GummiTeleop()
   }
 
   kdl_tree.getChain("base_link", "tool", chain);
-  fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
-  ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
 
-  const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames(); 
-  joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
+  weights_ = new KDL::JntArray(7);
+  opt_pos_ = new KDL::JntArray(7);
+  for(int i = 0; i < num_joints_; i++) {
+    (*weights_)(i) = 0.5;
+    (*opt_pos_)(i) = 0.0;
+  }
+
+
+  fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
+  ik_solver_ = new KDL::ChainIkSolverVel_pinv_nso(chain, *opt_pos_, *weights_,  0.00001, 150, 0.25);
+  //ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
+
+  const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames();
+  //joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
+  joint_names_.push_back(j_n.at(1));  //TODO
+  joint_names_.push_back(j_n.at(3));
+  joint_names_.push_back(j_n.at(4));
+  joint_names_.push_back(j_n.at(5));
+  joint_names_.push_back(j_n.at(6));
+  joint_names_.push_back(j_n.at(7));
+  joint_names_.push_back(j_n.at(8));
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
     joint_stiffnesses_.push_back(0.1);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
+
+    if(debug_mode_) {
+      printf("Joint %d found: %s.\n", i,  joint_names_.at(i).c_str());
+    }
   }
 
   gripper_pub_ = nh_.advertise<std_msgs::Float64>("teleop/gripper", 1);
@@ -142,7 +167,7 @@ GummiTeleop::GummiTeleop()
 
 void GummiTeleop::findAndSetParameters()
 {
-  nh_.param("teleop/num_joints", num_joints_, 6);
+  nh_.param("teleop/num_joints", num_joints_, 7);
   nh_.param("teleop/debug_mode", debug_mode_, 0);
   nh_.param("teleop/control_gain", control_gain_ , 0.1);
   nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
@@ -294,13 +319,14 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
   KDL::Frame F_at_hand = F_current;
   F_at_hand.M = KDL::Rotation::Identity();
 
-  T_desired = F_at_hand * T_desired;
+  T_desired = F_at_hand * T_desired; 
 
   if(!have_started_integrating_) {
     F_integrated_ = F_current;
     have_started_integrating_ = true;
   }
   else {
+
     KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
 					 T_desired.rot.y() * time_step,
 					 T_desired.rot.z() * time_step),
@@ -322,10 +348,9 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
       printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
       printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
-
     }
     
-    for(unsigned int i=0; i<num_joints_; i++) {
+    for(unsigned int i=0; i<6; i++) {
       T_current(i) = T_error(i) * control_gain_;
     } 
     
@@ -372,7 +397,7 @@ void GummiTeleop::publishJointVelocities()
   message.velocity = desired_joint_velocities_;
 
   if(passive_wrist_) {
-    message.effort[5] = -999;
+    message.effort[6] = -999;
   }
 
   joint_cmd_pub_.publish(message);
@@ -422,7 +447,7 @@ void GummiTeleop::publishJointVelocities()
 	   else {
 	     stiff_arm_ = true;
 	     printf("Setting all joint to stiff.\n");
-	     for(int i = 0; i < (num_joints_); i++) {
+	     for(int i = 0; i < num_joints_; i++) {
 	       joint_stiffnesses_.at(i) = 0.75;
 	     }
 	   }

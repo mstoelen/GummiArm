@@ -1,8 +1,8 @@
 moveit_setup_assistant_config:
   URDF:
-    package: ""
-    relative_path: /home/mstoelen/bitbucket/gummi-repo/sw/config/gummi.urdf
+    package: gummi_description
+    relative_path: gummi.urdf
   SRDF:
     relative_path: config/gummi.srdf
   CONFIG:
-    generated_timestamp: 1440690683
+    generated_timestamp: 1452970464

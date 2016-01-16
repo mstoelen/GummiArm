@@ -2,20 +2,56 @@
 
 <robot name="gummi">
 
- <link name="base_link" type="fixed">
+ <link name="base_link">
     <visual>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.01"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.005"/>
       <geometry>
-	<cylinder length="0.02" radius="0.065" />
+	<cylinder length="0.01" radius="0.065" />
+      </geometry>
+      <material name="">
+        <color rgba="0.5 0.1 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.005"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.065" />
+      </geometry>
+    </collision>
+  </link>
+
+ <link name="shoulder_intermediate">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.02"/>
+      <geometry>
+	<cylinder length="0.01" radius="0.065" />
+      </geometry>
+      <material name="">
+        <color rgba="0.5 0.5 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.02"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.065" />
+      </geometry>
+    </collision>
+  </link>
+
+ <link name="shoulder_preroll">
+    <visual>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.035"/>
+      <geometry>
+	<cylinder length="0.01" radius="0.065" />
       </geometry>
       <material name="">
         <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0535"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.035"/>
       <geometry>
-        <cylinder length="0.107" radius="0.065" />
+        <cylinder length="0.01" radius="0.065" />
       </geometry>
     </collision>
   </link>
@@ -24,16 +60,16 @@
     <visual>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-	<cylinder length="0.14" radius="0.07" />
+	<cylinder length="0.12" radius="0.06" />
       </geometry>
       <material name="">
         <color rgba="0.0 0.1 0.0 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.14" radius="0.07" />
+        <cylinder length="0.12" radius="0.06" />
       </geometry>
     </collision>
     <inertial>
@@ -54,9 +90,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.06" radius="0.03" />
       </geometry>
     </collision>
     <inertial>
@@ -77,9 +113,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.08"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.16" radius="0.04" />
       </geometry>
     </collision>
     <inertial>
@@ -100,9 +136,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.06" radius="0.03" />
       </geometry>
     </collision>
     <inertial>
@@ -123,9 +159,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.055"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.11" radius="0.04" />
       </geometry>
     </collision>
     <inertial>
@@ -139,14 +175,14 @@
     <visual>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-	<cylinder length="0.06" radius="0.02" />
+	<cylinder length="0.04" radius="0.02" />
       </geometry>
       <material name="">
         <color rgba="0.0 0.6 0.0 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <cylinder length="0.04" radius="0.02" />
       </geometry>
@@ -162,16 +198,16 @@
     <visual>
       <origin rpy="0.0 1.57080 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-	<cylinder length="0.005" radius="0.02" />
+	<cylinder length="0.01" radius="0.02" />
       </geometry>
       <material name="">
         <color rgba="0.0 0.7 0.0 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 1.57080 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.01" radius="0.02" />
       </geometry>
     </collision>
     <inertial>
@@ -192,9 +228,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.04" radius="0.02" />
+        <cylinder length="0.03" radius="0.04" />
       </geometry>
     </collision>
     <inertial>
@@ -204,9 +240,23 @@
     </inertial>
   </link>
   
+  <joint name="shoulder_yaw" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <parent link="base_link"/>
+    <child link="shoulder_intermediate"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-0.52" upper="1.04" velocity="1.0"/>
+  </joint> 
+  <joint name="shoulder_fake" type="fixed">
+    <origin rpy="0.0 0.0 1.57079" xyz="0.0 0.0 0.0"/>
+    <parent link="shoulder_intermediate"/>
+    <child link="shoulder_preroll"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="0" lower="-0.52" upper="1.04" velocity="1.0"/>
+  </joint>
   <joint name="shoulder_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 0.0 0.107"/>
-    <parent link="base_link"/>
+    <parent link="shoulder_preroll"/>
     <child link="shoulder"/>
     <axis xyz="0 0 1"/>
     <limit effort="0" lower="-0.55" upper="1.4" velocity="1.0"/>
