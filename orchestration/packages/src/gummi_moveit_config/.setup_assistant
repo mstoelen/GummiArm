@@ -5,4 +5,4 @@ moveit_setup_assistant_config:
   SRDF:
     relative_path: config/gummi.srdf
   CONFIG:
-    generated_timestamp: 1452970464
+    generated_timestamp: 1452978126

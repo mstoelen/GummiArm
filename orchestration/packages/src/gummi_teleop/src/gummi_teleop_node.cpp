@@ -12,8 +12,7 @@
 
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
-//#include <kdl/chainiksolvervel_pinv.hpp>
-#include <kdl/chainiksolvervel_pinv_nso.hpp>
+#include <kdl/chainiksolvervel_pinv.hpp>
 #include <kdl/frames.hpp>
 
 #include <angles/angles.h>
@@ -77,10 +76,7 @@ private:
   double scale_rotation_;
 
   KDL::ChainFkSolverPos_recursive* fk_solver_;
-  KDL::ChainIkSolverVel_pinv_nso* ik_solver_;
-  //KDL::ChainIkSolverVel_pinv* ik_solver_;
-  KDL::JntArray* opt_pos_;
-  KDL::JntArray* weights_;
+  KDL::ChainIkSolverVel_pinv* ik_solver_;
 
 };
 
@@ -123,31 +119,15 @@ GummiTeleop::GummiTeleop()
 
   kdl_tree.getChain("base_link", "tool", chain);
 
-  weights_ = new KDL::JntArray(7);
-  opt_pos_ = new KDL::JntArray(7);
-  for(int i = 0; i < num_joints_; i++) {
-    (*weights_)(i) = 0.5;
-    (*opt_pos_)(i) = 0.0;
-  }
-
-
   fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
-  ik_solver_ = new KDL::ChainIkSolverVel_pinv_nso(chain, *opt_pos_, *weights_,  0.00001, 150, 0.25);
-  //ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
+  ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
 
   const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames();
-  //joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
-  joint_names_.push_back(j_n.at(1));  //TODO
-  joint_names_.push_back(j_n.at(3));
-  joint_names_.push_back(j_n.at(4));
-  joint_names_.push_back(j_n.at(5));
-  joint_names_.push_back(j_n.at(6));
-  joint_names_.push_back(j_n.at(7));
-  joint_names_.push_back(j_n.at(8));
+  joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.1);
+    joint_stiffnesses_.push_back(0.3);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
 
@@ -441,14 +421,14 @@ void GummiTeleop::publishJointVelocities()
 	     stiff_arm_ = false;
 	     printf("Setting all joint to loose.\n");
 	     for(int i = 0; i < num_joints_; i++) {
-	       joint_stiffnesses_.at(i) = 0.1;
+	       joint_stiffnesses_.at(i) = 0.3;
 	     }
 	   }
 	   else {
 	     stiff_arm_ = true;
 	     printf("Setting all joint to stiff.\n");
 	     for(int i = 0; i < num_joints_; i++) {
-	       joint_stiffnesses_.at(i) = 0.75;
+	       joint_stiffnesses_.at(i) = 0.85;
 	     }
 	   }
 	 }

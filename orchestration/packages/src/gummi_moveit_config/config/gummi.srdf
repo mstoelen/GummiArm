@@ -11,7 +11,6 @@
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="right_arm">
         <joint name="shoulder_yaw" />
-        <joint name="shoulder_fake" />
         <joint name="shoulder_roll" />
         <joint name="shoulder_pitch" />
         <joint name="upperarm_roll" />
@@ -27,14 +26,13 @@
     <disable_collisions link1="base_link" link2="lowerarm" reason="Never" />
     <disable_collisions link1="base_link" link2="lowerarm_preroll" reason="Never" />
     <disable_collisions link1="base_link" link2="shoulder" reason="Never" />
-    <disable_collisions link1="base_link" link2="shoulder_intermediate" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="shoulder_preroll" reason="Never" />
+    <disable_collisions link1="base_link" link2="shoulder_preroll" reason="Adjacent" />
     <disable_collisions link1="base_link" link2="upperarm" reason="Never" />
     <disable_collisions link1="base_link" link2="upperarm_preroll" reason="Never" />
+    <disable_collisions link1="base_link" link2="wrist" reason="Never" />
     <disable_collisions link1="coupling" link2="lowerarm" reason="Never" />
     <disable_collisions link1="coupling" link2="lowerarm_preroll" reason="Never" />
     <disable_collisions link1="coupling" link2="shoulder" reason="Never" />
-    <disable_collisions link1="coupling" link2="shoulder_intermediate" reason="Never" />
     <disable_collisions link1="coupling" link2="shoulder_preroll" reason="Never" />
     <disable_collisions link1="coupling" link2="tool" reason="Adjacent" />
     <disable_collisions link1="coupling" link2="upperarm" reason="Never" />
@@ -42,27 +40,20 @@
     <disable_collisions link1="coupling" link2="wrist" reason="Adjacent" />
     <disable_collisions link1="lowerarm" link2="lowerarm_preroll" reason="Adjacent" />
     <disable_collisions link1="lowerarm" link2="shoulder" reason="Never" />
-    <disable_collisions link1="lowerarm" link2="shoulder_intermediate" reason="Never" />
     <disable_collisions link1="lowerarm" link2="shoulder_preroll" reason="Never" />
     <disable_collisions link1="lowerarm" link2="tool" reason="Never" />
     <disable_collisions link1="lowerarm" link2="upperarm_preroll" reason="Never" />
     <disable_collisions link1="lowerarm" link2="wrist" reason="Adjacent" />
     <disable_collisions link1="lowerarm_preroll" link2="shoulder" reason="Never" />
-    <disable_collisions link1="lowerarm_preroll" link2="shoulder_intermediate" reason="Never" />
     <disable_collisions link1="lowerarm_preroll" link2="shoulder_preroll" reason="Never" />
     <disable_collisions link1="lowerarm_preroll" link2="tool" reason="Never" />
     <disable_collisions link1="lowerarm_preroll" link2="upperarm" reason="Adjacent" />
     <disable_collisions link1="lowerarm_preroll" link2="upperarm_preroll" reason="Never" />
     <disable_collisions link1="lowerarm_preroll" link2="wrist" reason="Never" />
-    <disable_collisions link1="shoulder" link2="shoulder_intermediate" reason="Never" />
     <disable_collisions link1="shoulder" link2="shoulder_preroll" reason="Adjacent" />
     <disable_collisions link1="shoulder" link2="upperarm" reason="Never" />
     <disable_collisions link1="shoulder" link2="upperarm_preroll" reason="Adjacent" />
     <disable_collisions link1="shoulder" link2="wrist" reason="Never" />
-    <disable_collisions link1="shoulder_intermediate" link2="shoulder_preroll" reason="Adjacent" />
-    <disable_collisions link1="shoulder_intermediate" link2="upperarm" reason="Never" />
-    <disable_collisions link1="shoulder_intermediate" link2="upperarm_preroll" reason="Never" />
-    <disable_collisions link1="shoulder_intermediate" link2="wrist" reason="Never" />
     <disable_collisions link1="shoulder_preroll" link2="upperarm" reason="Never" />
     <disable_collisions link1="shoulder_preroll" link2="upperarm_preroll" reason="Never" />
     <disable_collisions link1="shoulder_preroll" link2="wrist" reason="Never" />

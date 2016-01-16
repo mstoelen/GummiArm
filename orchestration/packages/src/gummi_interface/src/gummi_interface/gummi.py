@@ -20,7 +20,7 @@ class Gummi:
         self.initSubscribers()
 
     def initVariables(self):
-        self.jointNames = ("shoulder_roll", "shoulder_pitch", "shoulder_yaw", "upperarm_roll", "elbow", "forearm_roll", "wrist")
+        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist")
         self.shoulderRollVel = 0
         self.shoulderPitchVel = 0
         self.shoulderYawVel = 0
@@ -30,15 +30,15 @@ class Gummi:
         self.wristVel = 0
         self.shoulderRollStiff = 0
         self.shoulderPitchStiff = 0
-        self.shoulderYawStiff = 0.0
+        self.shoulderYawStiff = 0.3
         self.elbowStiff = 0
         self.wristStiff = 0
         self.recordData = False
 
     def initJoints(self):
+        self.shoulderYaw = Antagonist("shoulder_yaw")
         self.shoulderRoll = Antagonist("shoulder_roll")
         self.shoulderPitch = Antagonist("shoulder_pitch")
-        self.shoulderYaw = Antagonist("shoulder_yaw")
         self.upperarmRoll = DirectDrive("upperarm_roll", self.pi)
         self.elbow = Antagonist("elbow")
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
@@ -56,14 +56,18 @@ class Gummi:
         self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
         self.doUpdate()
 
-    def setMaxLoads(self, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadShoulderYaw, maxLoadElbow, maxloadWrist):
+    def setMaxLoads(self, maxLoadShoulderYaw, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
+        self.shoulderYaw.setMaxLoad(maxLoadShoulderYaw)
         self.shoulderRoll.setMaxLoad(maxLoadShoulderRoll)
         self.shoulderPitch.setMaxLoad(maxLoadShoulderPitch)
-        self.shoulderYaw.setMaxLoad(maxLoadShoulderYaw)
         self.elbow.setMaxLoad(maxLoadElbow)
         self.wrist.setMaxLoad(maxloadWrist)
 
     def doUpdate(self):
+        if self.shoulderYawStiff < 0:
+            self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawStiff))
+        else:
+            self.shoulderYaw.servoWith(self.shoulderYawVel, self.shoulderYawStiff)
         if self.shoulderRollStiff < 0:
             self.shoulderRoll.moveWith(self.shoulderRollVel, abs(self.shoulderRollStiff))
         else:
@@ -72,10 +76,6 @@ class Gummi:
             self.shoulderPitch.moveWith(self.shoulderPitchVel, abs(self.shoulderPitchStiff))
         else:
             self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchStiff)
-        if self.shoulderYawStiff < 0:
-            self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawStiff))
-        else:
-            self.shoulderYaw.servoWith(self.shoulderYawVel, self.shoulderYawStiff)
         self.upperarmRoll.servoWith(self.upperarmRollVel)
         if self.elbowStiff < 0:
             self.elbow.moveWith(self.elbowVel, abs(self.elbowStiff))
@@ -105,9 +105,9 @@ class Gummi:
 
     def getJointAngles(self):
         angles = list()
+        angles.append(self.shoulderYaw.getJointAngle())
         angles.append(self.shoulderRoll.getJointAngle())
         angles.append(self.shoulderPitch.getJointAngle())
-        angles.append(self.shoulderYaw.getJointAngle())
         angles.append(self.upperarmRoll.getJointAngle())
         angles.append(self.elbow.getJointAngle())
         angles.append(self.forearmRoll.getJointAngle())
@@ -115,26 +115,26 @@ class Gummi:
         return angles
 
     def setVelocity(self, velocities):
-        self.shoulderRollVel = velocities[0]
-        self.shoulderPitchVel = velocities[1]
-        self.shoulderYawVel = velocities[2]
+        self.shoulderYawVel = velocities[0]
+        self.shoulderRollVel = velocities[1]
+        self.shoulderPitchVel = velocities[2]
         self.upperarmRollVel = velocities[3]
         self.elbowVel = velocities[4]
         self.forearmRollVel = velocities[5]
         self.wristVel = velocities[6]
 
-    def setStiffness(self, shoulderRoll, shoulderPitch, shoulderYaw, elbow, wrist):
+    def setStiffness(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
+        self.shoulderYawStiff = shoulderYaw
         self.shoulderRollStiff = shoulderRoll
         self.shoulderPitchStiff = shoulderPitch
-        self.shoulderYawStiff = shoulderYaw
         self.elbowStiff = elbow
         self.wristStiff = wrist
 
     def getLoads(self):
         loads = list()
+        loads.append(self.shoulderYaw.getLoadRatio())
         loads.append(self.shoulderRoll.getLoadRatio())
         loads.append(self.shoulderPitch.getLoadRatio())
-        loads.append(self.shoulderYaw.getLoadRatio())
         loads.append(1234)
         loads.append(self.elbow.getLoadRatio())
         loads.append(1234)
@@ -142,9 +142,9 @@ class Gummi:
         return loads
 
     def goRestingPose(self):
+        self.shoulderYaw.servoTo(0, self.shoulderYawStiff)
         self.shoulderRoll.servoTo(0, self.shoulderRollStiff)
         self.shoulderPitch.servoTo(0, self.shoulderPitchStiff)
-        self.shoulderYaw.servoTo(0, self.shoulderYawStiff)
         self.upperarmRoll.servoTo(0)
         self.elbow.servoTo(0, self.elbowStiff)
         self.forearmRoll.servoTo(0)
@@ -169,9 +169,9 @@ class Gummi:
         rospy.sleep(1)
 
     def prepareRecording(self, fileNameBase):
+        self.shoulderYaw.prepareRecording(fileNameBase)
         self.shoulderRoll.prepareRecording(fileNameBase)
         self.shoulderPitch.prepareRecording(fileNameBase)
-        self.shoulderYaw.prepareRecording(fileNameBase)
         self.upperarmRoll.prepareRecording(fileNameBase)
         self.elbow.prepareRecording(fileNameBase)
         self.forearmRoll.prepareRecording(fileNameBase)
@@ -188,9 +188,9 @@ class Gummi:
         timeNow = rospy.Time.now()
         duration = timeNow - self.timeStartRecording
         delta = duration.to_sec()
+        self.shoulderYaw.recordLine(delta)
         self.shoulderRoll.recordLine(delta)
         self.shoulderPitch.recordLine(delta)
-        self.shoulderYaw.recordLine(delta)
         self.upperarmRoll.recordLine(delta)
         self.elbow.recordLine(delta)
         self.forearmRoll.recordLine(delta)

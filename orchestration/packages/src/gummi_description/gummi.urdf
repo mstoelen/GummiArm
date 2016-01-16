@@ -20,24 +20,6 @@
     </collision>
   </link>
 
- <link name="shoulder_intermediate">
-    <visual>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.02"/>
-      <geometry>
-	<cylinder length="0.01" radius="0.065" />
-      </geometry>
-      <material name="">
-        <color rgba="0.5 0.5 0.1 1.0"/>
-      </material>
-    </visual>
-    <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.02"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.065" />
-      </geometry>
-    </collision>
-  </link>
-
  <link name="shoulder_preroll">
     <visual>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.035"/>
@@ -243,17 +225,10 @@
   <joint name="shoulder_yaw" type="revolute">
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     <parent link="base_link"/>
-    <child link="shoulder_intermediate"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.52" upper="1.04" velocity="1.0"/>
-  </joint> 
-  <joint name="shoulder_fake" type="fixed">
-    <origin rpy="0.0 0.0 1.57079" xyz="0.0 0.0 0.0"/>
-    <parent link="shoulder_intermediate"/>
     <child link="shoulder_preroll"/>
     <axis xyz="0 0 1"/>
     <limit effort="0" lower="-0.52" upper="1.04" velocity="1.0"/>
-  </joint>
+  </joint> 
   <joint name="shoulder_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 0.0 0.107"/>
     <parent link="shoulder_preroll"/>

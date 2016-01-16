@@ -65,3 +65,5 @@ right_arm:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
+  projection_evaluator: joints(shoulder_yaw,shoulder_roll)
+  longest_valid_segment_fraction: 0.05
