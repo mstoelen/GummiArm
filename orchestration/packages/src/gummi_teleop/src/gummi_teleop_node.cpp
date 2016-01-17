@@ -12,7 +12,7 @@
 
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
-#include <kdl/chainiksolvervel_pinv_nso.hpp>
+#include <kdl/chainiksolvervel_wdls.hpp>
 #include <kdl/frames.hpp>
 
 #include <angles/angles.h>
@@ -74,11 +74,10 @@ private:
   double min_joint_vel_;
   double scale_translation_;
   double scale_rotation_;
+  std::vector<float> ik_diag_weights_js, ik_diag_weights_ts;
 
-  KDL::JntArray* opt_pos_;
-  KDL::JntArray* weights_;
   KDL::ChainFkSolverPos_recursive* fk_solver_;
-  KDL::ChainIkSolverVel_pinv_nso* ik_solver_;
+  KDL::ChainIkSolverVel_wdls* ik_solver_;
 
 };
 
@@ -104,6 +103,13 @@ GummiTeleop::GummiTeleop()
   last_vel_ = zero_vel_; 
   desired_vel_ = zero_vel_;
 
+  for(int i = 0; i < num_joints_; i++) {
+    ik_diag_weights_js.push_back(0.0);
+  }
+  for(int i = 0; i < 6; i++) {
+    ik_diag_weights_ts.push_back(0.0);
+  }
+
   findAndSetParameters();
 
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description"); 
@@ -121,19 +127,34 @@ GummiTeleop::GummiTeleop()
 
   kdl_tree.getChain("base_link", "tool", chain);
 
-  opt_pos_ = new KDL::JntArray(num_joints_);
-  weights_ = new KDL::JntArray(num_joints_);
-  for(int i = 0; i < num_joints_; i++) {
-    (*opt_pos_)(i) = 0.0;
-    (*weights_)(i) = 0.1;
-  }
-  (*opt_pos_)(0) = 0.1;
-  (*weights_)(0) = 1000000.0;
-  (*opt_pos_)(2) = 0.1;
-  (*weights_)(2) = 10000.0;
-
   fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
-  ik_solver_ = new KDL::ChainIkSolverVel_pinv_nso(chain, *opt_pos_, *weights_);
+  ik_solver_ = new KDL::ChainIkSolverVel_wdls(chain);
+
+  Eigen::MatrixXd Mq(num_joints_, num_joints_);
+  for(int i = 0; i < num_joints_; i++) {
+    for(int j = 0; j < num_joints_; j++) {
+      if(i == j) {
+	Mq(i,j) = ik_diag_weights_js.at(i);
+      }
+      else{
+	Mq(i,j) = 0.0;  
+      }
+    }
+  }
+  ik_solver_->setWeightJS(Mq);
+
+  Eigen::MatrixXd Mt(6, 6);
+  for(int i = 0; i < 6; i++) {
+    for(int j = 0; j < 6; j++) {
+      if(i == j) {
+	Mt(i,j) = ik_diag_weights_ts.at(i);
+      }
+      else{
+	Mt(i,j) = 0.0;  
+      }
+    }
+  }
+  ik_solver_->setWeightTS(Mt);
 
   const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames();
   joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
@@ -166,6 +187,8 @@ void GummiTeleop::findAndSetParameters()
   nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
   nh_.param("teleop/scale_translation", scale_translation_, 0.5);
   nh_.param("teleop/scale_rotation", scale_rotation_, 1.0);
+  nh_.param("teleop/ik_diag_weights_js", ik_diag_weights_js, ik_diag_weights_js);
+  nh_.param("teleop/ik_diag_weights_ts", ik_diag_weights_ts, ik_diag_weights_ts);
 }
 
 void GummiTeleop::doUpdate()
