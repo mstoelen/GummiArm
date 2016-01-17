@@ -52,7 +52,7 @@ class Gummi:
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        self.setVelocity(msg.velocity)
+        self.setVelocity(msg.velocity) #TODO: CHECK NAMES
         self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
         self.doUpdate()
 
