@@ -1,6 +1,7 @@
+pose_mode: true
 num_joints: 7
-debug_mode: 0
-control_gain: 0.022
+debug_mode: 1
+control_gain: 0.0088
 max_joint_vel: 0.03
 scale_translation: 20.0
 scale_rotation: 60.0
