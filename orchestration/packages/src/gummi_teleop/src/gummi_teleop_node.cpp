@@ -12,7 +12,7 @@
 
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
-#include <kdl/chainiksolvervel_pinv.hpp>
+#include <kdl/chainiksolvervel_pinv_nso.hpp>
 #include <kdl/frames.hpp>
 
 #include <angles/angles.h>
@@ -75,8 +75,10 @@ private:
   double scale_translation_;
   double scale_rotation_;
 
+  KDL::JntArray* opt_pos_;
+  KDL::JntArray* weights_;
   KDL::ChainFkSolverPos_recursive* fk_solver_;
-  KDL::ChainIkSolverVel_pinv* ik_solver_;
+  KDL::ChainIkSolverVel_pinv_nso* ik_solver_;
 
 };
 
@@ -119,8 +121,19 @@ GummiTeleop::GummiTeleop()
 
   kdl_tree.getChain("base_link", "tool", chain);
 
+  opt_pos_ = new KDL::JntArray(num_joints_);
+  weights_ = new KDL::JntArray(num_joints_);
+  for(int i = 0; i < num_joints_; i++) {
+    (*opt_pos_)(i) = 0.0;
+    (*weights_)(i) = 0.1;
+  }
+  (*opt_pos_)(0) = 0.1;
+  (*weights_)(0) = 1000000.0;
+  (*opt_pos_)(2) = 0.1;
+  (*weights_)(2) = 10000.0;
+
   fk_solver_ = new KDL::ChainFkSolverPos_recursive(chain);
-  ik_solver_ = new KDL::ChainIkSolverVel_pinv(chain);
+  ik_solver_ = new KDL::ChainIkSolverVel_pinv_nso(chain, *opt_pos_, *weights_);
 
   const std::vector<std::string>&  j_n = kinematic_model_->getJointModelNames();
   joint_names_.assign(j_n.begin() + 1,j_n.end() - 2); //TODO
