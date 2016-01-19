@@ -374,6 +374,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
 				  T_desired.vel.y() * time_step,
 				  T_desired.vel.z() * time_step));
     
+    /*
     // Calculate desired pose
     KDL::Frame F_desired;
     if(pose_mode_) {
@@ -382,6 +383,13 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     else {
       F_desired = F_step*F_integrated_; 
     }    
+
+    KDL::Frame F_difference = F_at_hand.Inverse()*F_current.Inverse()*F_desired;
+    */
+
+    // Calculate desired pose
+    KDL::Frame F_desired;
+    F_desired = F_step*F_integrated_; 
 
     KDL::Twist T_error;
     T_error = diff(F_current, F_desired);
@@ -393,13 +401,23 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
       printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
       printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
-    }   
+    }
+     
 
-    for(unsigned int i=0; i<3; i++) {
+    /*
+    if(debug_mode_) {
+      printf("Debug: F_difference x %6.3f.\n", F_difference.p.x());
+      printf("Debug: F_difference y %6.3f.\n", F_difference.p.y());
+      printf("Debug: F_difference z %6.3f.\n", F_difference.p.z());
+    }
+
+    T_current(0) = F_difference.p.x() * 0.0005;
+    T_current(1) = F_difference.p.y() * 0.0005;
+    T_current(2) = F_difference.p.z() * 0.0005;
+    */
+
+    for(unsigned int i=0; i<6; i++) {
       T_current(i) = T_error(i) * control_gain_;
-    } 
-    for(unsigned int i=3; i<6; i++) {
-      T_current(i) = T_error(i) * control_gain_/4;
     } 
     
     F_integrated_ = F_current;

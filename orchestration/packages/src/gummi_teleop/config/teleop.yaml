@@ -1,8 +1,8 @@
-pose_mode: true
+pose_mode: false
 num_joints: 7
 debug_mode: 0
-control_gain: 0.0088
-max_joint_vel: 0.03
+control_gain: 0.022
+max_joint_vel: 0.3
 scale_translation: 20.0
 scale_rotation: 60.0
 ik_diag_weights_js: [0.75, 1.0, 0.75, 1.0, 1.0, 1.0, 1.0]
