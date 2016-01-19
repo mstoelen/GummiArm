@@ -45,7 +45,8 @@ private:
 
   ros::NodeHandle nh_;
 
-  int num_joints_, debug_mode_;
+  int num_joints_;
+  bool debug_mode_;
   ros::Publisher joint_cmd_pub_;
   ros::Publisher gripper_pub_;
   ros::Subscriber desired_sub_, desired_pose_sub_, joint_state_sub_, button_sub_;
@@ -189,7 +190,7 @@ void GummiTeleop::findAndSetParameters()
 {
   nh_.param("teleop/pose_mode", pose_mode_, false);
   nh_.param("teleop/num_joints", num_joints_, 7);
-  nh_.param("teleop/debug_mode", debug_mode_, 0);
+  nh_.param("teleop/debug_mode", debug_mode_, false);
   nh_.param("teleop/control_gain", control_gain_ , 0.1);
   nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
   nh_.param("teleop/scale_translation", scale_translation_, 0.5);
@@ -382,7 +383,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     }
     else {
       F_desired = F_step*F_integrated_; 
-    }    
+    }   
 
     KDL::Frame F_difference = F_at_hand.Inverse()*F_current.Inverse()*F_desired;
     */
@@ -411,15 +412,27 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: F_difference z %6.3f.\n", F_difference.p.z());
     }
 
-    T_current(0) = F_difference.p.x() * 0.0005;
-    T_current(1) = F_difference.p.y() * 0.0005;
-    T_current(2) = F_difference.p.z() * 0.0005;
+    KDL::Rotation R_difference;
+    R_difference = F_desired.M*F_current.M.Inverse();
+
+    double qx, qy, qz, qw;
+    R_difference.GetQuaternion(qx,qy,qz,qw);
+
+    if(debug_mode_) {
+      printf("Debug: qx: %6.3f, qy: %6.3f, qz: %6.3f, qw: %6.3f.\n", qx, qy, qz, qw);
+    }
     */
 
     for(unsigned int i=0; i<6; i++) {
       T_current(i) = T_error(i) * control_gain_;
     } 
-    
+
+    /*
+    for(unsigned int i=3; i<6; i++) {
+      T_current(i) = T_error(i) * 0.0001;
+    }     
+    */
+
     F_integrated_ = F_current;
   }
 
