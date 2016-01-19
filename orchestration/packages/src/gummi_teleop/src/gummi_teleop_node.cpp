@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
 #include <std_msgs/Float64.h>
@@ -26,6 +27,7 @@ private:
   void initializeJointPublishers();
   void advertiseJointPublishers();
   void desiredCallback(const geometry_msgs::Twist::ConstPtr& desired);
+  void desiredPoseCallback(const geometry_msgs::Pose::ConstPtr& desired);
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& joint_state_in);
   void buttonCallback(const sensor_msgs::Joy::ConstPtr& joy_in);
   geometry_msgs::Twist scaleDesired(geometry_msgs::Twist desired);
@@ -33,6 +35,7 @@ private:
   bool isZero(geometry_msgs::Twist vel);
   void publishJointVelocities();
   void printDesired(geometry_msgs::Twist desired);
+  void printDesiredPose(geometry_msgs::Pose desired);
   void printJointStateIn(sensor_msgs::JointState joint_state_in);
   bool checkIfConnectedToRobot();
   void processButtonPress();
@@ -45,7 +48,7 @@ private:
   int num_joints_, debug_mode_;
   ros::Publisher joint_cmd_pub_;
   ros::Publisher gripper_pub_;
-  ros::Subscriber desired_sub_, joint_state_sub_, button_sub_;
+  ros::Subscriber desired_sub_, desired_pose_sub_, joint_state_sub_, button_sub_;
   std::vector<std::string> joint_names_;
   std::vector<double> current_joint_positions_;
   bool received_joint_positions_;
@@ -75,6 +78,8 @@ private:
   double scale_translation_;
   double scale_rotation_;
   std::vector<float> ik_diag_weights_js, ik_diag_weights_ts;
+  bool pose_mode_;
+  KDL::Frame F_in_;
 
   KDL::ChainFkSolverPos_recursive* fk_solver_;
   KDL::ChainIkSolverVel_wdls* ik_solver_;
@@ -173,14 +178,16 @@ GummiTeleop::GummiTeleop()
   gripper_pub_ = nh_.advertise<std_msgs::Float64>("teleop/gripper", 1);
   joint_cmd_pub_ = nh_.advertise<sensor_msgs::JointState>("teleop/joint_commands", 1);
 
-  joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("teleop/joint_states", 10, &GummiTeleop::jointStateCallback,this);
-  desired_sub_ = nh_.subscribe<geometry_msgs::Twist>("teleop/cmd_vel", 10, &GummiTeleop::desiredCallback,this);
-  button_sub_ = nh_.subscribe<sensor_msgs::Joy>("teleop/buttons", 10, &GummiTeleop::buttonCallback,this);
+  joint_state_sub_ = nh_.subscribe<sensor_msgs::JointState>("teleop/joint_states", 10, &GummiTeleop::jointStateCallback, this);
+  desired_sub_ = nh_.subscribe<geometry_msgs::Twist>("teleop/cmd_vel", 10, &GummiTeleop::desiredCallback, this);
+  desired_pose_sub_ = nh_.subscribe<geometry_msgs::Pose>("teleop/cmd_pose", 10, &GummiTeleop::desiredPoseCallback, this);
+  button_sub_ = nh_.subscribe<sensor_msgs::Joy>("teleop/buttons", 10, &GummiTeleop::buttonCallback, this);
 
 }
 
 void GummiTeleop::findAndSetParameters()
 {
+  nh_.param("teleop/pose_mode", pose_mode_, false);
   nh_.param("teleop/num_joints", num_joints_, 7);
   nh_.param("teleop/debug_mode", debug_mode_, 0);
   nh_.param("teleop/control_gain", control_gain_ , 0.1);
@@ -243,6 +250,22 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
  
   if(debug_mode_) printDesired(*desired);
   desired_vel_ = scaleDesired(*desired);
+
+}
+
+void GummiTeleop::desiredPoseCallback(const geometry_msgs::Pose::ConstPtr& desired)
+{
+ 
+  if(debug_mode_) printDesiredPose(*desired);
+  F_in_.p.x(desired->position.x);
+  F_in_.p.y(desired->position.y);
+  F_in_.p.z(desired->position.z);
+  float qx, qy, qz, qw;
+  qx = desired->orientation.x;
+  qy = desired->orientation.y;
+  qz = desired->orientation.z;
+  qw = desired->orientation.w;
+  F_in_.M.Quaternion(qx,qy,qz,qw);
 
 }
 
@@ -339,6 +362,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
 
   if(!have_started_integrating_) {
     F_integrated_ = F_current;
+    F_in_ = F_current;
     have_started_integrating_ = true;
   }
   else {
@@ -352,8 +376,13 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     
     // Calculate desired pose
     KDL::Frame F_desired;
-    F_desired = F_step*F_integrated_; 
-    
+    if(pose_mode_) {
+      F_desired = F_in_;
+    }
+    else {
+      F_desired = F_step*F_integrated_; 
+    }    
+
     KDL::Twist T_error;
     T_error = diff(F_current, F_desired);
     
@@ -364,10 +393,13 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
       printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
       printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
-    }
-    
-    for(unsigned int i=0; i<6; i++) {
+    }   
+
+    for(unsigned int i=0; i<3; i++) {
       T_current(i) = T_error(i) * control_gain_;
+    } 
+    for(unsigned int i=3; i<6; i++) {
+      T_current(i) = T_error(i) * control_gain_/4;
     } 
     
     F_integrated_ = F_current;
@@ -483,6 +515,12 @@ void GummiTeleop::printDesired(geometry_msgs::Twist desired)
 {
   printf("Debug: Got desired linear velocity (x,y,z): %5.2f, %5.2f, %5.2f.\n",desired.linear.x,desired.linear.y,desired.linear.z);
   printf("Debug: Got desired angular velocity (x,y,z): %5.2f, %5.2f, %5.2f.\n",desired.angular.x,desired.angular.y,desired.angular.z);
+}
+
+void GummiTeleop::printDesiredPose(geometry_msgs::Pose desired) 
+{
+  printf("Debug: Got desired position (x,y,z): %5.2f, %5.2f, %5.2f.\n",desired.position.x,desired.position.y,desired.position.z);
+  printf("Debug: Got desired quaternion (x,y,z,w): %5.2f, %5.2f, %5.2f, %5.2f.\n",desired.orientation.x,desired.orientation.y,desired.orientation.z,desired.orientation.w);
 }
 
 void GummiTeleop::printJointStateIn(sensor_msgs::JointState joint_state_in)
