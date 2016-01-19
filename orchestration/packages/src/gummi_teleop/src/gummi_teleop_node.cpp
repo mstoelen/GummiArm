@@ -399,7 +399,7 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       T_current(i) = T_error(i) * control_gain_;
     } 
     for(unsigned int i=3; i<6; i++) {
-      T_current(i) = T_error(i) * 0.0; // TODO
+      T_current(i) = T_error(i) * control_gain_/4;
     } 
     
     F_integrated_ = F_current;
