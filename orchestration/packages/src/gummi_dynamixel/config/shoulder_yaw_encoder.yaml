@@ -1,0 +1,12 @@
+shoulder_yaw_encoder_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: shoulder_yaw_encoder
+    joint_speed: 0.5
+    motor:
+        id: 18
+        init: 512
+        min: 0
+        max: 1023
