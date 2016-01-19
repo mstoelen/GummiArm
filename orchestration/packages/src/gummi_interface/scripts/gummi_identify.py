@@ -5,15 +5,11 @@ import wx
 import sys
 import random
 import time
-import pygame
-from pygame.locals import *
 
 from gummi_interface.gummi import Gummi
 from gummi_interface.helpers import radToDeg
 
 def main(args):
-
-    pygame.init()
     
     rospy.init_node('GummiIdentify', anonymous=True)
     r = rospy.Rate(60)  
