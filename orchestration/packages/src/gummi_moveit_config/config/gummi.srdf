@@ -15,7 +15,7 @@
         <joint name="shoulder_pitch" />
         <joint name="upperarm_roll" />
         <joint name="elbow" />
-        <joint name="lowerarm_roll" />
+        <joint name="forearm_roll" />
         <joint name="wrist_pitch" />
         <joint name="wrist_to_coupling" />
         <joint name="coupling_to_tool" />
@@ -23,6 +23,7 @@
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="hand" parent_link="tool" group="right_arm" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="base_link" link2="coupling" reason="Never" />
     <disable_collisions link1="base_link" link2="lowerarm" reason="Never" />
     <disable_collisions link1="base_link" link2="lowerarm_preroll" reason="Never" />
     <disable_collisions link1="base_link" link2="shoulder" reason="Never" />

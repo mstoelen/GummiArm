@@ -69,6 +69,7 @@ private:
   bool have_started_integrating_;
   KDL::Frame F_integrated_;
   double control_gain_;
+  double control_gain_pose_;
   std::vector<double> desired_joint_velocities_;
   int zero_counter_;
   geometry_msgs::Twist zero_vel_;
@@ -172,7 +173,7 @@ GummiTeleop::GummiTeleop()
     current_joint_positions_.push_back(0.0);
 
     if(debug_mode_) {
-      printf("Joint %d found: %s.\n", i,  joint_names_.at(i).c_str());
+      printf("Debug: Joint %d found: %s.\n", i,  joint_names_.at(i).c_str());
     }
   }
 
@@ -191,7 +192,8 @@ void GummiTeleop::findAndSetParameters()
   nh_.param("teleop/pose_mode", pose_mode_, false);
   nh_.param("teleop/num_joints", num_joints_, 7);
   nh_.param("teleop/debug_mode", debug_mode_, false);
-  nh_.param("teleop/control_gain", control_gain_ , 0.1);
+  nh_.param("teleop/control_gain", control_gain_ , 0.01);
+  nh_.param("teleop/control_gain_pose", control_gain_pose_ , 0.001);
   nh_.param("teleop/max_joint_vel", max_joint_vel_, 0.04);
   nh_.param("teleop/scale_translation", scale_translation_, 0.5);
   nh_.param("teleop/scale_rotation", scale_rotation_, 1.0);
@@ -256,8 +258,8 @@ void GummiTeleop::desiredCallback(const geometry_msgs::Twist::ConstPtr& desired)
 
 void GummiTeleop::desiredPoseCallback(const geometry_msgs::Pose::ConstPtr& desired)
 {
- 
-  if(debug_mode_) printDesiredPose(*desired);
+  
+  printDesiredPose(*desired);
   F_in_.p.x(desired->position.x);
   F_in_.p.y(desired->position.y);
   F_in_.p.z(desired->position.z);
@@ -266,7 +268,7 @@ void GummiTeleop::desiredPoseCallback(const geometry_msgs::Pose::ConstPtr& desir
   qy = desired->orientation.y;
   qz = desired->orientation.z;
   qw = desired->orientation.w;
-  F_in_.M.Quaternion(qx,qy,qz,qw);
+  F_in_.M = KDL::Rotation::Quaternion(qx,qy,qz,qw);
 
 }
 
@@ -284,7 +286,10 @@ void GummiTeleop::jointStateCallback(const sensor_msgs::JointState::ConstPtr& jo
 
       if(name.compare(in.name[j]) == 0)  {
 	position = in.position[j];
-	current_joint_positions_.at(i) = position;
+	current_joint_positions_.at(i) = position; // TODO: Break if cannot find
+	if(debug_mode_) {
+	  printf("Debug: Found joint angle for %s: %f.\n", name.c_str(), position);
+	}
 	break;
       }
 
@@ -356,41 +361,48 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     assert(false);
   }
 
-  KDL::Frame F_at_hand = F_current;
-  F_at_hand.M = KDL::Rotation::Identity();
-
-  T_desired = F_at_hand * T_desired; 
-
   if(!have_started_integrating_) {
     F_integrated_ = F_current;
     F_in_ = F_current;
     have_started_integrating_ = true;
   }
   else {
-
-    KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
-					 T_desired.rot.y() * time_step,
-					 T_desired.rot.z() * time_step),
-		      KDL::Vector(T_desired.vel.x() * time_step,
-				  T_desired.vel.y() * time_step,
-				  T_desired.vel.z() * time_step));
     
-    // Calculate desired pose
     KDL::Frame F_desired;
     if(pose_mode_) {
       F_desired = F_in_;
     }
     else {
+      KDL::Frame F_at_hand = F_current;
+      F_at_hand.M = KDL::Rotation::Identity();
+      
+      T_desired = F_at_hand * T_desired; 
+      
+      KDL::Frame F_step(KDL::Rotation::RPY(T_desired.rot.x() * time_step,
+					   T_desired.rot.y() * time_step,
+					   T_desired.rot.z() * time_step),
+			KDL::Vector(T_desired.vel.x() * time_step,
+				    T_desired.vel.y() * time_step,
+				    T_desired.vel.z() * time_step));
+
       F_desired = F_step*F_integrated_; 
     }   
 
-    KDL::Frame F_difference = F_at_hand.Inverse()*F_current.Inverse()*F_desired;
-
-    /*
-    // Calculate desired pose
-    KDL::Frame F_desired;
-    F_desired = F_step*F_integrated_; 
-    */
+    if(debug_mode_) {
+      KDL::Vector x_c = F_current.M.UnitX();
+      printf("Debug: F_current x axis: %6.3f, %6.3f, %6.3f.\n", x_c.x(), x_c.y(), x_c.z());
+      KDL::Vector y_c = F_current.M.UnitY();
+      printf("Debug: F_current y axis: %6.3f, %6.3f, %6.3f.\n", y_c.x(), y_c.y(), y_c.z());
+      KDL::Vector z_c = F_current.M.UnitZ();
+      printf("Debug: F_current z axis: %6.3f, %6.3f, %6.3f.\n", z_c.x(), z_c.y(), z_c.z()); 
+      
+      KDL::Vector x_d = F_desired.M.UnitX();
+      printf("Debug: F_desired x axis: %6.3f, %6.3f, %6.3f.\n", x_d.x(), x_d.y(), x_d.z());
+      KDL::Vector y_d = F_desired.M.UnitY();
+      printf("Debug: F_desired y axis: %6.3f, %6.3f, %6.3f.\n", y_d.x(), y_d.y(), y_d.z());
+      KDL::Vector z_d = F_desired.M.UnitZ();
+      printf("Debug: _desired z axis: %6.3f, %6.3f, %6.3f.\n", z_d.x(), z_d.y(), z_d.z()); 
+    }
 
     KDL::Twist T_error;
     T_error = diff(F_current, F_desired);
@@ -399,60 +411,19 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: T_error x %6.3f.\n",T_error.vel.x());
       printf("Debug: T_error y %6.3f.\n",T_error.vel.y());
       printf("Debug: T_error z %6.3f.\n",T_error.vel.z());
-      //printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
-      //printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
-      //printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
-    }
-     
-
-    if(debug_mode_) {
-      printf("Debug: F_difference x %6.3f.\n", F_difference.p.x());
-      printf("Debug: F_difference y %6.3f.\n", F_difference.p.y());
-      printf("Debug: F_difference z %6.3f.\n", F_difference.p.z());
+      printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
+      printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
+      printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
     }
 
-    KDL::Rotation R_difference;
-    R_difference = F_desired.M*F_current.M.Inverse();
-
-    //double qx, qy, qz, qw;
-    //R_difference.GetQuaternion(qx,qy,qz,qw);
-    //if(debug_mode_) {
-    //  printf("Debug: qx: %6.3f, qy: %6.3f, qz: %6.3f, qw: %6.3f.\n", qx, qy, qz, qw);
-    //}
-    
-    KDL::Vector axis;
-    double epsilon, scaled_epsilon;
-    axis = R_difference.GetRot();
-    epsilon = axis.Normalize();
-
-    if(debug_mode_) {
-      printf("Debug: axis: %9.6f, %9.6f, %9.6f.\n", axis.x(), axis.y(), axis.z());
-    }
-    
-    scaled_epsilon = epsilon * 0.0001;
-    KDL::Rotation R_scaled_difference;
-    R_scaled_difference = KDL::Rotation::Rot2(axis, - scaled_epsilon);
-    if(debug_mode_) {
-      printf("Debug: scaled_epsilon: %9.6f.\n", scaled_epsilon);
-    }
-
-    double sroll, spitch, syaw;
-    R_scaled_difference.GetRPY(sroll, spitch, syaw);
-    if(debug_mode_) {
-      printf("Debug: sroll: %9.6f, spitch: %9.6f, syaw: %9.6f.\n", sroll, spitch, syaw );
-    }
-
-    T_current(3) = sroll;
-    T_current(4) = spitch;
-    T_current(5) = syaw;
-
-    for(unsigned int i=0; i<3; i++) {
-      T_current(i) = T_error(i) * control_gain_;
-    } 
-
-    //for(unsigned int i=3; i<6; i++) {
-    //  T_current(i) = 0.0;
-    //}     
+    for(unsigned int i=0; i<6; i++) {
+      if(pose_mode_) {
+	T_current(i) = T_error(i) * control_gain_pose_;
+      }
+      else {
+	T_current(i) = T_error(i) * control_gain_;
+      }
+    }     
 
     F_integrated_ = F_current;
   }

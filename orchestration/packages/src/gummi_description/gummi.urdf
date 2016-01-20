@@ -257,7 +257,7 @@
     <axis xyz="0 0 1"/>
     <limit effort="0" lower="-0.85" upper="0.85" velocity="1.0"/>
   </joint>
-  <joint name="lowerarm_roll" type="revolute">
+  <joint name="forearm_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.079 0.0"/>
     <parent link="lowerarm_preroll"/>
     <child link="lowerarm"/>

@@ -20,7 +20,7 @@ class Gummi:
         self.initSubscribers()
 
     def initVariables(self):
-        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist")
+        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch")
         self.shoulderRollVel = 0
         self.shoulderPitchVel = 0
         self.shoulderYawVel = 0
