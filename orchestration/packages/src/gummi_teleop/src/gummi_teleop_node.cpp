@@ -399,9 +399,9 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       printf("Debug: T_error x %6.3f.\n",T_error.vel.x());
       printf("Debug: T_error y %6.3f.\n",T_error.vel.y());
       printf("Debug: T_error z %6.3f.\n",T_error.vel.z());
-      printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
-      printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
-      printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
+      //printf("Debug: T_error rx %6.3f.\n",T_error.rot.x());
+      //printf("Debug: T_error ry %6.3f.\n",T_error.rot.y());
+      //printf("Debug: T_error rz %6.3f.\n",T_error.rot.z());
     }
      
 
@@ -414,20 +414,45 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
     KDL::Rotation R_difference;
     R_difference = F_desired.M*F_current.M.Inverse();
 
-    double qx, qy, qz, qw;
-    R_difference.GetQuaternion(qx,qy,qz,qw);
+    //double qx, qy, qz, qw;
+    //R_difference.GetQuaternion(qx,qy,qz,qw);
+    //if(debug_mode_) {
+    //  printf("Debug: qx: %6.3f, qy: %6.3f, qz: %6.3f, qw: %6.3f.\n", qx, qy, qz, qw);
+    //}
+    
+    KDL::Vector axis;
+    double epsilon, scaled_epsilon;
+    axis = R_difference.GetRot();
+    epsilon = axis.Normalize();
 
     if(debug_mode_) {
-      printf("Debug: qx: %6.3f, qy: %6.3f, qz: %6.3f, qw: %6.3f.\n", qx, qy, qz, qw);
+      printf("Debug: axis: %9.6f, %9.6f, %9.6f.\n", axis.x(), axis.y(), axis.z());
     }
+    
+    scaled_epsilon = epsilon * 0.0001;
+    KDL::Rotation R_scaled_difference;
+    R_scaled_difference = KDL::Rotation::Rot2(axis, - scaled_epsilon);
+    if(debug_mode_) {
+      printf("Debug: scaled_epsilon: %9.6f.\n", scaled_epsilon);
+    }
+
+    double sroll, spitch, syaw;
+    R_scaled_difference.GetRPY(sroll, spitch, syaw);
+    if(debug_mode_) {
+      printf("Debug: sroll: %9.6f, spitch: %9.6f, syaw: %9.6f.\n", sroll, spitch, syaw );
+    }
+
+    T_current(3) = sroll;
+    T_current(4) = spitch;
+    T_current(5) = syaw;
 
     for(unsigned int i=0; i<3; i++) {
       T_current(i) = T_error(i) * control_gain_;
     } 
 
-    for(unsigned int i=3; i<6; i++) {
-      T_current(i) = 0.0;
-    }     
+    //for(unsigned int i=3; i<6; i++) {
+    //  T_current(i) = 0.0;
+    //}     
 
     F_integrated_ = F_current;
   }
