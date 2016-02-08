@@ -33,7 +33,8 @@ class JointAngle:
         self.msgTime = rospy.Time(msg.header.stamp.secs, msg.header.stamp.nsecs)
         if abs(angle) <=  math.pi * 4:
             if self.encoderFlag and msg.goal_pos == angle:
-                print("WARNING: Encoder oddity, exactly same angle " + str(angle) + " and goal " + str(msg.goal_pos)  + " for " + self.name + ", ignoring.")
+                pass
+                #print("WARNING: Encoder oddity, exactly same angle " + str(angle) + " and goal " + str(msg.goal_pos)  + " for " + self.name + ", ignoring.")
             else:
                 self.encoderAngles.appendleft(angle)
 
@@ -41,7 +42,8 @@ class JointAngle:
                     self.encoderAngles.pop()
                     self.encoderAngle = np.median(self.encoderAngles) 
         else:
-            print("WARNING: Recieved value of " + str(angle) + " for " + self.name  + ", ignoring.")
+            pass
+            #print("WARNING: Recieved value of " + str(angle) + " for " + self.name  + ", ignoring.")
 
     def doVelocityIncrement(self):
         self.dAngle = self.dAngle + self.dVelocity
