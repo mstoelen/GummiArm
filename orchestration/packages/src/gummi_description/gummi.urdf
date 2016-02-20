@@ -241,7 +241,7 @@
     <parent link="shoulder"/>
     <child link="upperarm_preroll"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0.0" upper="1.75" velocity="1.0"/>
+    <limit effort="0" lower="0.0" upper="1.1" velocity="1.0"/>
   </joint>
   <joint name="upperarm_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.09 0.0"/>

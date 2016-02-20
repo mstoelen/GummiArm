@@ -9,7 +9,7 @@ nameEncoder: "shoulder_pitch_encoder"
 servoRange: 6.2832
 servoOffset: 0
 minAngle: 0
-maxAngle: 1.75
+maxAngle: 1.1
 angleOffset: 0.7
 gains:
     P: 0.03
