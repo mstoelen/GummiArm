@@ -1,5 +1,5 @@
 import unittest
-from joint_model import JointModel
+from gummi_interface.joint_model import JointModel
 
 #TODO: Integrate with Rostest
  
