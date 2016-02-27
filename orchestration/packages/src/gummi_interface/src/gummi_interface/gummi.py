@@ -13,6 +13,9 @@ from direct_drive import DirectDrive
 class Gummi:
 
     def __init__(self):
+        self.teleop = rospy.get_param("~teleop", 1)
+        print("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
+        
         self.pi = 3.1416
         self.initVariables()
         self.initJoints()
@@ -51,9 +54,12 @@ class Gummi:
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        self.setVelocity(msg.velocity) #TODO: CHECK NAMES
-        self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
-        self.doUpdate()
+        if self.teleop == 1:
+            self.setVelocity(msg.velocity) #TODO: CHECK NAMES
+            self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
+            self.doVelocityUpdate()
+        else:
+            print("WARNING: Receiving desired joint velocities, but ignoring as not in teleop mode. Check gummi.yaml file.")
 
     def setMaxLoads(self, maxLoadShoulderYaw, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
         self.shoulderYaw.setMaxLoad(maxLoadShoulderYaw)
@@ -62,7 +68,7 @@ class Gummi:
         self.elbow.setMaxLoad(maxLoadElbow)
         self.wrist.setMaxLoad(maxloadWrist)
 
-    def doUpdate(self):
+    def doVelocityUpdate(self):
         if self.shoulderYawCocont < 0:
             self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawCocont))
         else:
@@ -125,6 +131,19 @@ class Gummi:
         self.shoulderPitchCocont = shoulderPitch
         self.elbowCocont = elbow
         self.wristCocont = wrist
+
+    def servoTo(self, positions):
+        if self.teleop == 0:
+            self.shoulderYaw.servoTo(positions[0], self.shoulderYawCocont)
+            self.shoulderRoll.servoTo(positions[1], self.shoulderRollCocont)
+            self.shoulderPitch.servoTo(positions[2], self.shoulderPitchCocont)
+            self.upperarmRoll.servoTo(positions[3])
+            self.elbow.servoTo(positions[4], self.elbowCocont)
+            self.forearmRoll.servoTo(positions[5])
+            self.wrist.servoTo(positions[6], self.wristCocont)
+            self.publishJointState()
+        else:
+            print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
 
     def getLoads(self):
         loads = list()

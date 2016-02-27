@@ -65,7 +65,7 @@ def main(args):
                 print('At angle: ' + str(angles[index]) + ' degrees, sending velocity: ' + str(vel) + '.')
                 velocities[index] = vel
                 gummi.setVelocity(velocities)
-                gummi.doUpdate()
+                gummi.doVelocityUpdate()
 
         r.sleep()
   
