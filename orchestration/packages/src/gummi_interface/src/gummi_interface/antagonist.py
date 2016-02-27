@@ -55,11 +55,11 @@ class Antagonist:
         self.vGainUse = 0
         self.lGain = 0.03
 
-        self.dStiffness = 0
-        self.cStiffness = 0
+        self.dCocontraction = 0
+        self.cCocontraction = 0
         self.velocity = False
         self.closedLoop = False
-        self.maxStiffness = 1
+        self.maxCocontraction = 1
         self.meanError = 0
         self.maxLoad = 10000
         self.loadRatio = 0
@@ -98,44 +98,44 @@ class Antagonist:
         self.pubExtensor = rospy.Publisher(self.nameExtensor + "_controller/command", Float64, queue_size=5)
         self.pubFlexor = rospy.Publisher(self.nameFlexor + "_controller/command", Float64, queue_size=5)
 
-    def servoTo(self, dAngle, dStiffness):
+    def servoTo(self, dAngle, dCocontraction):
         self.velocity = False
         self.closedLoop = True
-        self.dStiffness = dStiffness  
+        self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
         self.doUpdate()
 
-    def moveTo(self, dEquilibrium, dStiffness):
+    def moveTo(self, dEquilibrium, dCocontraction):
         self.velocity = False
         self.closedLoop = False
         self.dEquilibrium = dEquilibrium
-        self.dStiffness = dStiffness
+        self.dCocontraction = dCocontraction
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
         self.doUpdate()
 
-    def moveWith(self, dEquilibriumVel, dStiffness):
+    def moveWith(self, dEquilibriumVel, dCocontraction):
         self.velocity = False
         self.closedLoop = False
         self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
-        self.dStiffness = dStiffness
+        self.dCocontraction = dCocontraction
         self.angle.setDesiredToEncoder()
         self.doUpdate()
 
-    def servoWith(self, dVelocity, dStiffness):
+    def servoWith(self, dVelocity, dCocontraction):
         self.closedLoop = True
         self.velocity = True
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
-        self.dStiffness = dStiffness  
+        self.dCocontraction = dCocontraction  
         self.doUpdate()
 
-    def passiveHold(self, dStiffness):
+    def passiveHold(self, dCocontraction):
         self.velocity = False
         self.closedLoop = False
-        self.dStiffness = dStiffness
+        self.dCocontraction = dCocontraction
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
         self.doUpdate()
@@ -160,7 +160,7 @@ class Antagonist:
             compliance = self.compliance.getContribution(excessLoad)
             
             scale = 1
-            self.cStiffness = self.dStiffness
+            self.cCocontraction = self.dCocontraction
             
             if compliance > 0.1:
                 self.doCompliance(compliance)
@@ -168,7 +168,7 @@ class Antagonist:
                 self.stretchReflex.inhibit()
             else:
                 scale = 1 - (reflex * 0.5)
-                self.cStiffness = self.dStiffness + reflex
+                self.cCocontraction = self.dCocontraction + reflex
                 
             self.scaleControlGain(scale)
                 
@@ -176,23 +176,23 @@ class Antagonist:
                 self.doClosedLoop()
                 
             self.capEquilibrium()
-            self.defineMaxStiffness()
-            self.capStiffness()
+            self.defineMaxCocontraction()
+            self.capCocontraction()
             self.createCommand()
             self.publishCommand()
 
     def createCommand(self):
         equilibrium = self.dEquilibrium
-        stiffness = self.cStiffness
+        cocontraction = self.cCocontraction
 
-        scaledStiffness = stiffness # TODO
+        scaledCocontraction = cocontraction # TODO
         #if abs(equilibrium) <= 1:
-        #    scaledStiffness = stiffness
+        #    scaledCocontraction = cocontraction
         #else:
-        #    scaledStiffness = stiffness*(2-abs(equilibrium))
+        #    scaledCocontraction = cocontraction*(2-abs(equilibrium))
 
-        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledStiffness*pi)
-        equilibriumExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledStiffness*pi)
+        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledCocontraction*pi)
+        equilibriumExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledCocontraction*pi)
         
         self.commandFlexor = equilibriumFlexor + self.servoOffset
         self.commandExtensor = equilibriumExtensor + self.servoOffset
@@ -237,23 +237,23 @@ class Antagonist:
             if self.dEquilibrium < -2:
                 self.dEquilibrium = -2.0
 
-    def defineMaxStiffness(self):
-        maxStiffness = 1
+    def defineMaxCocontraction(self):
+        maxCocontraction = 1
         if self.dEquilibrium > 1:
             diff = self.dEquilibrium - 1
-            maxStiffness = 1 - diff
+            maxCocontraction = 1 - diff
         else:
             if self.dEquilibrium < -1:
                 diff = -self.dEquilibrium - 1
-                maxStiffness = 1 - diff
-        self.maxStiffness = maxStiffness
+                maxCocontraction = 1 - diff
+        self.maxCocontraction = maxCocontraction
 
-    def capStiffness(self):
-        if self.cStiffness > self.maxStiffness:
-            self.cStiffness = self.maxStiffness
+    def capCocontraction(self):
+        if self.cCocontraction > self.maxCocontraction:
+            self.cCocontraction = self.maxCocontraction
         else:
-            if self.cStiffness < 0:
-                self.cStiffness = 0.0
+            if self.cCocontraction < 0:
+                self.cCocontraction = 0.0
 
     def publishCommand(self):
         self.pubExtensor.publish(self.commandExtensor)                
@@ -286,7 +286,7 @@ class Antagonist:
         jointRange = maxAngle - minAngle
         estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
         load = estimatedAngle - encoderAngle
-        adjustedLoad = load  * (1 + self.cStiffness)
+        adjustedLoad = load  * (1 + self.cCocontraction)
         self.loadRatio = adjustedLoad/self.maxLoad
 
     def getJointAngle(self):
@@ -303,11 +303,11 @@ class Antagonist:
 
     def prepareRecording(self, fileNameBase):
         fileName = fileNameBase + "_" + self.nameEncoder + ".csv"
-        self.recording.prepare(fileName, ["time","equilibrium","stiffness","angle","flexor-angle","extensor-angle", "load-ratio"])
+        self.recording.prepare(fileName, ["time","equilibrium","cocontraction","angle","flexor-angle","extensor-angle", "load-ratio"])
 
     def recordLine(self, delta):
         encoderAngle = self.getJointAngle()
         flexorAngle = self.getFlexorAngle()
         extensorAngle = self.getExtensorAngle()
         loadRatio = self.getLoadRatio()
-        self.recording.add([delta, self.dEquilibrium, self.cStiffness, encoderAngle, flexorAngle, extensorAngle, loadRatio])
+        self.recording.add([delta, self.dEquilibrium, self.cCocontraction, encoderAngle, flexorAngle, extensorAngle, loadRatio])

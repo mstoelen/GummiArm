@@ -28,11 +28,11 @@ class Gummi:
         self.elbowVel = 0
         self.forearmRollVel = 0
         self.wristVel = 0
-        self.shoulderRollStiff = 0
-        self.shoulderPitchStiff = 0
-        self.shoulderYawStiff = 0.3
-        self.elbowStiff = 0
-        self.wristStiff = 0
+        self.shoulderRollCocont = 0
+        self.shoulderPitchCocont = 0
+        self.shoulderYawCocont = 0.3
+        self.elbowCocont = 0
+        self.wristCocont = 0
         self.recordData = False
 
     def initJoints(self):
@@ -53,7 +53,7 @@ class Gummi:
 
     def cmdCallback(self, msg):
         self.setVelocity(msg.velocity) #TODO: CHECK NAMES
-        self.setStiffness(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
+        self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
         self.doUpdate()
 
     def setMaxLoads(self, maxLoadShoulderYaw, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
@@ -64,31 +64,31 @@ class Gummi:
         self.wrist.setMaxLoad(maxloadWrist)
 
     def doUpdate(self):
-        if self.shoulderYawStiff < 0:
-            self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawStiff))
+        if self.shoulderYawCocont < 0:
+            self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawCocont))
         else:
-            self.shoulderYaw.servoWith(self.shoulderYawVel, self.shoulderYawStiff)
-        if self.shoulderRollStiff < 0:
-            self.shoulderRoll.moveWith(self.shoulderRollVel, abs(self.shoulderRollStiff))
+            self.shoulderYaw.servoWith(self.shoulderYawVel, self.shoulderYawCocont)
+        if self.shoulderRollCocont < 0:
+            self.shoulderRoll.moveWith(self.shoulderRollVel, abs(self.shoulderRollCocont))
         else:
-            self.shoulderRoll.servoWith(self.shoulderRollVel, self.shoulderRollStiff)
-        if self.shoulderPitchStiff < 0:
-            self.shoulderPitch.moveWith(self.shoulderPitchVel, abs(self.shoulderPitchStiff))
+            self.shoulderRoll.servoWith(self.shoulderRollVel, self.shoulderRollCocont)
+        if self.shoulderPitchCocont < 0:
+            self.shoulderPitch.moveWith(self.shoulderPitchVel, abs(self.shoulderPitchCocont))
         else:
-            self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchStiff)
+            self.shoulderPitch.servoWith(self.shoulderPitchVel, self.shoulderPitchCocont)
         self.upperarmRoll.servoWith(self.upperarmRollVel)
-        if self.elbowStiff < 0:
-            self.elbow.moveWith(self.elbowVel, abs(self.elbowStiff))
+        if self.elbowCocont < 0:
+            self.elbow.moveWith(self.elbowVel, abs(self.elbowCocont))
         else:
-            self.elbow.servoWith(self.elbowVel, self.elbowStiff)
+            self.elbow.servoWith(self.elbowVel, self.elbowCocont)
         self.forearmRoll.servoWith(self.forearmRollVel)
-        if self.wristStiff == -999:
+        if self.wristCocont == -999:
             self.wrist.passiveHold(0.0)
         else:
-            if self.wristStiff < 0:
-                self.wrist.moveWith(self.wristVel, abs(self.wristStiff))
+            if self.wristCocont < 0:
+                self.wrist.moveWith(self.wristVel, abs(self.wristCocont))
             else:
-                self.wrist.servoWith(self.wristVel, self.wristStiff)
+                self.wrist.servoWith(self.wristVel, self.wristCocont)
         
         self.publishJointState()
 
@@ -123,12 +123,12 @@ class Gummi:
         self.forearmRollVel = velocities[5]
         self.wristVel = velocities[6]
 
-    def setStiffness(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
-        self.shoulderYawStiff = shoulderYaw
-        self.shoulderRollStiff = shoulderRoll
-        self.shoulderPitchStiff = shoulderPitch
-        self.elbowStiff = elbow
-        self.wristStiff = wrist
+    def setCocontraction(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
+        self.shoulderYawCocont = shoulderYaw
+        self.shoulderRollCocont = shoulderRoll
+        self.shoulderPitchCocont = shoulderPitch
+        self.elbowCocont = elbow
+        self.wristCocont = wrist
 
     def getLoads(self):
         loads = list()
@@ -142,28 +142,28 @@ class Gummi:
         return loads
 
     def goRestingPose(self):
-        self.shoulderYaw.servoTo(0, self.shoulderYawStiff)
-        self.shoulderRoll.servoTo(0, self.shoulderRollStiff)
-        self.shoulderPitch.servoTo(0, self.shoulderPitchStiff)
+        self.shoulderYaw.servoTo(0, self.shoulderYawCocont)
+        self.shoulderRoll.servoTo(0, self.shoulderRollCocont)
+        self.shoulderPitch.servoTo(0, self.shoulderPitchCocont)
         self.upperarmRoll.servoTo(0)
-        self.elbow.servoTo(0, self.elbowStiff)
+        self.elbow.servoTo(0, self.elbowCocont)
         self.forearmRoll.servoTo(0)
-        self.wrist.servoTo(0, self.wristStiff)
+        self.wrist.servoTo(0, self.wristCocont)
 
     def doGradualStartup(self):
-        self.shoulderYaw.moveTo(-0.1, self.shoulderYawStiff)
+        self.shoulderYaw.moveTo(-0.1, self.shoulderYawCocont)
         rospy.sleep(1)
-        self.shoulderRoll.moveTo(-1.25, self.shoulderRollStiff)
+        self.shoulderRoll.moveTo(-1.25, self.shoulderRollCocont)
         rospy.sleep(1)
-        self.shoulderPitch.moveTo(0.5, self.shoulderPitchStiff)
+        self.shoulderPitch.moveTo(0.5, self.shoulderPitchCocont)
         rospy.sleep(1)
         self.upperarmRoll.servoTo(0)
         rospy.sleep(1)
-        self.elbow.moveTo(0, self.elbowStiff)
+        self.elbow.moveTo(0, self.elbowCocont)
         rospy.sleep(1)
         self.forearmRoll.servoTo(0)
         rospy.sleep(1)
-        self.wrist.moveTo(0, self.wristStiff)
+        self.wrist.moveTo(0, self.wristCocont)
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)
