@@ -33,7 +33,6 @@ class Gummi:
         self.shoulderYawCocont = 0.3
         self.elbowCocont = 0
         self.wristCocont = 0
-        self.recordData = False
 
     def initJoints(self):
         self.shoulderYaw = Antagonist("shoulder_yaw")
@@ -91,9 +90,6 @@ class Gummi:
                 self.wrist.servoWith(self.wristVel, self.wristCocont)
         
         self.publishJointState()
-
-        if self.recordData:
-            self.addLineRecording()
 
     def publishJointState(self):
         msg = JointState()
@@ -167,33 +163,5 @@ class Gummi:
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)
-
-    def prepareRecording(self, fileNameBase):
-        self.shoulderYaw.prepareRecording(fileNameBase)
-        self.shoulderRoll.prepareRecording(fileNameBase)
-        self.shoulderPitch.prepareRecording(fileNameBase)
-        self.upperarmRoll.prepareRecording(fileNameBase)
-        self.elbow.prepareRecording(fileNameBase)
-        self.forearmRoll.prepareRecording(fileNameBase)
-        self.wrist.prepareRecording(fileNameBase)
-        
-    def startRecording(self):
-        self.timeStartRecording = rospy.Time.now()
-        self.recordData = True
-
-    def stopRecording(self):
-        self.recordData = False
-
-    def addLineRecording(self):        
-        timeNow = rospy.Time.now()
-        duration = timeNow - self.timeStartRecording
-        delta = duration.to_sec()
-        self.shoulderYaw.recordLine(delta)
-        self.shoulderRoll.recordLine(delta)
-        self.shoulderPitch.recordLine(delta)
-        self.upperarmRoll.recordLine(delta)
-        self.elbow.recordLine(delta)
-        self.forearmRoll.recordLine(delta)
-        self.wrist.recordLine(delta)
     
         

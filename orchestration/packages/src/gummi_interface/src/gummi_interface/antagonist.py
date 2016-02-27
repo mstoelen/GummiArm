@@ -9,7 +9,6 @@ from std_msgs.msg import Float64
 from helpers import fetchParam
 from joint_angle import JointAngle
 from reflex import Reflex
-from recording import Recording
 from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
 class Antagonist:
@@ -37,7 +36,6 @@ class Antagonist:
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.stretchReflex = Reflex(0, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
-        self.recording = Recording()
 
         self.initPublishers()
         self.initVariables()
@@ -300,14 +298,3 @@ class Antagonist:
 
     def getLoadRatio(self):
         return self.loadRatio
-
-    def prepareRecording(self, fileNameBase):
-        fileName = fileNameBase + "_" + self.nameEncoder + ".csv"
-        self.recording.prepare(fileName, ["time","equilibrium","cocontraction","angle","flexor-angle","extensor-angle", "load-ratio"])
-
-    def recordLine(self, delta):
-        encoderAngle = self.getJointAngle()
-        flexorAngle = self.getFlexorAngle()
-        extensorAngle = self.getExtensorAngle()
-        loadRatio = self.getLoadRatio()
-        self.recording.add([delta, self.dEquilibrium, self.cCocontraction, encoderAngle, flexorAngle, extensorAngle, loadRatio])

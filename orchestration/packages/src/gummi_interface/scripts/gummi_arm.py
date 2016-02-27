@@ -10,12 +10,6 @@ from gummi_interface.gummi import Gummi
 
 def main(args):
 
-    record = False
-    if rospy.get_param("gummi/recording") == 1:
-        record = True
-        fileNameBase = rospy.get_param("gummi/name_base_recording")
-        print("WARNING: Will record in files with base: " + fileNameBase + ".")
-
     rospy.init_node('GummiArm', anonymous=True)
     r = rospy.Rate(100)  
 
@@ -34,11 +28,6 @@ def main(args):
         r.sleep()
 
     print("GummiArm is live!")
-
-    if record:
-        print("Recording!")
-        gummi.prepareRecording(fileNameBase)
-        gummi.startRecording()
 
     while not rospy.is_shutdown():
         gummi.publishJointState()
