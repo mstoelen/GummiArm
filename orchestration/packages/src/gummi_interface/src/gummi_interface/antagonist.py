@@ -190,7 +190,8 @@ class Antagonist:
                 sumCocontraction = self.dCocontraction + reflex
                 self.model.setCocontraction(sumCocontraction)
                     
-            self.model.generateCommands()
+            if self.calibrated is 1:
+                self.model.generateCommands()
             self.scaleControlGain(scale)
                 
             if self.closedLoop:
@@ -296,3 +297,6 @@ class Antagonist:
 
     def getLoadRatio(self):
         return self.loadRatio
+
+    def getName(self):
+        return self.name

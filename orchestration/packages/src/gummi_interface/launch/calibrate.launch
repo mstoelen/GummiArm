@@ -1,0 +1,10 @@
+<launch>	
+  <node name="gummi" pkg="gummi_interface" type="gummi_calibrate.py" output="screen">
+  	<rosparam file="$(find gummi_interface)/config/gummi.yaml" command="load"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_roll.yaml" command="load" ns="shoulder_roll"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_pitch.yaml" command="load" ns="shoulder_pitch"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_yaw.yaml" command="load" ns="shoulder_yaw"/>
+	<rosparam file="$(find gummi_interface)/config/elbow.yaml" command="load" ns="elbow"/>	
+  	<rosparam file="$(find gummi_interface)/config/wrist.yaml" command="load" ns="wrist"/>				
+  </node>
+</launch>

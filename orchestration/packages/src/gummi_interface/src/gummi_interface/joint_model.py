@@ -24,7 +24,7 @@ class JointModel:
         self.fExtensor = interpolate.interp2d(self.thetas, self.ccs, self.alphasExtensor)
         return True
 
-    def generateCommands(self, angle, cocontraction):
+    def generateCommands(self):
         self.flexor = self.fFlexor(self.angle, self.cocontraction)[0]
         self.extensor = self.fExtensor(self.angle, self.cocontraction)[0]
 
