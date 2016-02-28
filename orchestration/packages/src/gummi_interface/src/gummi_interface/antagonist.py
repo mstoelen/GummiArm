@@ -164,8 +164,6 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            reflex = self.cocontractionReflex.getContribution()
-            
             self.createLoadRatio()
             excessLoad = abs(self.loadRatio) - 1
             self.compliance.updateExcitation(excessLoad)
@@ -178,13 +176,14 @@ class Antagonist:
                 self.doCompliance(compliance)
                 scale = 1 - (compliance * 0.5)
                 self.cocontractionReflex.inhibit()
-            else:
-                scale = 1 - (reflex * 0.5)
-                self.cCocontraction = self.dCocontraction + reflex
-                if self.feedForward:
-                    self.model.setCocontraction(self.cCocontraction)
-                    self.model.generateCommands()
-                
+                self.model.setAngle(self.angle.getEncoder())
+            
+            if self.feedForward:
+                reflex = self.cocontractionReflex.getContribution()
+                sumCocontraction = self.dCocontraction + reflex
+                self.model.setCocontraction(sumCocontraction)
+                    
+            self.model.generateCommands()
             self.scaleControlGain(scale)
                 
             if self.closedLoop:
