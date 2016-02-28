@@ -37,7 +37,7 @@ class Antagonist:
         self.model = JointModel(self.name)
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.stretchReflex = Reflex(0, 0.02, 0.01)
+        self.cocontractionReflex = Reflex(0, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
 
         self.initPublishers()
@@ -62,15 +62,10 @@ class Antagonist:
         self.closedLoop = False
         self.feedForward = False
         self.maxCocontraction = 1
-        self.meanError = 0
         self.maxLoad = 10000
         self.loadRatio = 0
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
-
-        self.equilibriumErrors = list()
-        for i in range(0, 5):
-            self.equilibriumErrors.append(0.0)
 
         self.model.generate()
 
@@ -108,8 +103,7 @@ class Antagonist:
         self.feedForward = True
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
-        self.resetEquilibriumErrors()
-        self.stretchReflex.inhibit()
+        self.cocontractionReflex.inhibit()
         self.doUpdate()
 
     def goTo(self, dAngle, dStartCocontraction):
@@ -118,8 +112,7 @@ class Antagonist:
         self.feedForward = False
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
-        self.resetEquilibriumErrors()
-        self.stretchReflex.inhibit()
+        self.cocontractionReflex.inhibit()
         self.doUpdate()
 
     def moveTo(self, dEquilibrium, dCocontraction):
@@ -128,8 +121,7 @@ class Antagonist:
         self.feedForward = False
         self.dEquilibrium = dEquilibrium
         self.dCocontraction = dCocontraction
-        self.resetEquilibriumErrors()
-        self.stretchReflex.inhibit()
+        self.cocontractionReflex.inhibit()
         self.doUpdate()
 
     def moveWith(self, dEquilibriumVel, dCocontraction):
@@ -155,8 +147,7 @@ class Antagonist:
         self.closedLoop = False
         self.feedForward = False
         self.dCocontraction = dCocontraction
-        self.resetEquilibriumErrors()
-        self.stretchReflex.inhibit()
+        self.cocontractionReflex.inhibit()
         self.doUpdate()
 
     def setMaxLoad(self, maxLoad):
@@ -170,9 +161,7 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            self.createEquilibriumError()            
-            self.createMeanError()
-            reflex = self.stretchReflex.getContribution(self.meanError)
+            reflex = self.cocontractionReflex.getContribution(0.0) #TODO
             
             self.createLoadRatio()
             excessLoad = abs(self.loadRatio) - 1
@@ -184,7 +173,7 @@ class Antagonist:
             if compliance > 0.1:
                 self.doCompliance(compliance)
                 scale = 1 - (compliance * 0.5)
-                self.stretchReflex.inhibit()
+                self.cocontractionReflex.inhibit()
             else:
                 scale = 1 - (reflex * 0.5)
                 self.cCocontraction = self.dCocontraction + reflex
@@ -215,17 +204,6 @@ class Antagonist:
         
         self.commandFlexor = equilibriumFlexor + self.servoOffset
         self.commandExtensor = equilibriumExtensor + self.servoOffset
-
-    def resetEquilibriumErrors(self):
-        for error in self.equilibriumErrors:
-            self.equilibriumErrors.pop(0)
-            self.equilibriumErrors.append(0.0)
-
-    def createEquilibriumError(self):
-        encoderAngle = self.angle.getEncoder()
-        error = self.dEquilibrium - encoderAngle
-        self.equilibriumErrors.append(error)
-        self.equilibriumErrors.pop(0)
 
     def doClosedLoop(self):
         encoderAngle = self.angle.getEncoder()
@@ -277,18 +255,6 @@ class Antagonist:
     def publishCommand(self):
         self.pubExtensor.publish(self.commandExtensor)                
         self.pubFlexor.publish(self.commandFlexor)
-
-    def createMeanError(self):
-        sum = 0
-        index = 0
-        for error in self.equilibriumErrors:
-            error = abs(error)
-            if index > 0:
-                changeInError = error - previousError
-                sum = sum + changeInError
-            previousError = error
-            index = index + 1
-        self.meanError = sum/(index - 1)
 
     def scaleControlGain(self, scale):
         self.pGainUse = self.pGain * scale
