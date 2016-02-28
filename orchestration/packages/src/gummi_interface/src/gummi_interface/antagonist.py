@@ -60,6 +60,7 @@ class Antagonist:
         self.cCocontraction = 0
         self.velocity = False
         self.closedLoop = False
+        self.feedForward = False
         self.maxCocontraction = 1
         self.meanError = 0
         self.maxLoad = 10000
@@ -104,6 +105,17 @@ class Antagonist:
     def servoTo(self, dAngle, dCocontraction):
         self.velocity = False
         self.closedLoop = True
+        self.feedForward = True
+        self.dCocontraction = dCocontraction  
+        self.angle.setDesired(dAngle)
+        self.resetEquilibriumErrors()
+        self.stretchReflex.inhibit()
+        self.doUpdate()
+
+    def goTo(self, dAngle, dStartCocontraction):
+        self.velocity = False
+        self.closedLoop = True
+        self.feedForward = False
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
         self.resetEquilibriumErrors()
@@ -113,6 +125,7 @@ class Antagonist:
     def moveTo(self, dEquilibrium, dCocontraction):
         self.velocity = False
         self.closedLoop = False
+        self.feedForward = False
         self.dEquilibrium = dEquilibrium
         self.dCocontraction = dCocontraction
         self.resetEquilibriumErrors()
@@ -122,6 +135,7 @@ class Antagonist:
     def moveWith(self, dEquilibriumVel, dCocontraction):
         self.velocity = False
         self.closedLoop = False
+        self.feedForward = False
         self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
         self.dCocontraction = dCocontraction
         self.angle.setDesiredToEncoder()
@@ -130,6 +144,7 @@ class Antagonist:
     def servoWith(self, dVelocity, dCocontraction):
         self.closedLoop = True
         self.velocity = True
+        self.feedForward = False
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
         self.dCocontraction = dCocontraction  
@@ -138,6 +153,7 @@ class Antagonist:
     def passiveHold(self, dCocontraction):
         self.velocity = False
         self.closedLoop = False
+        self.feedForward = False
         self.dCocontraction = dCocontraction
         self.resetEquilibriumErrors()
         self.stretchReflex.inhibit()
