@@ -16,7 +16,8 @@ class Antagonist:
     def __init__(self, name):
         self.name = name
 
-        self.signEquilibrium =  fetchParam("~" + self.name + "/signEquilibrium", 1)
+        self.calibrated = rospy.get_param("~" + self.name + "/calibrated")
+        self.signEquilibrium = rospy.get_param("~" + self.name + "/signEquilibrium")
         self.signFlexor = rospy.get_param("~" + self.name + "/signFlexor")
         self.signExtensor = rospy.get_param("~" + self.name + "/signExtensor")
         self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
@@ -35,6 +36,10 @@ class Antagonist:
 
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
         self.model = JointModel(self.name)
+
+        if self.calibrated is 1:
+            self.model.generate()
+
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(0.1, 0.02, 0.01)
@@ -67,7 +72,6 @@ class Antagonist:
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
 
-        self.model.generate()
 
     def calculateEqVelCalibration(self):
         joint_range = self.angle.getMax() - self.angle.getMin()
@@ -107,16 +111,19 @@ class Antagonist:
         self.doUpdate()
 
     def goTo(self, dAngle, dStartCocontraction):
-        self.velocity = False
-        self.closedLoop = True
-        self.feedForward = False
-        self.dCocontraction = dCocontraction  
-        self.angle.setDesired(dAngle)
-        self.model.setAngle(dAngle)
-
-        excitation = self.angle.getEncoder() - dAngle
-        self.reflex.updateExcitation(excitation)
-        self.doUpdate()
+        if self.calibrated is 1:
+            self.velocity = False
+            self.closedLoop = True
+            self.feedForward = False
+            self.dCocontraction = dCocontraction  
+            self.angle.setDesired(dAngle)
+            self.model.setAngle(dAngle)
+            
+            excitation = self.angle.getEncoder() - dAngle
+            self.reflex.updateExcitation(excitation)
+            self.doUpdate()
+        else:
+            print("Warning: Joint " + self.name + " listed as calibrated in .yaml config file. Ignoring goTo() command.")
 
     def moveTo(self, dEquilibrium, dCocontraction):
         self.velocity = False
