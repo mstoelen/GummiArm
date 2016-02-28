@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+PKG = 'gummi_interface'
+import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
+
 import unittest
 from gummi_interface.joint_model import JointModel
 
@@ -30,4 +35,5 @@ class TestJointModel(unittest.TestCase):
         self.assertEqual(angle, 0.0) #TODO: Create test dataset
         
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    rostest.rosrun(PKG, 'test_joint_model', TestJointModel)

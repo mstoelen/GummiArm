@@ -3,6 +3,7 @@ signFlexor: -1
 signExtensor: -1
 signEncoder: -1
 signJoint: 1
+name: "wrist"
 nameFlexor: "wrist_flexor"
 nameExtensor: "wrist_extensor"
 nameEncoder: "wrist_encoder"

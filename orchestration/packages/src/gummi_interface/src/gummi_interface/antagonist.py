@@ -8,6 +8,7 @@ from std_msgs.msg import Float64
 
 from helpers import fetchParam
 from joint_angle import JointAngle
+from joint_model import JointModel
 from reflex import Reflex
 from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
 
@@ -20,6 +21,7 @@ class Antagonist:
         self.signExtensor = rospy.get_param("~" + self.name + "/signExtensor")
         self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
         self.signJoint = rospy.get_param("~" + self.name + "/signJoint")
+        self.name = rospy.get_param("~" + self.name + "/name")
         self.nameFlexor = rospy.get_param("~" + self.name + "/nameFlexor")
         self.nameExtensor = rospy.get_param("~" + self.name + "/nameExtensor")
         self.nameEncoder = rospy.get_param("~" + self.name + "/nameEncoder")
@@ -32,6 +34,7 @@ class Antagonist:
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
+        self.model = JointModel(self.name)
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.stretchReflex = Reflex(0, 0.02, 0.01)
@@ -67,6 +70,8 @@ class Antagonist:
         self.equilibriumErrors = list()
         for i in range(0, 5):
             self.equilibriumErrors.append(0.0)
+
+        self.model.generate()
 
     def calculateEqVelCalibration(self):
         joint_range = self.angle.getMax() - self.angle.getMin()
