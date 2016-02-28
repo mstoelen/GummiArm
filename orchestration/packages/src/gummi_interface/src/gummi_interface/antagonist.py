@@ -200,11 +200,13 @@ class Antagonist:
         equilibrium = self.dEquilibrium
         cocontraction = self.cCocontraction
 
-        scaledCocontraction = cocontraction # TODO
-
-        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledCocontraction*pi)
-        commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledCocontraction*pi)
+        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*cocontraction*pi)
+        commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
         
+        if self.feedForward:
+            commandFlexor = commandFlexor + self.model.getFlexor()
+            commandExtensor = commandExtensor + self.model.getExtensor()
+
         self.commandFlexor = commandFlexor + self.servoOffset
         self.commandExtensor = commandExtensor + self.servoOffset
 
