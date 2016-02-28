@@ -6,28 +6,36 @@ from scipy import interpolate
 class JointModel:
     def __init__(self, name):
         self.name = name
-        self.agonist = 0.0
-        self.antagonist = 0.0
+        self.flexor = 0.0
+        self.extensor = 0.0
+        self.angle = 0.0
+        self.cocontraction = 0.0
         self.loadCalibration()
 
     def loadCalibration(self):
-        self.alphasAgonist  = rospy.get_param("~" + self.name + "/calib/alphasAgonist")
-        self.alphasAntagonist = rospy.get_param("~" + self.name + "/calib/alphasAntagonist")
+        self.alphasFlexor  = rospy.get_param("~" + self.name + "/calib/alphasFlexor")
+        self.alphasExtensor = rospy.get_param("~" + self.name + "/calib/alphasExtensor")
         self.thetas = rospy.get_param("~" + self.name + "/calib/thetas")
         self.ccs = rospy.get_param("~" + self.name + "/calib/ccs")
 
     def generate(self):
         # TODO: Check for content of arrays
-        self.fAgonist = interpolate.interp2d(self.thetas, self.ccs, self.alphasAgonist)
-        self.fAntagonist = interpolate.interp2d(self.thetas, self.ccs, self.alphasAntagonist)
+        self.fFlexor = interpolate.interp2d(self.thetas, self.ccs, self.alphasFlexor)
+        self.fExtensor = interpolate.interp2d(self.thetas, self.ccs, self.alphasExtensor)
         return True
 
-    def calculateCommands(self, angle, cocontraction):
-        self.agonist = self.fAgonist(angle, cocontraction)[0]
-        self.antagonist = self.fAntagonist(angle, cocontraction)[0]
+    def generateCommands(self, angle, cocontraction):
+        self.flexor = self.fFlexor(self.angle, self.cocontraction)[0]
+        self.extensor = self.fExtensor(self.angle, self.cocontraction)[0]
 
-    def getAgonist(self):
-        return self.agonist
+    def setCocontraction(self, cocontraction):
+        self.cocontraction = cocontraction
 
-    def getAntagonist(self):
-        return self.antagonist
+    def setAngle(self, angle):
+        self.angle = angle
+
+    def getFlexor(self):
+        return self.flexor
+
+    def getExtensor(self):
+        return self.extensor

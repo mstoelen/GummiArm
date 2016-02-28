@@ -24,15 +24,11 @@ class Reflex:
     def inhibit(self):
         self.inhibition = 1
 
-    def getContribution(self, newExcitation):
+    def getContribution(self):
         self.inhibition = self.discount(self.inhibition, self.inhibitionRate)
         self.excitation = self.discount(self.excitation, self.excitationRate)
-        self.updateExcitation(newExcitation)
-
         contribution = self.excitation * (1 - self.inhibition) * self.gain
-
         #print("Reflex contribution, excitation, inhibition: " + str(contribution) + ", " + str(self.excitation) + ", " + str(self.inhibition))
-
         return contribution
 
     def updateExcitation(self, newExcitation):

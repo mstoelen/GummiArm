@@ -37,7 +37,7 @@ class Antagonist:
         self.model = JointModel(self.name)
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(0, 0.02, 0.01)
+        self.cocontractionReflex = Reflex(0.1, 0.02, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
 
         self.initPublishers()
@@ -112,7 +112,10 @@ class Antagonist:
         self.feedForward = False
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
-        self.cocontractionReflex.inhibit()
+        self.model.setAngle(dAngle)
+
+        excitation = self.angle.getEncoder() - dAngle
+        self.reflex.updateExcitation(excitation)
         self.doUpdate()
 
     def moveTo(self, dEquilibrium, dCocontraction):
@@ -161,11 +164,12 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            reflex = self.cocontractionReflex.getContribution(0.0) #TODO
+            reflex = self.cocontractionReflex.getContribution()
             
             self.createLoadRatio()
             excessLoad = abs(self.loadRatio) - 1
-            compliance = self.compliance.getContribution(excessLoad)
+            self.compliance.updateExcitation(excessLoad)
+            compliance = self.compliance.getContribution()
             
             scale = 1
             self.cCocontraction = self.dCocontraction
@@ -177,6 +181,9 @@ class Antagonist:
             else:
                 scale = 1 - (reflex * 0.5)
                 self.cCocontraction = self.dCocontraction + reflex
+                if self.feedForward:
+                    self.model.setCocontraction(self.cCocontraction)
+                    self.model.generateCommands()
                 
             self.scaleControlGain(scale)
                 
@@ -194,16 +201,12 @@ class Antagonist:
         cocontraction = self.cCocontraction
 
         scaledCocontraction = cocontraction # TODO
-        #if abs(equilibrium) <= 1:
-        #    scaledCocontraction = cocontraction
-        #else:
-        #    scaledCocontraction = cocontraction*(2-abs(equilibrium))
 
-        equilibriumFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledCocontraction*pi)
-        equilibriumExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledCocontraction*pi)
+        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*scaledCocontraction*pi)
+        commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*scaledCocontraction*pi)
         
-        self.commandFlexor = equilibriumFlexor + self.servoOffset
-        self.commandExtensor = equilibriumExtensor + self.servoOffset
+        self.commandFlexor = commandFlexor + self.servoOffset
+        self.commandExtensor = commandExtensor + self.servoOffset
 
     def doClosedLoop(self):
         encoderAngle = self.angle.getEncoder()
