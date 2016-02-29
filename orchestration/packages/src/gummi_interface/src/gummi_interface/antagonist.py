@@ -209,7 +209,7 @@ class Antagonist:
         equilibrium = self.dEquilibrium
         cocontraction = self.cCocontraction
 
-        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2  + 0.5*cocontraction*pi)
+        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
         commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
         
         if self.feedForward:
