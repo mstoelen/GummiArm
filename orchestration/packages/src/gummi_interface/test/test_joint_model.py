@@ -48,6 +48,15 @@ class TestJointModel(unittest.TestCase):
         jm.generateCommands()
         angle = jm.getExtensor()
         self.assertTrue(angle > 0.882 and angle < 1.032)
+
+    def test_outside_range(self):
+        jm = JointModel("test")
+        global alphasFlexor, alphasExtensor, thetas, ccs
+        jm.setCalibration(thetas, ccs, alphasFlexor, alphasExtensor)
+        jm.setAngle(-0.9)
+        jm.setCocontraction(0.4)
+        result = jm.generateCommands()
+        self.assertFalse(result)
         
 if __name__ == '__main__':
     import rostest

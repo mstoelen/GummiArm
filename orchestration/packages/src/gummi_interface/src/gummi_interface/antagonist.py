@@ -104,7 +104,7 @@ class Antagonist:
     def servoTo(self, dAngle, dCocontraction):
         self.velocity = False
         self.closedLoop = True
-        self.feedForward = True
+        self.feedForward = False
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
         self.cocontractionReflex.inhibit()
@@ -114,7 +114,7 @@ class Antagonist:
         if self.calibrated is 1:
             self.velocity = False
             self.closedLoop = True
-            self.feedForward = False
+            self.feedForward = True
             self.dCocontraction = dCocontraction  
             self.angle.setDesired(dAngle)
             self.model.setAngle(dAngle)
@@ -191,7 +191,9 @@ class Antagonist:
                 self.model.setCocontraction(sumCocontraction)
                     
             if self.calibrated is 1:
-                self.model.generateCommands()
+                if not self.model.generateCommands():
+                    self.feedForward = False
+                    print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
             self.scaleControlGain(scale)
                 
             if self.closedLoop:

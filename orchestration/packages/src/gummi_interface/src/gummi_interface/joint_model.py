@@ -27,6 +27,10 @@ class JointModel:
     def generateCommands(self):
         self.flexor = griddata((self.thetas, self.ccs), self.alphasFlexor, (self.angle, self.cocontraction))
         self.extensor = griddata((self.thetas, self.ccs), self.alphasExtensor, (self.angle, self.cocontraction))
+        if np.isnan(self.flexor) or np.isnan(self.extensor):
+            return False
+        else:
+            return True
 
     def setCocontraction(self, cocontraction):
         self.cocontraction = cocontraction
