@@ -38,7 +38,7 @@ class Antagonist:
         self.model = JointModel(self.name)
 
         if self.calibrated is 1:
-            self.model.generate()
+            self.model.loadCalibration()
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)

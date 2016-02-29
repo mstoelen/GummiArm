@@ -40,8 +40,7 @@ def main(args):
 
             print("Moving arm into place.")
             for i in range (0,100):
-                gummi.setCocontraction(0.8, 0.8, 0.8, cocont, 0.8)
-                gummi.servoTo([0, 0, 0, 0, rest * pi/180, 0, 0])
+                gummi.elbow.servoTo(rest * pi/180, cocont)
                 r.sleep()
             print("Test started, cocontraction: " + str(cocont) + ", attempt: " + str(att) + ".")
             
@@ -61,9 +60,8 @@ def main(args):
                         else:
                             command = rest
 
-                    command_rad = command * pi/180
-
-                    gummi.servoTo([0, 0, 0, 0, command_rad, 0, 0])
+                    gummi.elbow.servoTo(command * pi/180, cocont)
+                    #gummi.elbow.goTo(command * pi/180, cocont)
 
                     angles = gummi.getJointAngles()
                     angle = angles[4] * 180/pi
