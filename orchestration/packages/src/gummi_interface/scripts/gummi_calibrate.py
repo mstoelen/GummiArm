@@ -18,8 +18,8 @@ def main(args):
     
     gummi = Gummi()
 
-    anglesToTry = [x / 100.0 for x in range(-30, 31, 15)]
-    cocontractionsToTry = [x / 100.0 for x in range(80, -1, -40)] 
+    anglesToTry = [x / 100.0 for x in range(-48, 49, 6)]
+    cocontractionsToTry = [x / 100.0 for x in range(80, -1, -10)] 
 
     gummi.setMaxLoads(100, 100, 100, 100, 100)
     gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
@@ -35,12 +35,21 @@ def main(args):
         r.sleep()
 
     print("GummiArm is live!")
+
+    for i in range (0,400):
+        gummi.elbow.servoTo(0, 0.5)
+        r.sleep()
     
     thetas = list()
     ccs = list()
     alphas_flexor = list()
     alphas_extensor = list()
     for cocont in cocontractionsToTry: 
+
+        for i in range (0,400):
+            gummi.elbow.servoTo(0, cocont)
+            r.sleep()
+
         for angle in anglesToTry:
             print("Moving arm to angle: " + str(angle) + " and cocontraction: " + str(cocont) + ".")
             for i in range (0,400):
@@ -52,6 +61,10 @@ def main(args):
             ccs.append(round(cocont, 3))
             alphas_flexor.append(round(joint.getFlexorAngle(), 3))
             alphas_extensor.append(round(joint.getExtensorAngle(), 3))
+
+        for i in range (0,400):
+            gummi.elbow.servoTo(0, cocont)
+            r.sleep()
 
     data = {'thetas': thetas, 'ccs': ccs, 'alphasFlexor': alphas_flexor, 'alphasExtensor': alphas_extensor}
     text = yaml.dump(data,
