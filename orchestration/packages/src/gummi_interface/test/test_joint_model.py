@@ -1,38 +1,53 @@
 #!/usr/bin/env python
 
 PKG = 'gummi_interface'
-import roslib; roslib.load_manifest(PKG)  # This line is not needed with Catkin.
 
 import unittest
+import matplotlib.pyplot as plt
+from calibration_data import thetas, ccs, alphasFlexor, alphasExtensor
 from gummi_interface.joint_model import JointModel
 
-#TODO: Integrate with Rostest
- 
 class TestJointModel(unittest.TestCase):
- 
-    def test_initialize_joint_model_for_elbow(self):
-        jm = JointModel("test")
-        self.assertIsNotNone(jm)
 
-    def test_load_calibration_agonist(self):
+    def test_exact_flexor(self):
         jm = JointModel("test")
-        self.assertIsNotNone(jm.fAgonist)
+        global alphasFlexor, alphasExtensor, thetas, ccs
+        jm.setCalibration(thetas, ccs, alphasFlexor, alphasExtensor)
+        jm.setAngle(-0.481)
+        jm.setCocontraction(0.8)
+        jm.generateCommands()
+        angle = jm.getFlexor()
+        self.assertEqual(angle, 1.356)
 
-    def test_load_calibration_antagonist(self):
+    def test_exact_extensor(self):
         jm = JointModel("test")
-        self.assertIsNotNone(jm.fAntagonist)
+        global alphasFlexor, alphasExtensor, thetas, ccs
+        jm.setCalibration(thetas, ccs, alphasFlexor, alphasExtensor)
+        jm.setAngle(-0.481)
+        jm.setCocontraction(0.8)
+        jm.generateCommands()
+        angle = jm.getExtensor()
+        self.assertEqual(angle, 1.666)
 
-    def test_interpolation_agonist(self):
+    def test_interpolation_flexor(self):
         jm = JointModel("test")
-        jm.calculateCommands(0.0,0.0)
-        angle = jm.getAgonist()
-        self.assertEqual(angle, 0.0) #TODO: Create test dataset
+        global alphasFlexor, alphasExtensor, thetas, ccs
+        jm.setCalibration(thetas, ccs, alphasFlexor, alphasExtensor)
+        jm.setAngle(0.03)
+        jm.setCocontraction(0.4)
+        jm.generateCommands()
+        angle = jm.getFlexor()
+        self.assertTrue(angle > 2.870 and angle < 3.014)
 
-    def test_interpolation_antagonist(self):
+    def test_interpolation_extensor(self):
         jm = JointModel("test")
-        jm.calculateCommands(0.0,0.0)
-        angle = jm.getAntagonist()
-        self.assertEqual(angle, 0.0) #TODO: Create test dataset
+        global alphasFlexor, alphasExtensor, thetas, ccs
+        jm.setCalibration(thetas, ccs, alphasFlexor, alphasExtensor)
+        jm.setAngle(0.03)
+        jm.setCocontraction(0.4)
+        jm.generateCommands()
+        angle = jm.getExtensor()
+        self.assertTrue(angle > 0.882 and angle < 1.032)
         
 if __name__ == '__main__':
     import rostest
