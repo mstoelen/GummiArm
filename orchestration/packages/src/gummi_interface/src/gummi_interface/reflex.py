@@ -24,6 +24,10 @@ class Reflex:
     def inhibit(self):
         self.inhibition = 1
 
+    def clear(self):
+        self.inhibition = 0
+        self.excitation = 0
+
     def getContribution(self):
         contribution = self.excitation * (1 - self.inhibition) * self.gain
         self.inhibition = self.discount(self.inhibition, self.inhibitionRate)
@@ -34,3 +38,4 @@ class Reflex:
     def updateExcitation(self, newExcitation):
         if newExcitation > (self.excitation * 1.5):
             self.excitation = newExcitation
+            print("New excitation: " + str(newExcitation))

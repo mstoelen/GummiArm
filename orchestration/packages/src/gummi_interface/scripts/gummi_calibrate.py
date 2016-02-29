@@ -18,7 +18,7 @@ def main(args):
     
     gummi = Gummi()
 
-    anglesToTry = [x / 100.0 for x in range(-48, 49, 6)]
+    anglesToTry = [x / 100.0 for x in range(-48, 49, 12)]
     cocontractionsToTry = [x / 100.0 for x in range(80, -1, -10)] 
 
     gummi.setMaxLoads(100, 100, 100, 100, 100)
@@ -36,37 +36,35 @@ def main(args):
 
     print("GummiArm is live!")
 
-    for i in range (0,400):
+    for i in range (0,300):
         gummi.elbow.servoTo(0, 0.5)
         r.sleep()
     
     thetas = list()
     ccs = list()
-    alphas_flexor = list()
-    alphas_extensor = list()
+    equilibriums = list()
     for cocont in cocontractionsToTry: 
 
-        for i in range (0,400):
+        for i in range (0,300):
             gummi.elbow.servoTo(0, cocont)
             r.sleep()
 
         for angle in anglesToTry:
             print("Moving arm to angle: " + str(angle) + " and cocontraction: " + str(cocont) + ".")
-            for i in range (0,400):
+            for i in range (0,300):
                 gummi.elbow.servoTo(angle, cocont)
                 r.sleep()
 
             joint = gummi.elbow
             thetas.append(round(joint.angle.getEncoder(), 3))
             ccs.append(round(cocont, 3))
-            alphas_flexor.append(round(joint.getFlexorAngle(), 3))
-            alphas_extensor.append(round(joint.getExtensorAngle(), 3))
+            equilibriums.append(round(joint.getDesiredEquilibrium(), 3))
 
-        for i in range (0,400):
+        for i in range (0,300):
             gummi.elbow.servoTo(0, cocont)
             r.sleep()
 
-    data = {'thetas': thetas, 'ccs': ccs, 'alphasFlexor': alphas_flexor, 'alphasExtensor': alphas_extensor}
+    data = {'thetas': thetas, 'ccs': ccs, 'equilibriums': equilibriums}
     text = yaml.dump(data,
                      default_flow_style = False,
                      explicit_start = True)

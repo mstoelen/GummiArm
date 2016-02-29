@@ -10,9 +10,9 @@ def main(args):
 
     pi = 3.1416
 
-    desired = 23
-    rest = -37.5
-    cocontractions_to_try = (0, 0.25, 0.5, 0.75, 1)
+    desired = -20
+    rest = 20
+    cocontractions_to_try = (0.0, 0.25, 0.5) #(0, 0.25, 0.5, 0.75, 1)
 
     rospy.init_node('cocontractionTest', anonymous=True)
     r = rospy.Rate(60)  
@@ -23,7 +23,7 @@ def main(args):
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.0, 0.8)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
-    gummi.doGradualStartup()
+    #gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(3)
@@ -50,22 +50,22 @@ def main(args):
                 writer.writerow(['time','desired','angle'])
                 
                 time1 = rospy.Time.now()
+                now = False
                 for i in range (0,800):
 
                     if i < 200:
                         command = rest
                     else:
-                        if i <500:
+                        if i < 500:
                             command = desired
+                            now = False
+                            if i == 200:
+                                now = True
                         else:
                             command = rest
 
-                    gummi.elbow.servoTo(command * pi/180, cocont)
-                    
-                    #now = False
-                    #if i is 1:
-                    #    now = True
-                    #gummi.elbow.goTo(command * pi/180, cocont, now)
+                    #gummi.elbow.servoTo(command * pi/180, cocont)
+                    gummi.elbow.goTo(command * pi/180, cocont, now)
 
                     angles = gummi.getJointAngles()
                     angle = angles[4] * 180/pi

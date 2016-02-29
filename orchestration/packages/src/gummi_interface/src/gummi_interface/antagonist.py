@@ -42,7 +42,7 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(0.1, 0.02, 0.01)
+        self.cocontractionReflex = Reflex(3.0, 0.005, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
 
         self.initPublishers()
@@ -66,7 +66,7 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.maxCocontraction = 1
+        self.maxCocontraction = 0.8 #TODO
         self.maxLoad = 10000
         self.loadRatio = 0
         self.errorLast = 0.0
@@ -107,7 +107,7 @@ class Antagonist:
         self.feedForward = False
         self.dCocontraction = dCocontraction  
         self.angle.setDesired(dAngle)
-        self.cocontractionReflex.inhibit()
+        self.cocontractionReflex.clear()
         self.doUpdate()
 
     def goTo(self, dAngle, dStartCocontraction, now):
@@ -115,13 +115,12 @@ class Antagonist:
             self.velocity = False
             self.closedLoop = True
             if now:
+                self.dCocontraction = dStartCocontraction 
+                excitation = abs(self.angle.getEncoder() - dAngle)
+                self.cocontractionReflex.updateExcitation(excitation)
                 self.feedForward = True
-            self.dCocontraction = dCocontraction  
             self.angle.setDesired(dAngle)
             self.model.setAngle(dAngle)
-            
-            excitation = self.angle.getEncoder() - dAngle
-            self.reflex.updateExcitation(excitation)
             self.doUpdate()
         else:
             print("Warning: Joint " + self.name + " listed as calibrated in .yaml config file. Ignoring goTo() command.")
@@ -132,7 +131,7 @@ class Antagonist:
         self.feedForward = False
         self.dEquilibrium = dEquilibrium
         self.dCocontraction = dCocontraction
-        self.cocontractionReflex.inhibit()
+        self.cocontractionReflex.clear()
         self.doUpdate()
 
     def moveWith(self, dEquilibriumVel, dCocontraction):
@@ -158,7 +157,7 @@ class Antagonist:
         self.closedLoop = False
         self.feedForward = False
         self.dCocontraction = dCocontraction
-        self.cocontractionReflex.inhibit()
+        self.cocontractionReflex.clear()
         self.doUpdate()
 
     def setMaxLoad(self, maxLoad):
@@ -178,7 +177,6 @@ class Antagonist:
             compliance = self.compliance.getContribution()
             
             scale = 1
-            self.cCocontraction = self.dCocontraction
             
             if compliance > 0.1:
                 self.doCompliance(compliance)
@@ -188,15 +186,24 @@ class Antagonist:
             if self.calibrated is 1:
                 reflex = self.cocontractionReflex.getContribution()
                 sumCocontraction = self.dCocontraction + reflex
+                if sumCocontraction > self.maxCocontraction:
+                    sumCocontraction = self.maxCocontraction
                 self.model.setAngle(self.angle.getEncoder())
                 self.model.setCocontraction(sumCocontraction)
+                self.cCocontraction = sumCocontraction
+
+                print("Cocontraction: " + str(self.cCocontraction))
 
                 if self.feedForward:
                     if not self.model.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
                     else:
-                        self.dEquilibrium = self.model.getEquilibriumPoint()
+                        print("Setting feedforward!")
+                        print("Reflex contribution: " + str(reflex))
+                        self.dEquilibrium = self.model.getEquilibriumPoint() * self.signEquilibrium
                         self.feedForward = False
+            else:
+                self.cCocontraction = self.dCocontraction
                     
             self.scaleControlGain(scale)
                 
@@ -204,7 +211,6 @@ class Antagonist:
                 self.doClosedLoop()
                 
             self.capEquilibrium()
-            self.defineMaxCocontraction()
             self.capCocontraction()
             self.createCommand()
             self.publishCommand()
@@ -249,17 +255,6 @@ class Antagonist:
             if self.dEquilibrium < -2:
                 self.dEquilibrium = -2.0
 
-    def defineMaxCocontraction(self):
-        maxCocontraction = 1
-        if self.dEquilibrium > 1:
-            diff = self.dEquilibrium - 1
-            maxCocontraction = 1 - diff
-        else:
-            if self.dEquilibrium < -1:
-                diff = -self.dEquilibrium - 1
-                maxCocontraction = 1 - diff
-        self.maxCocontraction = maxCocontraction
-
     def capCocontraction(self):
         if self.cCocontraction > self.maxCocontraction:
             self.cCocontraction = self.maxCocontraction
@@ -288,6 +283,9 @@ class Antagonist:
         load = estimatedAngle - encoderAngle
         adjustedLoad = load  * (1 + self.cCocontraction)
         self.loadRatio = adjustedLoad/self.maxLoad
+
+    def getDesiredEquilibrium(self):
+        return self.dEquilibrium
 
     def getJointAngle(self):
         return self.angle.getEncoder()
