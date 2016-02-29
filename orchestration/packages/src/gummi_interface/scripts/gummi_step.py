@@ -61,7 +61,11 @@ def main(args):
                             command = rest
 
                     gummi.elbow.servoTo(command * pi/180, cocont)
-                    #gummi.elbow.goTo(command * pi/180, cocont)
+                    
+                    #now = False
+                    #if i is 1:
+                    #    now = True
+                    #gummi.elbow.goTo(command * pi/180, cocont, now)
 
                     angles = gummi.getJointAngles()
                     angle = angles[4] * 180/pi

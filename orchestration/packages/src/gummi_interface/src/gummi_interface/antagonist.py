@@ -110,11 +110,12 @@ class Antagonist:
         self.cocontractionReflex.inhibit()
         self.doUpdate()
 
-    def goTo(self, dAngle, dStartCocontraction):
+    def goTo(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False
             self.closedLoop = True
-            self.feedForward = True
+            if now:
+                self.feedForward = True
             self.dCocontraction = dCocontraction  
             self.angle.setDesired(dAngle)
             self.model.setAngle(dAngle)
@@ -183,17 +184,20 @@ class Antagonist:
                 self.doCompliance(compliance)
                 scale = 1 - (compliance * 0.5)
                 self.cocontractionReflex.inhibit()
-                self.model.setAngle(self.angle.getEncoder())
             
-            if self.feedForward:
+            if self.calibrated is 1:
                 reflex = self.cocontractionReflex.getContribution()
                 sumCocontraction = self.dCocontraction + reflex
+                self.model.setAngle(self.angle.getEncoder())
                 self.model.setCocontraction(sumCocontraction)
+
+                if self.feedForward:
+                    if not self.model.generateCommand():
+                        print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
+                    else:
+                        self.dEquilibrium = self.model.getEquilibriumPoint()
+                        self.feedForward = False
                     
-            if self.calibrated is 1:
-                if not self.model.generateCommands():
-                    self.feedForward = False
-                    print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
             self.scaleControlGain(scale)
                 
             if self.closedLoop:
@@ -211,10 +215,6 @@ class Antagonist:
 
         commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
         commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
-        
-        if self.feedForward:
-            commandFlexor = commandFlexor + self.model.getFlexor()
-            commandExtensor = commandExtensor + self.model.getExtensor()
 
         self.commandFlexor = commandFlexor + self.servoOffset
         self.commandExtensor = commandExtensor + self.servoOffset
@@ -229,6 +229,7 @@ class Antagonist:
         
         prop_term = error * self.pGainUse
         vel_term = errorChange * self.vGainUse
+
         self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
     def doCompliance(self, contribution):
