@@ -9,12 +9,14 @@ from gummi_interface.gummi import Gummi
 def main(args):
 
     pi = 3.1416
+    print("Please enter path to folder where you want data file saved:")
+    path =  raw_input()
 
-    desired = -20
-    rest = 20
+    desired = 20
+    rest = -23
     cocontractions_to_try = (0.0, 0.25, 0.5) #(0, 0.25, 0.5, 0.75, 1)
 
-    rospy.init_node('cocontractionTest', anonymous=True)
+    rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
@@ -23,7 +25,7 @@ def main(args):
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.0, 0.8)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
-    #gummi.doGradualStartup()
+    gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(3)
@@ -39,12 +41,12 @@ def main(args):
         for att in range (1,2):
 
             print("Moving arm into place.")
-            for i in range (0,100):
+            for i in range (0,400):
                 gummi.elbow.servoTo(rest * pi/180, cocont)
                 r.sleep()
             print("Test started, cocontraction: " + str(cocont) + ", attempt: " + str(att) + ".")
             
-            fileName = 'step_test_s_' + str(cocont) + '_a_' + str(att) + '.csv'
+            fileName = path + '/step_test_s_' + str(cocont) + '_a_' + str(att) + '.csv'
             with open(fileName, 'wb') as csvfile:
                 writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['time','desired','angle'])
@@ -63,6 +65,9 @@ def main(args):
                                 now = True
                         else:
                             command = rest
+                            now = False
+                            if i == 500:
+                                now = True
 
                     #gummi.elbow.servoTo(command * pi/180, cocont)
                     gummi.elbow.goTo(command * pi/180, cocont, now)

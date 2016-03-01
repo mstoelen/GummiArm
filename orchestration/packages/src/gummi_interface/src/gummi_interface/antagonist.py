@@ -42,7 +42,7 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(3.0, 0.005, 0.01)
+        self.cocontractionReflex = Reflex(1.5, 0.01, 0.01)
         self.compliance = Reflex(15, 0.02, 0.01)
 
         self.initPublishers()
@@ -178,21 +178,19 @@ class Antagonist:
             
             scale = 1
             
-            if compliance > 0.1:
-                self.doCompliance(compliance)
-                scale = 1 - (compliance * 0.5)
-                self.cocontractionReflex.inhibit()
-            
+            #if compliance > 0.1: #TODO
+            #    self.doCompliance(compliance)
+            #    scale = 1 - (compliance * 0.5)
+            #    self.cocontractionReflex.inhibit()
+        
             if self.calibrated is 1:
                 reflex = self.cocontractionReflex.getContribution()
+                scale = 1 - (reflex * 0.5)
                 sumCocontraction = self.dCocontraction + reflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
-                self.model.setAngle(self.angle.getEncoder())
                 self.model.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
-
-                print("Cocontraction: " + str(self.cCocontraction))
 
                 if self.feedForward:
                     if not self.model.generateCommand():
@@ -200,8 +198,11 @@ class Antagonist:
                     else:
                         print("Setting feedforward!")
                         print("Reflex contribution: " + str(reflex))
-                        self.dEquilibrium = self.model.getEquilibriumPoint() * self.signEquilibrium
+                        self.dEquilibrium = self.model.getEquilibriumPoint()
+                        print("New equilibrium from feedforward: " + str(self.dEquilibrium))
+                        print("And, current cocontraction: " + str(self.cCocontraction))
                         self.feedForward = False
+                        scale = 0
             else:
                 self.cCocontraction = self.dCocontraction
                     
