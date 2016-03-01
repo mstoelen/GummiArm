@@ -36,3 +36,7 @@ class JointModel:
 
     def getEquilibriumPoint(self):
         return self.p
+
+    def getMap(self, gridThetas, gridCcs):
+        return griddata((self.thetas, self.ccs), self.equilibriums, (gridThetas, gridCcs))
+    
