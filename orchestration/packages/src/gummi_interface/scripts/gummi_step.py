@@ -12,16 +12,23 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    desired = 20
-    rest = -23
-    cocontractions_to_try = (0.0, 0.25, 0.5) #(0, 0.25, 0.5, 0.75, 1)
+    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
+    joint = gummi.elbow
 
-    gummi.setCocontraction(0.8, 0.8, 0.8, 0.0, 0.8)
+    minAngle = joint.angle.getMin()*180/pi
+    maxAngle = joint.angle.getMax()*180/pi
+    rangeAngle = maxAngle - minAngle
+
+    rest = minAngle + rangeAngle/5
+    desired = maxAngle - rangeAngle/5
+    print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
+
+    gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
@@ -35,29 +42,29 @@ def main(args):
 
     print("GummiArm is live!")
      
-    for cocont in cocontractions_to_try: 
+    for cocont in cocontractionsToTry: 
       
         for att in range (1,2):
 
             print("Moving arm into place.")
             for i in range (0,400):
-                gummi.elbow.servoTo(rest * pi/180, cocont)
+                joint.servoTo(rest * pi/180, cocont)
                 r.sleep()
             print("Test started, cocontraction: " + str(cocont) + ", attempt: " + str(att) + ".")
             
-            fileName = path + '/step_test_s_' + str(cocont) + '_a_' + str(att) + '.csv'
+            fileName = path + '/step_test_' + joint.getName() + '_s_' + str(cocont) + '_a_' + str(att) + '.csv'
             with open(fileName, 'wb') as csvfile:
                 writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['time','desired','angle'])
                 
                 time1 = rospy.Time.now()
                 now = False
-                for i in range (0,800):
+                for i in range (0,1000):
 
                     if i < 200:
                         command = rest
                     else:
-                        if i < 500:
+                        if i < 600:
                             command = desired
                             now = False
                             if i == 200:
@@ -65,14 +72,13 @@ def main(args):
                         else:
                             command = rest
                             now = False
-                            if i == 500:
+                            if i == 600:
                                 now = True
 
-                    #gummi.elbow.servoTo(command * pi/180, cocont)
-                    gummi.elbow.goTo(command * pi/180, cocont, now)
+                    #joint.servoTo(command * pi/180, cocont)
+                    joint.goTo(command * pi/180, cocont, now)
 
-                    angles = gummi.getJointAngles()
-                    angle = angles[4] * 180/pi
+                    angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()
                     duration = time2-time1
                     delta = duration.to_sec()

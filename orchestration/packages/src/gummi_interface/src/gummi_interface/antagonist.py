@@ -42,7 +42,7 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(1.5, 0.01, 0.01)
+        self.cocontractionReflex = Reflex(1.5, 0.015, 0.01)
 
         self.initPublishers()
         self.initVariables()
@@ -65,7 +65,7 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.maxCocontraction = 0.8 #TODO
+        self.maxCocontraction = 1.0
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
 
@@ -119,7 +119,7 @@ class Antagonist:
             self.model.setAngle(dAngle)
             self.doUpdate()
         else:
-            print("Warning: Joint " + self.name + " listed as calibrated in .yaml config file. Ignoring goTo() command.")
+            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
 
     def moveTo(self, dEquilibrium, dCocontraction):
         self.velocity = False
@@ -168,7 +168,7 @@ class Antagonist:
        
             if self.calibrated is 1:
                 reflex = self.cocontractionReflex.getContribution()
-                scale = 1 - (reflex * 0.5)
+                scale = 1 - reflex
                 sumCocontraction = self.dCocontraction + reflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction

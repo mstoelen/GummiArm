@@ -3,7 +3,10 @@
 import yaml
 import rospy
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
+from gummi_interface.joint_model import JointModel
 from gummi_interface.antagonist import Antagonist
 from gummi_interface.gummi import Gummi
 
@@ -17,9 +20,17 @@ def main(args):
     r = rospy.Rate(60)  
     
     gummi = Gummi()
+    joint = gummi.shoulderYaw
+    numSteps = 7
 
-    anglesToTry = [x / 100.0 for x in range(-48, 49, 12)]
-    cocontractionsToTry = [x / 100.0 for x in range(80, -1, -10)] 
+    minAngle = joint.angle.getMin()
+    maxAngle = joint.angle.getMax()
+    rangeAngle = maxAngle - minAngle
+    stepAngle = rangeAngle/numSteps
+    print("Using min angle: " + str(minAngle) + ", max angle: " + str(maxAngle) + ", and step size: " + str(stepAngle))
+
+    anglesToTry = [x / 100.0 for x in range(int(minAngle * 100), int(maxAngle * 100) + 1, int(stepAngle * 100))]
+    cocontractionsToTry = [x / 100.0 for x in range(100, -1, -100/numSteps)] 
 
     gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 
@@ -36,7 +47,7 @@ def main(args):
     print("GummiArm is live!")
 
     for i in range (0,300):
-        gummi.elbow.servoTo(0, 0.5)
+        joint.servoTo(0, 0.5)
         r.sleep()
     
     thetas = list()
@@ -45,22 +56,21 @@ def main(args):
     for cocont in cocontractionsToTry: 
 
         for i in range (0,300):
-            gummi.elbow.servoTo(0, cocont)
+            joint.servoTo(0, cocont)
             r.sleep()
 
         for angle in anglesToTry:
-            print("Moving arm to angle: " + str(angle) + " and cocontraction: " + str(cocont) + ".")
+            print("Moving joint to angle: " + str(angle) + " and cocontraction: " + str(cocont) + ".")
             for i in range (0,300):
-                gummi.elbow.servoTo(angle, cocont)
+                joint.servoTo(angle, cocont)
                 r.sleep()
 
-            joint = gummi.elbow
             thetas.append(round(joint.angle.getEncoder(), 3))
             ccs.append(round(cocont, 3))
             equilibriums.append(round(joint.getDesiredEquilibrium(), 3))
 
         for i in range (0,300):
-            gummi.elbow.servoTo(0, cocont)
+            joint.servoTo(0, cocont)
             r.sleep()
 
     data = {'thetas': thetas, 'ccs': ccs, 'equilibriums': equilibriums}
@@ -73,6 +83,13 @@ def main(args):
     with open(fileName, 'w') as outfile:
         outfile.write(text)
         print("Calibration data written to: " + fileName)
+
+    jm = JointModel("test")
+    jm.setCalibration(thetas, ccs, equilibriums)
+    gridX, gridY = np.mgrid[minAngle:maxAngle:0.01, 0:1:0.01]
+    map = jm.getMap(gridX, gridY)
+    plt.imshow(map.T, extent=(minAngle, maxAngle, 0, 1))
+    plt.show()
 
 if __name__ == '__main__':
     main(sys.argv)
