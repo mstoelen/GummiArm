@@ -11,7 +11,7 @@ nameEncoder: "elbow_encoder"
 servoRange: 6.2832
 servoOffset: 0
 minAngle: -0.85
-maxAngle: 0.85
+maxAngle: 0.65
 angleOffset: 0
 gains:
     P: 0.025
