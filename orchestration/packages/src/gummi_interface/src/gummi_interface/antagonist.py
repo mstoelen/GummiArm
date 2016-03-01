@@ -43,7 +43,6 @@ class Antagonist:
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(1.5, 0.01, 0.01)
-        self.compliance = Reflex(15, 0.02, 0.01)
 
         self.initPublishers()
         self.initVariables()
@@ -67,11 +66,8 @@ class Antagonist:
         self.closedLoop = False
         self.feedForward = False
         self.maxCocontraction = 0.8 #TODO
-        self.maxLoad = 10000
-        self.loadRatio = 0
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
-
 
     def calculateEqVelCalibration(self):
         joint_range = self.angle.getMax() - self.angle.getMin()
@@ -160,9 +156,6 @@ class Antagonist:
         self.cocontractionReflex.clear()
         self.doUpdate()
 
-    def setMaxLoad(self, maxLoad):
-        self.maxLoad = maxLoad
-
     def doUpdate(self):
         msgTime = self.angle.getMsgTime()
         currentTime = rospy.get_rostime()
@@ -171,18 +164,8 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            self.createLoadRatio()
-            excessLoad = abs(self.loadRatio) - 1
-            self.compliance.updateExcitation(excessLoad)
-            compliance = self.compliance.getContribution()
-            
             scale = 1
-            
-            #if compliance > 0.1: #TODO
-            #    self.doCompliance(compliance)
-            #    scale = 1 - (compliance * 0.5)
-            #    self.cocontractionReflex.inhibit()
-        
+       
             if self.calibrated is 1:
                 reflex = self.cocontractionReflex.getContribution()
                 scale = 1 - (reflex * 0.5)
@@ -239,16 +222,6 @@ class Antagonist:
 
         self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
 
-    def doCompliance(self, contribution):
-        if abs(self.loadRatio) > 1:
-            self.closedLoop = False
-            encoderAngle = self.angle.getEncoder()
-            self.angle.setDesiredToEncoder()
-            if self.loadRatio > 0:
-                self.dEquilibrium = self.dEquilibrium - contribution * self.lGain * self.signEquilibrium
-            else: 
-                self.dEquilibrium = self.dEquilibrium + contribution * self.lGain * self.signEquilibrium
-
     def capEquilibrium(self):
         if self.dEquilibrium > 2:
                 self.dEquilibrium = 2.0
@@ -275,16 +248,6 @@ class Antagonist:
         if self.vGainUse < 0:
             self.vGainUse = 0
 
-    def createLoadRatio(self):
-        encoderAngle = self.angle.getEncoder()
-        minAngle = self.angle.getMin()
-        maxAngle = self.angle.getMax()
-        jointRange = maxAngle - minAngle
-        estimatedAngle = (self.dEquilibrium/2)*(jointRange/2)*self.signEquilibrium + self.angleOffset
-        load = estimatedAngle - encoderAngle
-        adjustedLoad = load  * (1 + self.cCocontraction)
-        self.loadRatio = adjustedLoad/self.maxLoad
-
     def getDesiredEquilibrium(self):
         return self.dEquilibrium
 
@@ -296,9 +259,6 @@ class Antagonist:
 
     def getExtensorAngle(self):
         return self.extensorAngle.getEncoder()
-
-    def getLoadRatio(self):
-        return self.loadRatio
 
     def getName(self):
         return self.name

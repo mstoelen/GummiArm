@@ -15,8 +15,6 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.setMaxLoads(10, 10, 10, 10, 10)
-
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
     

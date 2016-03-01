@@ -21,7 +21,6 @@ def main(args):
     anglesToTry = [x / 100.0 for x in range(-48, 49, 12)]
     cocontractionsToTry = [x / 100.0 for x in range(80, -1, -10)] 
 
-    gummi.setMaxLoads(100, 100, 100, 100, 100)
     gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')

@@ -61,13 +61,6 @@ class Gummi:
         else:
             print("WARNING: Receiving desired joint velocities, but ignoring as not in teleop mode. Check gummi.yaml file.")
 
-    def setMaxLoads(self, maxLoadShoulderYaw, maxLoadShoulderRoll, maxLoadShoulderPitch, maxLoadElbow, maxloadWrist):
-        self.shoulderYaw.setMaxLoad(maxLoadShoulderYaw)
-        self.shoulderRoll.setMaxLoad(maxLoadShoulderRoll)
-        self.shoulderPitch.setMaxLoad(maxLoadShoulderPitch)
-        self.elbow.setMaxLoad(maxLoadElbow)
-        self.wrist.setMaxLoad(maxloadWrist)
-
     def doVelocityUpdate(self):
         if self.shoulderYawCocont < 0:
             self.shoulderYaw.moveWith(self.shoulderYawVel, abs(self.shoulderYawCocont))
@@ -102,7 +95,6 @@ class Gummi:
         msg.header.stamp = rospy.Time.now()
         msg.name = self.jointNames
         msg.position = self.getJointAngles()
-        msg.effort = self.getLoads()
         self.jointStatePub.publish(msg)
 
     def getJointAngles(self):
@@ -144,17 +136,6 @@ class Gummi:
             self.publishJointState()
         else:
             print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
-
-    def getLoads(self):
-        loads = list()
-        loads.append(self.shoulderYaw.getLoadRatio())
-        loads.append(self.shoulderRoll.getLoadRatio())
-        loads.append(self.shoulderPitch.getLoadRatio())
-        loads.append(1234)
-        loads.append(self.elbow.getLoadRatio())
-        loads.append(1234)
-        loads.append(self.wrist.getLoadRatio())
-        return loads
 
     def goRestingPose(self):
         self.shoulderYaw.servoTo(0, self.shoulderYawCocont)

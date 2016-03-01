@@ -16,7 +16,6 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.setMaxLoads(100, 100, 100, 100, 100)
     gummi.setCocontraction(0.5, 0.5, 0.5, 0.5, 0.5)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
