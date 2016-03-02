@@ -1,4 +1,4 @@
-calibrated: 0
+calibrated: 1
 signEquilibrium: -1
 signFlexor: -1
 signExtensor: -1
@@ -11,7 +11,7 @@ nameEncoder: "wrist_encoder"
 servoRange: 5.4978
 servoOffset: 0
 minAngle: -0.9
-maxAngle: 0.9
+maxAngle: 0.6
 angleOffset: 0.0
 gains:
     P: 0.025

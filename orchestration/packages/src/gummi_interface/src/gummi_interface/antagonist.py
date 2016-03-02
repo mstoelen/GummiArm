@@ -251,6 +251,9 @@ class Antagonist:
     def getDesiredEquilibrium(self):
         return self.dEquilibrium
 
+    def getCommandedCocontraction(self):
+        return self.cCocontraction
+
     def getJointAngle(self):
         return self.angle.getEncoder()
 

@@ -18,14 +18,14 @@ def main(args):
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.elbow
+    joint = gummi.shoulderYaw
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/5
-    desired = maxAngle - rangeAngle/5
+    rest = minAngle + rangeAngle/4
+    desired = maxAngle - rangeAngle/4
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
@@ -55,7 +55,7 @@ def main(args):
             fileName = path + '/step_test_' + joint.getName() + '_s_' + str(cocont) + '_a_' + str(att) + '.csv'
             with open(fileName, 'wb') as csvfile:
                 writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(['time','desired','angle'])
+                writer.writerow(['time','desired','angle', 'equilibrium', 'flexor', 'extensor'])
                 
                 time1 = rospy.Time.now()
                 now = False
@@ -82,8 +82,12 @@ def main(args):
                     time2 = rospy.Time.now()
                     duration = time2-time1
                     delta = duration.to_sec()
+                    equilibrium = joint.getDesiredEquilibrium()
+                    cocontraction = joint.getCommandedCocontraction()
+                    flexor = joint.getFlexorAngle()
+                    extensor = joint.getExtensorAngle()
 
-                    writer.writerow([delta, command, angle])
+                    writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor])
                     r.sleep()
             
 if __name__ == '__main__':

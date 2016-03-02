@@ -25,12 +25,10 @@ def main(args):
 
     minAngle = joint.angle.getMin()
     maxAngle = joint.angle.getMax()
-    rangeAngle = maxAngle - minAngle
-    stepAngle = rangeAngle/numSteps
-    print("Using min angle: " + str(minAngle) + ", max angle: " + str(maxAngle) + ", and step size: " + str(stepAngle))
+    print("Using min angle: " + str(minAngle) + ", max angle: " + str(maxAngle) + ", and steps: " + str(numSteps))
 
-    anglesToTry = [x / 100.0 for x in range(int(minAngle * 100), int(maxAngle * 100) + 1, int(stepAngle * 100))]
-    cocontractionsToTry = [x / 100.0 for x in range(100, -1, -100/numSteps)] 
+    anglesToTry = np.linspace(minAngle, maxAngle, numSteps)
+    cocontractionsToTry = np.linspace(1.0, 0.0, numSteps)
 
     gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 

@@ -269,7 +269,7 @@
     <parent link="lowerarm"/>
     <child link="wrist"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-1.0" upper="1.0" velocity="1.0"/>
+    <limit effort="0" lower="-0.9" upper="0.6" velocity="1.0"/>
   </joint>
   <joint name="wrist_to_coupling" type="fixed">
     <origin rpy="0.0 0.0 -1.57079" xyz="0.0 -0.0281 0.0"/>
