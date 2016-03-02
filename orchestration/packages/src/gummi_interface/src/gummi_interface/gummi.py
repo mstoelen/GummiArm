@@ -137,6 +137,19 @@ class Gummi:
         else:
             print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
 
+    def goTo(self, positions, now):
+        if self.teleop == 0:
+            self.shoulderYaw.goTo(positions[0], self.shoulderYawCocont, now)
+            self.shoulderRoll.goTo(positions[1], self.shoulderRollCocont, now)
+            self.shoulderPitch.goTo(positions[2], self.shoulderPitchCocont, now)
+            self.upperarmRoll.servoTo(positions[3])
+            self.elbow.goTo(positions[4], self.elbowCocont, now)
+            self.forearmRoll.servoTo(positions[5])
+            self.wrist.goTo(positions[6], self.wristCocont, now)
+            self.publishJointState()
+        else:
+            print("WARNING: Asked to go to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
+
     def goRestingPose(self):
         self.shoulderYaw.servoTo(0, self.shoulderYawCocont)
         self.shoulderRoll.servoTo(0, self.shoulderRollCocont)
