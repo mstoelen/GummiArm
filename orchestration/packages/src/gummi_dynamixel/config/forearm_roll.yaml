@@ -4,7 +4,7 @@ forearm_roll_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: forearm_roll
-    joint_speed: 1.5
+    joint_speed: 10
     motor:
         id: 4
         init: 512
