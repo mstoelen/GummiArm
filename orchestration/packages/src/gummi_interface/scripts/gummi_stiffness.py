@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#TODO: Fix and test this script
+
 import rospy
 import sys
 import csv
