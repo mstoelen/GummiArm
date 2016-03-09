@@ -265,7 +265,7 @@
     <limit effort="0" lower="-2.7489" upper="2.7489" velocity="1.0"/>
   </joint>
   <joint name="wrist_pitch" type="revolute">
-    <origin rpy="-1.57079 0.0 0.0" xyz="0.0 0.0 0.15"/>
+    <origin rpy=" 0.0 1.57079 0.0" xyz="0.0 0.0 0.15"/>
     <parent link="lowerarm"/>
     <child link="wrist"/>
     <axis xyz="0 0 1"/>

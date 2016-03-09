@@ -156,7 +156,7 @@ class Gummi:
         self.shoulderPitch.servoTo(0, self.shoulderPitchCocont)
         self.upperarmRoll.servoTo(0)
         self.elbow.servoTo(0, self.elbowCocont)
-        self.forearmRoll.servoTo(0)
+        self.forearmRoll.servoTo(self.pi/2)
         self.wrist.servoTo(0, self.wristCocont)
 
     def doGradualStartup(self):
@@ -170,7 +170,7 @@ class Gummi:
         rospy.sleep(1)
         self.elbow.moveTo(0, self.elbowCocont)
         rospy.sleep(1)
-        self.forearmRoll.servoTo(0)
+        self.forearmRoll.servoTo(self.pi/2)
         rospy.sleep(1)
         self.wrist.moveTo(0, self.wristCocont)
         rospy.sleep(1)
