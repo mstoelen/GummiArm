@@ -42,7 +42,8 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(1.5, 0.015, 0.01)
+        self.cocontractionReflex = Reflex(1.5, 0.005, 0.01)
+        self.gainReflex = Reflex(1.0, 0.01, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -114,6 +115,7 @@ class Antagonist:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
                 self.cocontractionReflex.updateExcitation(excitation)
+                self.gainReflex.updateExcitation(excitation)
                 self.feedForward = True
             self.angle.setDesired(dAngle)
             self.model.setAngle(dAngle)
@@ -136,6 +138,7 @@ class Antagonist:
         self.feedForward = False
         self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
         self.dCocontraction = dCocontraction
+        self.cocontractionReflex.clear()
         self.angle.setDesiredToEncoder()
         self.doUpdate()
 
@@ -146,6 +149,7 @@ class Antagonist:
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
         self.dCocontraction = dCocontraction  
+        self.cocontractionReflex.clear()
         self.doUpdate()
 
     def passiveHold(self, dCocontraction):
@@ -167,20 +171,23 @@ class Antagonist:
             scale = 1
        
             if self.calibrated is 1:
-                reflex = self.cocontractionReflex.getContribution()
-                scale = 1 - reflex
-                sumCocontraction = self.dCocontraction + reflex
+                cocontReflex = self.cocontractionReflex.getContribution()
+                sumCocontraction = self.dCocontraction + cocontReflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
                 self.model.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
+
+                scale = 1 - self.gainReflex.getContribution()
+                if scale < 0:
+                    scale = 0
 
                 if self.feedForward:
                     if not self.model.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
                     else:
                         print("Setting feedforward!")
-                        print("Reflex contribution: " + str(reflex))
+                        print("Cocontraction reflex contribution: " + str(cocontReflex))
                         self.dEquilibrium = self.model.getEquilibriumPoint()
                         print("New equilibrium from feedforward: " + str(self.dEquilibrium))
                         print("And, current cocontraction: " + str(self.cCocontraction))
