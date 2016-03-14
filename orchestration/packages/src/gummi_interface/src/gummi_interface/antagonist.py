@@ -97,6 +97,7 @@ class Antagonist:
     def initPublishers(self):
         self.pubExtensor = rospy.Publisher(self.nameExtensor + "_controller/command", Float64, queue_size=5)
         self.pubFlexor = rospy.Publisher(self.nameFlexor + "_controller/command", Float64, queue_size=5)
+        self.pubDiagnostics = rospy.Publisher("diagnostics", Float64, queue_size=5)
 
     def servoTo(self, dAngle, dCocontraction):
         self.velocity = False
@@ -246,6 +247,10 @@ class Antagonist:
     def publishCommand(self):
         self.pubExtensor.publish(self.commandExtensor)                
         self.pubFlexor.publish(self.commandFlexor)
+
+    def pubDiagnostics(self):
+        msg.test = 0.0
+        self.pubDiagnostics.publish(msg)
 
     def scaleControlGain(self, scale):
         self.pGainUse = self.pGain * scale
