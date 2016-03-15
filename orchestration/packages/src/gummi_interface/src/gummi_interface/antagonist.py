@@ -5,6 +5,7 @@ from xml.dom.minidom import parse
 import rospy
 
 from std_msgs.msg import Float64
+from msg import Diagnostics
 
 from helpers import fetchParam
 from joint_angle import JointAngle
@@ -43,7 +44,7 @@ class Antagonist:
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(1.5, 0.005, 0.01)
-        self.gainReflex = Reflex(1.0, 0.01, 0.0)
+        self.gainReflex = Reflex(2.0, 0.01, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -60,6 +61,7 @@ class Antagonist:
         self.pGainUse = 0
         self.vGainUse = 0
         self.lGain = 0.03
+        self.scale = 1
 
         self.dCocontraction = 0
         self.cCocontraction = 0
@@ -97,7 +99,7 @@ class Antagonist:
     def initPublishers(self):
         self.pubExtensor = rospy.Publisher(self.nameExtensor + "_controller/command", Float64, queue_size=5)
         self.pubFlexor = rospy.Publisher(self.nameFlexor + "_controller/command", Float64, queue_size=5)
-        self.pubDiagnostics = rospy.Publisher("diagnostics", Float64, queue_size=5)
+        self.pubDiagnostics = rospy.Publisher(self.name + "/diagnostics", Diagnostics, queue_size=5)
 
     def servoTo(self, dAngle, dCocontraction):
         self.velocity = False
@@ -169,7 +171,7 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            scale = 1
+            self.scale = 1
        
             if self.calibrated is 1:
                 cocontReflex = self.cocontractionReflex.getContribution()
@@ -179,9 +181,9 @@ class Antagonist:
                 self.model.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
 
-                scale = 1 - self.gainReflex.getContribution()
-                if scale < 0:
-                    scale = 0
+                self.scale = 1 - self.gainReflex.getContribution()
+                if self.scale < 0:
+                    self.scale = 0
 
                 if self.feedForward:
                     if not self.model.generateCommand():
@@ -193,11 +195,11 @@ class Antagonist:
                         print("New equilibrium from feedforward: " + str(self.dEquilibrium))
                         print("And, current cocontraction: " + str(self.cCocontraction))
                         self.feedForward = False
-                        scale = 0
+                        self.scale = 0
             else:
                 self.cCocontraction = self.dCocontraction
                     
-            self.scaleControlGain(scale)
+            self.scaleControlGain()
                 
             if self.closedLoop:
                 self.doClosedLoop()
@@ -206,6 +208,7 @@ class Antagonist:
             self.capCocontraction()
             self.createCommand()
             self.publishCommand()
+            self.publishDiagnostics()
 
     def createCommand(self):
         equilibrium = self.dEquilibrium
@@ -248,15 +251,21 @@ class Antagonist:
         self.pubExtensor.publish(self.commandExtensor)                
         self.pubFlexor.publish(self.commandFlexor)
 
-    def pubDiagnostics(self):
-        msg.test = 0.0
+    def publishDiagnostics(self):
+        msg = Diagnostics()
+        msg.equilibrium = self.dEquilibrium
+        msg.gain_scale = self.scale
+        msg.encoder = self.getJointAngle()
+        msg.alpha_flexor = self.commandFlexor
+        msg.alpha_extensor = self.commandExtensor
+        msg.cocontraction = self.cCocontraction
         self.pubDiagnostics.publish(msg)
 
-    def scaleControlGain(self, scale):
-        self.pGainUse = self.pGain * scale
+    def scaleControlGain(self):
+        self.pGainUse = self.pGain * self.scale
         if self.pGainUse < 0:
             self.pGainUse = 0
-        self.vGainUse = self.vGain * scale
+        self.vGainUse = self.vGain * self.scale
         if self.vGainUse < 0:
             self.vGainUse = 0
 

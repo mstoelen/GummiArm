@@ -12,7 +12,7 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
+    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -24,8 +24,8 @@ def main(args):
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/3
-    desired = maxAngle - rangeAngle/3
+    rest = minAngle + rangeAngle/4
+    desired = maxAngle - rangeAngle/4
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
@@ -49,13 +49,14 @@ def main(args):
             print("Moving arm into place.")
             for i in range (0,600):
                 joint.servoTo(rest * pi/180, cocont)
+                gummi.elbow.servoTo(gummi.elbow.angle.getMax(), 0.8)
                 r.sleep()
             print("Test started, cocontraction: " + str(cocont) + ", attempt: " + str(att) + ".")
             
             fileName = path + '/step_test_' + joint.getName() + '_s_' + str(cocont) + '_a_' + str(att) + '.csv'
             with open(fileName, 'wb') as csvfile:
                 writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(['time','desired','angle', 'equilibrium', 'flexor', 'extensor'])
+                writer.writerow(['time','desired', 'angle', 'equilibrium', 'cocontraction', 'flexor', 'extensor', 'gain_scale'])
                 
                 time1 = rospy.Time.now()
                 now = False
@@ -75,8 +76,8 @@ def main(args):
                             if i == 600:
                                 now = True
 
-                    joint.servoTo(command * pi/180, cocont)
-                    #joint.goTo(command * pi/180, cocont, now)
+                    #joint.servoTo(command * pi/180, cocont)
+                    joint.goTo(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()
@@ -86,8 +87,9 @@ def main(args):
                     cocontraction = joint.getCommandedCocontraction()
                     flexor = joint.getFlexorAngle()
                     extensor = joint.getExtensorAngle()
+                    scale = joint.scale
 
-                    writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor])
+                    writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor, scale])
                     r.sleep()
             
 if __name__ == '__main__':

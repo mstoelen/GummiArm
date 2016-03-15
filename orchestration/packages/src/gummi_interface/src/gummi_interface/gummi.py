@@ -31,10 +31,10 @@ class Gummi:
         self.elbowVel = 0
         self.forearmRollVel = 0
         self.wristVel = 0
-        self.shoulderRollCocont = 0
+        self.shoulderRollCocont = 0.3
         self.shoulderPitchCocont = 0
         self.shoulderYawCocont = 0.3
-        self.elbowCocont = 0
+        self.elbowCocont = 0.3
         self.wristCocont = 0
 
     def initJoints(self):
