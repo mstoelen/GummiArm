@@ -10,8 +10,8 @@ nameExtensor: "wrist_extensor"
 nameEncoder: "wrist_encoder"
 servoRange: 5.4978
 servoOffset: 0
-minAngle: -0.9
-maxAngle: 0.6
+minAngle: -0.75
+maxAngle: 0.5
 angleOffset: 0.0
 gains:
     P: 0.025

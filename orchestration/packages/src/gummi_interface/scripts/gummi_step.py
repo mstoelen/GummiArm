@@ -12,7 +12,7 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
+    cocontractionsToTry = (0.0, 0.5, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -75,8 +75,8 @@ def main(args):
                             if i == 600:
                                 now = True
 
-                    #joint.servoTo(command * pi/180, cocont)
-                    joint.goTo(command * pi/180, cocont, now)
+                    joint.servoTo(command * pi/180, cocont)
+                    #joint.goTo(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()
