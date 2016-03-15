@@ -35,7 +35,7 @@ class Gummi:
         self.shoulderPitchCocont = 0
         self.shoulderYawCocont = 0.3
         self.elbowCocont = 0.3
-        self.wristCocont = 0
+        self.wristCocont = 0.3
 
     def initJoints(self):
         self.shoulderYaw = Antagonist("shoulder_yaw")
