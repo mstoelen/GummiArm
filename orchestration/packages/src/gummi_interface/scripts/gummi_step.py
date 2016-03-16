@@ -56,7 +56,7 @@ def main(args):
         for att in range (1,4):
 
             print("Setting desired cocontraction.")
-            for i in range (0,300):
+            for i in range (0,600):
                 joint.servoTo(rest * pi/180, cocont)
                 if elbowExtended: 
                     gummi.elbow.servoTo(gummi.elbow.angle.getMin(), 0.8)
@@ -71,7 +71,7 @@ def main(args):
                 
                 time1 = rospy.Time.now()
                 now = False
-                for i in range (0,1100):
+                for i in range (0,1400):
 
                     if i < 200:
                         command = rest

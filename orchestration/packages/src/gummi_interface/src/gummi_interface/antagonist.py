@@ -44,7 +44,7 @@ class Antagonist:
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(1.5, 0.005, 0.01)
-        self.gainReflex = Reflex(2.0, 0.01, 0.0)
+        self.gainReflex = Reflex(2.5, 0.02, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -113,7 +113,7 @@ class Antagonist:
     def goTest(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False
-            self.closedLoop = False
+            self.closedLoop = True
             if now:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
@@ -272,8 +272,8 @@ class Antagonist:
         msg.equilibrium = self.dEquilibrium
         msg.gain_scale = self.scale
         msg.encoder = self.getJointAngle()
-        msg.alpha_flexor = self.commandFlexor
-        msg.alpha_extensor = self.commandExtensor
+        msg.alpha_flexor = self.getFlexorAngle()
+        msg.alpha_extensor = self.getExtensorAngle()
         msg.cocontraction = self.cCocontraction
         self.pubDiagnostics.publish(msg)
 

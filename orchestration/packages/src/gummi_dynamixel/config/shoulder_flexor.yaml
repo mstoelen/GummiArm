@@ -4,7 +4,7 @@ shoulder_flexor_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: shoulder_flexor
-    joint_speed: 10
+    joint_speed: 100
     motor:
         id: 13
         init: 6143

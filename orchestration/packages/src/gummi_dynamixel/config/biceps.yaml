@@ -4,7 +4,7 @@ biceps_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: biceps
-    joint_speed: 10.0
+    joint_speed: 100.0
     motor:
         id: 1
         init: 6143
