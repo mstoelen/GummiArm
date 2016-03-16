@@ -13,13 +13,13 @@ def main(args):
     path =  raw_input()
 
     cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
-    elbowExtended = True
+    elbowExtended = False
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.shoulderPitch
+    joint = gummi.shoulderRoll
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
