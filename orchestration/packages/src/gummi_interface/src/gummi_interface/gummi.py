@@ -156,7 +156,8 @@ class Gummi:
         self.shoulderPitch.goTo(0, self.shoulderPitchCocont, now)
         self.upperarmRoll.servoTo(0)
         self.elbow.goTo(0, self.elbowCocont, now)
-        self.forearmRoll.servoTo(self.pi/2)
+        #self.forearmRoll.servoTo(self.pi/2)
+        self.forearmRoll.servoTo(0)
         self.wrist.goTo(0, self.wristCocont, now)
 
     def doGradualStartup(self):
