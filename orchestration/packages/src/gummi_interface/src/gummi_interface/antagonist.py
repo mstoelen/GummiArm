@@ -110,6 +110,22 @@ class Antagonist:
         self.cocontractionReflex.clear()
         self.doUpdate()
 
+    def goTest(self, dAngle, dStartCocontraction, now):
+        if self.calibrated is 1:
+            self.velocity = False
+            self.closedLoop = False
+            if now:
+                self.dCocontraction = dStartCocontraction 
+                excitation = abs(self.angle.getEncoder() - dAngle)
+                #self.cocontractionReflex.updateExcitation(excitation)
+                self.gainReflex.updateExcitation(excitation)
+                self.feedForward = True
+            self.angle.setDesired(dAngle)
+            self.model.setAngle(dAngle)
+            self.doUpdate()
+        else:
+            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
+
     def goTo(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False

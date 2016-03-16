@@ -38,7 +38,7 @@ def main(args):
     rospy.sleep(3)
 
     gummi.goRestingPose(True)
-    for i in range(0, 400):
+    for i in range(0,400):
         gummi.goRestingPose(False)
         r.sleep()
 
@@ -53,7 +53,7 @@ def main(args):
      
     for cocont in cocontractionsToTry: 
       
-        for att in range (1,2):
+        for att in range (1,4):
 
             print("Setting desired cocontraction.")
             for i in range (0,300):
@@ -87,8 +87,8 @@ def main(args):
                             if i == 600:
                                 now = True
 
-                    joint.servoTo(command * pi/180, cocont)
-                    #joint.goTo(command * pi/180, cocont, now)
+                    #joint.servoTo(command * pi/180, cocont)
+                    joint.goTest(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()
