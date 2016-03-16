@@ -25,8 +25,8 @@ def main(args):
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/5
-    desired = maxAngle - rangeAngle/5
+    rest = minAngle + rangeAngle/4
+    desired = maxAngle - rangeAngle/4
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
