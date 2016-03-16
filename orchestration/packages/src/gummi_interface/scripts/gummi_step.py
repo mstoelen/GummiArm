@@ -13,7 +13,7 @@ def main(args):
     path =  raw_input()
 
     cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
-    elbowExtended = True
+    elbowExtended = False
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -25,8 +25,8 @@ def main(args):
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/4
-    desired = maxAngle - rangeAngle/4
+    rest = minAngle + rangeAngle/5
+    desired = maxAngle - rangeAngle/5
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
@@ -87,8 +87,8 @@ def main(args):
                             if i == 600:
                                 now = True
 
-                    #joint.servoTo(command * pi/180, cocont)
-                    joint.goTest(command * pi/180, cocont, now)
+                    joint.servoTo(command * pi/180, cocont)
+                    #joint.goTest(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()

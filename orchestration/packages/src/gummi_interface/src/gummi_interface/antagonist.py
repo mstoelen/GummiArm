@@ -113,7 +113,7 @@ class Antagonist:
     def goTest(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False
-            self.closedLoop = True
+            self.closedLoop = False
             if now:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
