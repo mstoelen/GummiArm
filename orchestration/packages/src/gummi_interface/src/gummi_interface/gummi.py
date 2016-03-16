@@ -150,25 +150,25 @@ class Gummi:
         else:
             print("WARNING: Asked to go to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
 
-    def goRestingPose(self):
-        self.shoulderYaw.servoTo(0, self.shoulderYawCocont)
-        self.shoulderRoll.servoTo(0, self.shoulderRollCocont)
-        self.shoulderPitch.servoTo(0, self.shoulderPitchCocont)
+    def goRestingPose(self, now):
+        self.shoulderYaw.goTo(0, self.shoulderYawCocont, now)
+        self.shoulderRoll.goTo(0, self.shoulderRollCocont, now)
+        self.shoulderPitch.goTo(0, self.shoulderPitchCocont, now)
         self.upperarmRoll.servoTo(0)
-        self.elbow.servoTo(0, self.elbowCocont)
+        self.elbow.goTo(0, self.elbowCocont, now)
         self.forearmRoll.servoTo(self.pi/2)
-        self.wrist.servoTo(0, self.wristCocont)
+        self.wrist.goTo(0, self.wristCocont, now)
 
     def doGradualStartup(self):
-        self.shoulderYaw.moveTo(-0.1, self.shoulderYawCocont)
+        self.shoulderYaw.moveTo(-0.05, self.shoulderYawCocont)
         rospy.sleep(1)
-        self.shoulderRoll.moveTo(-1.25, self.shoulderRollCocont)
+        self.shoulderRoll.moveTo(-0.75, self.shoulderRollCocont)
         rospy.sleep(1)
         self.shoulderPitch.moveTo(0.5, self.shoulderPitchCocont)
         rospy.sleep(1)
         self.upperarmRoll.servoTo(0)
         rospy.sleep(1)
-        self.elbow.moveTo(0, self.elbowCocont)
+        self.elbow.moveTo(-0.6, self.elbowCocont)
         rospy.sleep(1)
         self.forearmRoll.servoTo(self.pi/2)
         rospy.sleep(1)

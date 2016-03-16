@@ -12,13 +12,14 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
+    cocontractionsToTry = (0.2, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
+    elbowExtended = True
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.elbow
+    joint = gummi.shoulderPitch
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
@@ -36,21 +37,31 @@ def main(args):
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(3)
 
+    gummi.goRestingPose(True)
     for i in range(0, 400):
-        gummi.goRestingPose()
+        gummi.goRestingPose(False)
         r.sleep()
 
     print("GummiArm is live!")
+
+    print("Moving arm into place.")
+    for i in range (0,200):
+        joint.servoTo(rest * pi/180, 0.6)
+        if elbowExtended: 
+            gummi.elbow.servoTo(gummi.elbow.angle.getMin(), 0.8)
+        r.sleep()
      
     for cocont in cocontractionsToTry: 
       
         for att in range (1,2):
 
-            print("Moving arm into place.")
-            for i in range (0,600):
+            print("Setting desired cocontraction.")
+            for i in range (0,300):
                 joint.servoTo(rest * pi/180, cocont)
-                gummi.elbow.servoTo(gummi.elbow.angle.getMax(), 0.8)
+                if elbowExtended: 
+                    gummi.elbow.servoTo(gummi.elbow.angle.getMin(), 0.8)
                 r.sleep()
+
             print("Test started, cocontraction: " + str(cocont) + ", attempt: " + str(att) + ".")
             
             fileName = path + '/step_test_' + joint.getName() + '_s_' + str(cocont) + '_a_' + str(att) + '.csv'
@@ -60,7 +71,7 @@ def main(args):
                 
                 time1 = rospy.Time.now()
                 now = False
-                for i in range (0,1000):
+                for i in range (0,1100):
 
                     if i < 200:
                         command = rest
@@ -76,8 +87,8 @@ def main(args):
                             if i == 600:
                                 now = True
 
-                    #joint.servoTo(command * pi/180, cocont)
-                    joint.goTo(command * pi/180, cocont, now)
+                    joint.servoTo(command * pi/180, cocont)
+                    #joint.goTo(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()

@@ -38,4 +38,4 @@ class Reflex:
     def updateExcitation(self, newExcitation):
         if newExcitation > (self.excitation * 1.5):
             self.excitation = newExcitation
-            print("New excitation: " + str(newExcitation))
+            #print("New excitation: " + str(newExcitation))

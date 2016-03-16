@@ -189,11 +189,11 @@ class Antagonist:
                     if not self.model.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
                     else:
-                        print("Setting feedforward!")
-                        print("Cocontraction reflex contribution: " + str(cocontReflex))
+                        #print("Setting feedforward!")
+                        #print("Cocontraction reflex contribution: " + str(cocontReflex))
                         self.dEquilibrium = self.model.getEquilibriumPoint()
-                        print("New equilibrium from feedforward: " + str(self.dEquilibrium))
-                        print("And, current cocontraction: " + str(self.cCocontraction))
+                        #print("New equilibrium from feedforward: " + str(self.dEquilibrium))
+                        #print("And, current cocontraction: " + str(self.cCocontraction))
                         self.feedForward = False
                         self.scale = 0
             else:
