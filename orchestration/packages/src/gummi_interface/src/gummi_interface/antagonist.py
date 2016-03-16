@@ -44,7 +44,7 @@ class Antagonist:
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(1.5, 0.005, 0.01)
-        self.gainReflex = Reflex(2.5, 0.02, 0.0)
+        self.gainReflex = Reflex(3.0, 0.05, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -117,7 +117,7 @@ class Antagonist:
             if now:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
-                #self.cocontractionReflex.updateExcitation(excitation)
+                self.cocontractionReflex.updateExcitation(excitation)
                 self.gainReflex.updateExcitation(excitation)
                 self.feedForward = True
             self.angle.setDesired(dAngle)
