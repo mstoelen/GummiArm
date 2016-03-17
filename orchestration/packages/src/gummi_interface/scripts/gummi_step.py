@@ -13,20 +13,20 @@ def main(args):
     path =  raw_input()
 
     cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
-    elbowExtended = False
+    elbowExtended = True
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.elbow
+    joint = gummi.shoulderPitch
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/3
-    desired = maxAngle - rangeAngle/3
+    rest = minAngle + rangeAngle/4
+    desired = maxAngle - rangeAngle/4
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
