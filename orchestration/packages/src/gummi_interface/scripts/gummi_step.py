@@ -12,7 +12,7 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
+    cocontractionsToTry = (0.0, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
     elbowExtended = False
 
     rospy.init_node('gummi', anonymous=True)
@@ -25,8 +25,8 @@ def main(args):
     maxAngle = joint.angle.getMax()*180/pi
     rangeAngle = maxAngle - minAngle
 
-    rest = minAngle + rangeAngle/4
-    desired = maxAngle - rangeAngle/4
+    rest = minAngle + rangeAngle/3
+    desired = maxAngle - rangeAngle/3
     print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
 
     gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)

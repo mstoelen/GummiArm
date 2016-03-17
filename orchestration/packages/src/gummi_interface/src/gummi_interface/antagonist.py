@@ -43,8 +43,8 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(1.5, 0.005, 0.01)
-        self.gainReflex = Reflex(3.0, 0.05, 0.0)
+        self.cocontractionReflex = Reflex(1.92, 0.002, 0.0)
+        self.gainReflex = Reflex(1.92, 0.03, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -190,16 +190,20 @@ class Antagonist:
             self.scale = 1
        
             if self.calibrated is 1:
+                self.gainReflex.doDiscount()
+                self.scale = 1 - self.gainReflex.getContribution()
+                if self.scale < 0:
+                    self.scale = 0
+
+                if self.scale > 0.75: # TODO
+                    self.cocontractionReflex.doDiscount()
+
                 cocontReflex = self.cocontractionReflex.getContribution()
-                sumCocontraction = self.dCocontraction + cocontReflex
+                sumCocontraction = self.dCocontraction + (1 - self.dCocontraction) * cocontReflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
                 self.model.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
-
-                self.scale = 1 - self.gainReflex.getContribution()
-                if self.scale < 0:
-                    self.scale = 0
 
                 if self.feedForward:
                     if not self.model.generateCommand():
