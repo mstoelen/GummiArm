@@ -12,14 +12,14 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
+    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
     elbowExtended = False
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.shoulderRoll
+    joint = gummi.elbow
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
