@@ -12,14 +12,14 @@ def main(args):
     print("Please enter path to folder where you want data file saved:")
     path =  raw_input()
 
-    cocontractionsToTry = (0.0, 0.25, 0.5, 0.75, 1.0)
-    elbowExtended = True
+    cocontractionsToTry = (0.0, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
+    elbowExtended = False
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     gummi = Gummi()
-    joint = gummi.shoulderPitch
+    joint = gummi.elbow
 
     minAngle = joint.angle.getMin()*180/pi
     maxAngle = joint.angle.getMax()*180/pi
@@ -53,7 +53,7 @@ def main(args):
      
     for cocont in cocontractionsToTry: 
       
-        for att in range (1,4):
+        for att in range (1,3):
 
             print("Setting desired cocontraction.")
             for i in range (0,600):
@@ -67,7 +67,7 @@ def main(args):
             fileName = path + '/step_test_' + joint.getName() + '_s_' + str(cocont) + '_a_' + str(att) + '.csv'
             with open(fileName, 'wb') as csvfile:
                 writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(['time','desired', 'angle', 'equilibrium', 'cocontraction', 'flexor', 'extensor', 'gain_scale'])
+                writer.writerow(['time','desired', 'angle', 'equilibrium', 'cocontraction', 'flexor', 'extensor', 'ballistic_reflex'])
                 
                 time1 = rospy.Time.now()
                 now = False
@@ -98,9 +98,9 @@ def main(args):
                     cocontraction = joint.getCommandedCocontraction()
                     flexor = joint.getFlexorAngle()
                     extensor = joint.getExtensorAngle()
-                    scale = joint.scale
+                    ballistic = joint.ballistic
 
-                    writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor, scale])
+                    writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor, ballistic])
                     r.sleep()
             
 if __name__ == '__main__':

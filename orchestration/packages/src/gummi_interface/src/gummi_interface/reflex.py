@@ -37,6 +37,15 @@ class Reflex:
         #print("Reflex contribution, excitation, inhibition: " + str(contribution) + ", " + str(self.excitation) + ", " + str(self.inhibition))
         return contribution
 
+    def getCappedContribution(self):
+        contribution = self.getContribution()
+        if contribution > 1:
+             contribution = 1
+        else:
+            if contribution < 0:
+                contribution = 0
+        return contribution
+
     def updateExcitation(self, newExcitation):
         if newExcitation > (self.excitation * 1.5):
             self.excitation = newExcitation

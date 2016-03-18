@@ -36,15 +36,17 @@ class Antagonist:
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
-        self.model = JointModel(self.name)
+        self.ballisticModel = JointModel(self.name)
+        self.actualModel = JointModel(self.name)
 
         if self.calibrated is 1:
-            self.model.loadCalibration()
+            self.ballisticModel.loadCalibration()
+            self.actualModel.loadCalibration()
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(1.5, 0.003, 0.0)
-        self.gainReflex = Reflex(3.0, 0.05, 0.0)
+        self.cocontractionReflex = Reflex(3.0, 0.003, 0.0)
+        self.ballisticReflex = Reflex(3.0, 0.05, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -57,11 +59,9 @@ class Antagonist:
         self.commandFlexor = 0
         self.commandExtensor = 0
         self.dEquilibrium = 0
-
-        self.pGainUse = 0
-        self.vGainUse = 0
-        self.lGain = 0.03
-        self.scale = 1
+        self.deltaEqFeedback = 0
+        self.deltaEqBallistic = 0
+        self.actualEquilibrium = 0
 
         self.dCocontraction = 0
         self.cCocontraction = 0
@@ -71,6 +71,7 @@ class Antagonist:
         self.maxCocontraction = 1.0
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
+        self.ballistic = 0
 
     def calculateEqVelCalibration(self):
         joint_range = self.angle.getMax() - self.angle.getMin()
@@ -118,10 +119,10 @@ class Antagonist:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
                 self.cocontractionReflex.updateExcitation(excitation)
-                self.gainReflex.updateExcitation(excitation)
+                self.ballisticReflex.updateExcitation(excitation)
                 self.feedForward = True
             self.angle.setDesired(dAngle)
-            self.model.setAngle(dAngle)
+            self.ballisticModel.setAngle(dAngle)
             self.doUpdate()
         else:
             print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
@@ -134,10 +135,10 @@ class Antagonist:
                 self.dCocontraction = dStartCocontraction 
                 excitation = abs(self.angle.getEncoder() - dAngle)
                 self.cocontractionReflex.updateExcitation(excitation)
-                self.gainReflex.updateExcitation(excitation)
+                self.ballisticReflex.updateExcitation(excitation)
                 self.feedForward = True
             self.angle.setDesired(dAngle)
-            self.model.setAngle(dAngle)
+            self.ballisticModel.setAngle(dAngle)
             self.doUpdate()
         else:
             print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
@@ -187,48 +188,53 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            self.scale = 1
-       
-            if self.calibrated is 1:
-                self.gainReflex.doDiscount()
-                self.scale = 1 - self.gainReflex.getContribution()
-                if self.scale < 0:
-                    self.scale = 0
+            if self.closedLoop:
+                self.doClosedLoop()
+            else:
+                self.deltaEqFeedback = 0
 
-                if self.scale > 0.75: # TODO
-                    self.cocontractionReflex.doDiscount()
+            if self.calibrated is 1:
+                self.ballisticReflex.doDiscount()
+                self.cocontractionReflex.doDiscount()
 
                 cocontReflex = self.cocontractionReflex.getContribution()
                 sumCocontraction = self.dCocontraction + (1 - self.dCocontraction) * cocontReflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
-                self.model.setCocontraction(sumCocontraction)
+
+                self.ballisticModel.setCocontraction(sumCocontraction)
+                self.actualModel.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
 
                 if self.feedForward:
-                    if not self.model.generateCommand():
+                    if not self.ballisticModel.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
+                        self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
                     else:
-                        #print("Setting feedforward!")
-                        #print("Cocontraction reflex contribution: " + str(cocontReflex))
-                        self.dEquilibrium = self.model.getEquilibriumPoint()
-                        #print("New equilibrium from feedforward: " + str(self.dEquilibrium))
-                        #print("And, current cocontraction: " + str(self.cCocontraction))
-                        self.feedForward = False
-                        self.scale = 0
+                        self.actualModel.setAngle(self.getJointAngle())
+                        self.actualModel.generateCommand()
+                        self.actualEquilibrium = self.actualModel.getEquilibriumPoint()
+                        ballisticEquilibrium = self.ballisticModel.getEquilibriumPoint()
+                        self.deltaEqBallistic = ballisticEquilibrium - self.actualEquilibrium
+                        self.ballistic = self.ballisticReflex.getCappedContribution()
+                        #wa = self.doWeightedAverage(self.deltaEqFeedback, 1 - self.ballistic, self.deltaEqBallistic, self.ballistic)
+                        wa = self.doWeightedAverage(self.deltaEqFeedback, 0.0, self.deltaEqBallistic, 1.0)
+                        self.dEquilibrium =  self.actualEquilibrium + wa
+                else:
+                    self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
+                
             else:
                 self.cCocontraction = self.dCocontraction
-                    
-            self.scaleControlGain()
-                
-            if self.closedLoop:
-                self.doClosedLoop()
-                
+                self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
+
             self.capEquilibrium()
             self.capCocontraction()
             self.createCommand()
             self.publishCommand()
             self.publishDiagnostics()
+
+    def doWeightedAverage(self, value1, weight1, value2, weight2):
+        return (value1*weight1 + value2*weight2)
 
     def createCommand(self):
         equilibrium = self.dEquilibrium
@@ -248,10 +254,10 @@ class Antagonist:
         errorChange = self.errorLast - error
         self.errorLast = error
         
-        prop_term = error * self.pGainUse
-        vel_term = errorChange * self.vGainUse
+        prop_term = error * self.pGain
+        vel_term = errorChange * self.vGain
 
-        self.dEquilibrium = self.dEquilibrium + (prop_term + vel_term)*self.signEquilibrium
+        self.deltaEqFeedback = (prop_term + vel_term)*self.signEquilibrium
 
     def capEquilibrium(self):
         if self.dEquilibrium > 2:
@@ -274,20 +280,11 @@ class Antagonist:
     def publishDiagnostics(self):
         msg = Diagnostics()
         msg.equilibrium = self.dEquilibrium
-        msg.gain_scale = self.scale
         msg.encoder = self.getJointAngle()
         msg.alpha_flexor = self.getFlexorAngle()
         msg.alpha_extensor = self.getExtensorAngle()
         msg.cocontraction = self.cCocontraction
         self.pubDiagnostics.publish(msg)
-
-    def scaleControlGain(self):
-        self.pGainUse = self.pGain * self.scale
-        if self.pGainUse < 0:
-            self.pGainUse = 0
-        self.vGainUse = self.vGain * self.scale
-        if self.vGainUse < 0:
-            self.vGainUse = 0
 
     def getDesiredEquilibrium(self):
         return self.dEquilibrium
