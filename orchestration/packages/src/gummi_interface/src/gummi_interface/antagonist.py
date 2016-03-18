@@ -37,16 +37,14 @@ class Antagonist:
 
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
         self.ballisticModel = JointModel(self.name)
-        self.actualModel = JointModel(self.name)
 
         if self.calibrated is 1:
             self.ballisticModel.loadCalibration()
-            self.actualModel.loadCalibration()
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(3.0, 0.003, 0.0)
-        self.ballisticReflex = Reflex(3.0, 0.05, 0.0)
+        self.ballisticReflex = Reflex(0.0, 0.02, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -59,15 +57,16 @@ class Antagonist:
         self.commandFlexor = 0
         self.commandExtensor = 0
         self.dEquilibrium = 0
+        self.feedbackEquilibrium = 0
+        self.ballisticEquilibrium = 0
         self.deltaEqFeedback = 0
-        self.deltaEqBallistic = 0
-        self.actualEquilibrium = 0
 
         self.dCocontraction = 0
         self.cCocontraction = 0
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
+        self.useBallistic = False
         self.maxCocontraction = 1.0
         self.errorLast = 0.0
         self.dEqVelCalibration = 1.0
@@ -190,8 +189,9 @@ class Antagonist:
         else:
             if self.closedLoop:
                 self.doClosedLoop()
+                self.feedbackEquilibrium = self.feedbackEquilibrium + self.deltaEqFeedback
             else:
-                self.deltaEqFeedback = 0
+                self.feedbackEquilibrium = self.dEquilibrium
 
             if self.calibrated is 1:
                 self.ballisticReflex.doDiscount()
@@ -203,26 +203,24 @@ class Antagonist:
                     sumCocontraction = self.maxCocontraction
 
                 self.ballisticModel.setCocontraction(sumCocontraction)
-                self.actualModel.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
 
                 if self.feedForward:
                     if not self.ballisticModel.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
-                        self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
+                        self.ballisticEquilibrium = self.dEquilibrium
+                        self.useBallistic = False
                     else:
-                        self.actualModel.setAngle(self.getJointAngle())
-                        self.actualModel.generateCommand()
-                        self.actualEquilibrium = self.actualModel.getEquilibriumPoint()
-                        ballisticEquilibrium = self.ballisticModel.getEquilibriumPoint()
-                        self.deltaEqBallistic = ballisticEquilibrium - self.actualEquilibrium
-                        self.ballistic = self.ballisticReflex.getCappedContribution()
-                        #wa = self.doWeightedAverage(self.deltaEqFeedback, 1 - self.ballistic, self.deltaEqBallistic, self.ballistic)
-                        wa = self.doWeightedAverage(self.deltaEqFeedback, 0.0, self.deltaEqBallistic, 1.0)
-                        self.dEquilibrium =  self.actualEquilibrium + wa
+                        self.ballisticEquilibrium = self.ballisticModel.getEquilibriumPoint()
+                        self.useBallistic = True
+                    self.feedForward = False
+
+                if self.useBallistic:
+                    self.ballistic = self.ballisticReflex.getCappedContribution()
+                    self.dEquilibrium = self.doWeightedAverage(self.feedbackEquilibrium, 1 - self.ballistic, self.ballisticEquilibrium, self.ballistic)
                 else:
                     self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
-                
+
             else:
                 self.cCocontraction = self.dCocontraction
                 self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
