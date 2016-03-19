@@ -13,7 +13,7 @@ def main(args):
     path =  raw_input()
 
     cocontractionsToTry = (0.0, 1.0) #(0.0, 0.25, 0.5, 0.75, 1.0)
-    elbowExtended = False
+    elbowExtended = True
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -45,8 +45,9 @@ def main(args):
     print("GummiArm is live!")
 
     print("Moving arm into place.")
+    joint.goTo(rest * pi/180, 0.3, True)
     for i in range (0,200):
-        joint.servoTo(rest * pi/180, 0.6)
+        joint.goTo(rest * pi/180, 0.3, False)
         if elbowExtended: 
             gummi.elbow.servoTo(gummi.elbow.angle.getMin(), 0.8)
         r.sleep()
@@ -75,6 +76,7 @@ def main(args):
 
                     if i < 200:
                         command = rest
+                        joint.servoTo(command * pi/180, cocont)
                     else:
                         if i < 600:
                             command = desired
@@ -86,9 +88,7 @@ def main(args):
                             now = False
                             if i == 600:
                                 now = True
-
-                    #joint.servoTo(command * pi/180, cocont)
-                    joint.goTest(command * pi/180, cocont, now)
+                        joint.goTest(command * pi/180, cocont, now)
 
                     angle = joint.getJointAngle() * 180/pi
                     time2 = rospy.Time.now()

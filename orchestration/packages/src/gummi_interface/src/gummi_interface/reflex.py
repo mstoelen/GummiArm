@@ -38,7 +38,7 @@ class Reflex:
         return contribution
 
     def getCappedContribution(self):
-        contribution = self.getContribution()
+        contribution = self.excitation * (1 - self.inhibition) * self.gain
         if contribution > 1:
              contribution = 1
         else:

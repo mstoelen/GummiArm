@@ -35,16 +35,19 @@ class Antagonist:
         self.pGain = rospy.get_param("~" + self.name + "/gains/P")
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
+        self.range = self.maxAngle - self.minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
         self.ballisticModel = JointModel(self.name)
+        self.feedbackModel = JointModel(self.name)
 
         if self.calibrated is 1:
             self.ballisticModel.loadCalibration()
+            self.feedbackModel.loadCalibration()
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(3.0, 0.003, 0.0)
-        self.ballisticReflex = Reflex(0.0, 0.02, 0.0)
+        self.cocontractionReflex = Reflex(2.0, 0.003, 0.0)
+        self.ballisticReflex = Reflex(1.5, 0.03, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -57,9 +60,10 @@ class Antagonist:
         self.commandFlexor = 0
         self.commandExtensor = 0
         self.dEquilibrium = 0
-        self.feedbackEquilibrium = 0
+        self.feedbackJointAngle = 0
         self.ballisticEquilibrium = 0
-        self.deltaEqFeedback = 0
+        self.feedbackEquilibrium = 0
+        self.deltaAngleFeedback = 0
 
         self.dCocontraction = 0
         self.cCocontraction = 0
@@ -102,40 +106,43 @@ class Antagonist:
         self.pubDiagnostics = rospy.Publisher(self.name + "/diagnostics", Diagnostics, queue_size=5)
 
     def servoTo(self, dAngle, dCocontraction):
-        self.velocity = False
-        self.closedLoop = True
-        self.feedForward = False
-        self.dCocontraction = dCocontraction  
-        self.angle.setDesired(dAngle)
-        self.cocontractionReflex.clear()
-        self.doUpdate()
+        if self.calibrated is 1:
+            self.velocity = False
+            self.closedLoop = True
+            self.feedForward = False
+            self.dCocontraction = dCocontraction  
+            self.angle.setDesired(dAngle)
+            self.cocontractionReflex.clear()
+            self.doUpdate()
+        else:
+            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring servoTo() command.")
 
     def goTest(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False
             self.closedLoop = True
+            excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
                 self.dCocontraction = dStartCocontraction 
-                excitation = abs(self.angle.getEncoder() - dAngle)
-                self.cocontractionReflex.updateExcitation(excitation)
                 self.ballisticReflex.updateExcitation(excitation)
                 self.feedForward = True
+            self.cocontractionReflex.updateExcitation(excitation)
             self.angle.setDesired(dAngle)
             self.ballisticModel.setAngle(dAngle)
             self.doUpdate()
         else:
-            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
+            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTest() command.")
 
     def goTo(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False
             self.closedLoop = True
+            excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
                 self.dCocontraction = dStartCocontraction 
-                excitation = abs(self.angle.getEncoder() - dAngle)
-                self.cocontractionReflex.updateExcitation(excitation)
                 self.ballisticReflex.updateExcitation(excitation)
                 self.feedForward = True
+            self.cocontractionReflex.updateExcitation(excitation)
             self.angle.setDesired(dAngle)
             self.ballisticModel.setAngle(dAngle)
             self.doUpdate()
@@ -187,12 +194,6 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            if self.closedLoop:
-                self.doClosedLoop()
-                self.feedbackEquilibrium = self.feedbackEquilibrium + self.deltaEqFeedback
-            else:
-                self.feedbackEquilibrium = self.dEquilibrium
-
             if self.calibrated is 1:
                 self.ballisticReflex.doDiscount()
                 self.cocontractionReflex.doDiscount()
@@ -203,9 +204,11 @@ class Antagonist:
                     sumCocontraction = self.maxCocontraction
 
                 self.ballisticModel.setCocontraction(sumCocontraction)
+                self.feedbackModel.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
 
                 if self.feedForward:
+                    #now = rospy.get_time()
                     if not self.ballisticModel.generateCommand():
                         print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
                         self.ballisticEquilibrium = self.dEquilibrium
@@ -214,16 +217,24 @@ class Antagonist:
                         self.ballisticEquilibrium = self.ballisticModel.getEquilibriumPoint()
                         self.useBallistic = True
                     self.feedForward = False
+                    #then = rospy.get_time()
+                    #duration = then - now
+                    #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
+
+                if self.closedLoop:
+                    self.doClosedLoop()
+                    self.feedbackJointAngle = self.feedbackJointAngle + self.deltaAngleFeedback
+                    self.feedbackModel.setAngle(self.feedbackJointAngle)
+                    self.feedbackModel.generateCommand()
+                    self.feedbackEquilibrium = self.feedbackModel.getEquilibriumPoint()
+                else:
+                    self.feedbackEquilibrium = self.dEquilibrium
 
                 if self.useBallistic:
                     self.ballistic = self.ballisticReflex.getCappedContribution()
                     self.dEquilibrium = self.doWeightedAverage(self.feedbackEquilibrium, 1 - self.ballistic, self.ballisticEquilibrium, self.ballistic)
                 else:
-                    self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
-
-            else:
-                self.cCocontraction = self.dCocontraction
-                self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
+                    self.dEquilibrium = self.feedbackEquilibrium
 
             self.capEquilibrium()
             self.capCocontraction()
@@ -255,7 +266,7 @@ class Antagonist:
         prop_term = error * self.pGain
         vel_term = errorChange * self.vGain
 
-        self.deltaEqFeedback = (prop_term + vel_term)*self.signEquilibrium
+        self.deltaAngleFeedback = (prop_term + vel_term)
 
     def capEquilibrium(self):
         if self.dEquilibrium > 2:
@@ -282,6 +293,7 @@ class Antagonist:
         msg.alpha_flexor = self.getFlexorAngle()
         msg.alpha_extensor = self.getExtensorAngle()
         msg.cocontraction = self.cCocontraction
+        msg.ballistic = self.ballistic
         self.pubDiagnostics.publish(msg)
 
     def getDesiredEquilibrium(self):
