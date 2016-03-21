@@ -124,7 +124,7 @@ class Antagonist:
             excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
                 self.dCocontraction = dStartCocontraction 
-                self.ballisticReflex.updateExcitation(excitation)
+                #self.ballisticReflex.updateExcitation(excitation)
                 self.feedForward = True
             self.cocontractionReflex.updateExcitation(excitation)
             self.angle.setDesired(dAngle)
@@ -210,7 +210,7 @@ class Antagonist:
                 if self.feedForward:
                     #now = rospy.get_time()
                     if not self.ballisticModel.generateCommand():
-                        print("Warning: Outside calibration data for joint " + self.name + ", not using model-based feedforward.")
+                        print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
                         self.ballisticEquilibrium = self.dEquilibrium
                         self.useBallistic = False
                     else:
@@ -222,11 +222,14 @@ class Antagonist:
                     #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
 
                 if self.closedLoop:
-                    self.doClosedLoop()
+                    self.doClosedLoop()        
                     self.feedbackJointAngle = self.feedbackJointAngle + self.deltaAngleFeedback
                     self.feedbackModel.setAngle(self.feedbackJointAngle)
-                    self.feedbackModel.generateCommand()
-                    self.feedbackEquilibrium = self.feedbackModel.getEquilibriumPoint()
+                    if not self.feedbackModel.generateCommand():
+                        print("Warning: Outside feedback calibration data for joint " + self.name + ", using current.")
+                        self.feedbackEquilibrium = self.dEquilibrium
+                    else:
+                        self.feedbackEquilibrium = self.feedbackModel.getEquilibriumPoint()
                 else:
                     self.feedbackEquilibrium = self.dEquilibrium
 

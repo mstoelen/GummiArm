@@ -1,5 +1,6 @@
 <launch>	
   <node name="gummi" pkg="gummi_interface" type="gummi_step.py" output="screen">
+  	<rosparam file="$(find gummi_interface)/config/step.yaml" command="load"/>
   	<rosparam file="$(find gummi_interface)/config/gummi.yaml" command="load"/>
   	<rosparam file="$(find gummi_interface)/config/shoulder_roll.yaml" command="load" ns="shoulder_roll"/>
 	<rosparam file="$(find gummi_interface)/config/calibration_shoulder_roll.yaml" command="load" ns="shoulder_roll/calib"/>
