@@ -25,7 +25,7 @@ def main(args):
     for jointNum in jointNums:
 
         print("Output path is '" + path + "'.")
-        print("Joint is " + str(jointNum) + ".")
+        print("Joint to test: " + str(jointNum) + ".")
         print("Elbow extended: " + str(elbowExtended) + ".")
 
         if jointNum is 0:
