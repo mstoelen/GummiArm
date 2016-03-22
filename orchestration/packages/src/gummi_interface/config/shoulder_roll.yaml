@@ -15,4 +15,5 @@ maxAngle: 2.4
 angleOffset: 1.05
 gains:
     P: 0.01
+    I: 0
     D: 0.1

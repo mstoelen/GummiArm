@@ -3,9 +3,12 @@
 from math import pi
 from xml.dom.minidom import parse
 import rospy
+import numpy as np
 
 from std_msgs.msg import Float64
 from msg import Diagnostics
+from collections import deque
+
 
 from helpers import fetchParam
 from joint_angle import JointAngle
@@ -33,6 +36,7 @@ class Antagonist:
         self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
         self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
         self.pGain = rospy.get_param("~" + self.name + "/gains/P")
+        self.iGain = rospy.get_param("~" + self.name + "/gains/I")
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
         self.range = self.maxAngle - self.minAngle
@@ -44,7 +48,7 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(2.0, 0.00175, 0.0)
+        self.cocontractionReflex = Reflex(1.5, 0.001, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0, 0.0)
         self.feedbackReflex.updateExcitation(1.0)
 
@@ -61,6 +65,7 @@ class Antagonist:
         self.dEquilibrium = 0
         self.deltaAngleFeedback = 0
 
+        self.errors = deque()
         self.dCocontraction = 0
         self.cCocontraction = 0
         self.velocity = False
@@ -223,6 +228,8 @@ class Antagonist:
                     #duration = then - now
                     #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
 
+            self.generateError()
+
             if self.closedLoop:
                 if self.feedbackReflex.isZero() is False:
                     self.ballistic = 0
@@ -260,18 +267,27 @@ class Antagonist:
         self.commandFlexor = commandFlexor + self.servoOffset
         self.commandExtensor = commandExtensor + self.servoOffset
 
-    def doClosedLoop(self):
+    def generateError(self):
         encoderAngle = self.angle.getEncoder()
         dAngle = self.angle.getDesired()
         
         error = dAngle - encoderAngle
+
+        self.errors.appendleft(error)
+        if len(self.errors) > 30:
+            self.errors.pop()
+
+    def doClosedLoop(self):
+        error = self.errors[0]
+
         errorChange = self.errorLast - error
         self.errorLast = error
         
         prop_term = error * self.pGain
         vel_term = errorChange * self.vGain
+        int_term = np.sum(self.errors) * self.iGain
 
-        self.deltaEqFeedback = (prop_term + vel_term) * self.signEquilibrium
+        self.deltaEqFeedback = (prop_term  + vel_term + int_term) * self.signEquilibrium
 
     def capEquilibrium(self):
         if self.dEquilibrium > 2:
