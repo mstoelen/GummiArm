@@ -110,6 +110,7 @@ def main(args):
                                 now = False
                                 if i == 600:
                                     now = True
+                            #joint.servoTo(command * pi/180, cocont)
                             joint.goTest(command * pi/180, cocont, now)
 
                         angle = joint.getJointAngle() * 180/pi
