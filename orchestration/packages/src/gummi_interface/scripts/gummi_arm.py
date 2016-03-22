@@ -11,7 +11,7 @@ from gummi_interface.gummi import Gummi
 def main(args):
 
     rospy.init_node('GummiArm', anonymous=True)
-    r = rospy.Rate(100)  
+    r = rospy.Rate(60)  
 
     gummi = Gummi()
 
@@ -21,8 +21,9 @@ def main(args):
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(3)
 
-    for i in range(0, 400):
-        gummi.goRestingPose()
+    gummi.goRestingPose(True)
+    for i in range(0,400):
+        gummi.goRestingPose(False)
         r.sleep()
 
     print("GummiArm is live!")
