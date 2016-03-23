@@ -51,7 +51,7 @@ def main(args):
         desired = maxAngle - rangeAngle/4
         print("Moving from rest: " + str(rest) + ", to desired: " + str(desired) + ".")
         
-        gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.7)
+        gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.8)
         
         print('WARNING: Moving joints sequentially to equilibrium positions.')
         gummi.doGradualStartup()

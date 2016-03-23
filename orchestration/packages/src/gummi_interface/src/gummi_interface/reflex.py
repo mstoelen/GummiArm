@@ -13,6 +13,8 @@ class Reflex:
     def initVariables(self):
         self.inhibition = 0
         self.excitation = 0
+        self.baseContribution = 0
+        self.maxContribution = 0
 
     def discount(self, value, rate):
         discount = value * rate
@@ -36,13 +38,18 @@ class Reflex:
     def clear(self):
         self.inhibition = 0
         self.excitation = 0
+        self.baseContribution = 0
+        self.maxContribution = 0
 
     def doDiscount(self):
         self.inhibition = self.discount(self.inhibition, self.inhibitionRate)
         self.excitation = self.discount(self.excitation, self.excitationRate)
 
+    def setBaseContribution(self, base):
+        self.baseContribution = base
+
     def getContribution(self):
-        contribution = self.excitation * (1 - self.inhibition) * self.gain
+        contribution = self.baseContribution + (self.maxContribution - self.baseContribution) * self.excitation * (1 - self.inhibition) * self.gain
         #print("Reflex contribution, excitation, inhibition: " + str(contribution) + ", " + str(self.excitation) + ", " + str(self.inhibition))
         return contribution
 
@@ -58,5 +65,6 @@ class Reflex:
     def updateExcitation(self, newExcitation):
         if newExcitation > self.excitation:
             self.excitation = newExcitation
+            self.maxContribution = self.excitation * (1 - self.inhibition) * self.gain
             #print("New excitation: " + str(newExcitation))
 

@@ -48,7 +48,7 @@ class Antagonist:
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
-        self.cocontractionReflex = Reflex(1.5, 0.001, 0.0)
+        self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0, 0.0)
         self.feedbackReflex.updateExcitation(1.0)
 
@@ -78,7 +78,7 @@ class Antagonist:
         self.deltaAngleBallistic = 0
         self.deltaEqFeedback = 0
 
-        self.ballisticRatio = 0.9
+        self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
 
     def calculateEqVelCalibration(self):
@@ -118,6 +118,7 @@ class Antagonist:
             self.dCocontraction = dCocontraction  
             self.angle.setDesired(dAngle)
             self.cocontractionReflex.clear()
+            self.cocontractionReflex.setBaseContribution(dCocontraction)
             self.doUpdate()
         else:
             print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring servoTo() command.")
@@ -128,11 +129,11 @@ class Antagonist:
             self.closedLoop = True
             excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
-                self.dCocontraction = dStartCocontraction 
+                self.cocontractionReflex.setBaseContribution(dStartCocontraction)
+                self.cocontractionReflex.updateExcitation(excitation)
                 self.feedbackReflex.inhibit()
                 self.feedForward = True
                 self.deltaAngleBallistic = dAngle - self.getJointAngle()
-            self.cocontractionReflex.updateExcitation(excitation)
             self.angle.setDesired(dAngle)
             aim = self.getBallisticAim(dAngle)
             self.ballisticModel.setAngle(aim)
@@ -146,17 +147,17 @@ class Antagonist:
             self.closedLoop = True
             excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
-                self.dCocontraction = dStartCocontraction 
+                self.cocontractionReflex.setBaseContribution(dStartCocontraction)
+                self.cocontractionReflex.updateExcitation(excitation)
                 self.feedbackReflex.inhibit()
                 self.feedForward = True
                 self.deltaAngleBallistic = dAngle - self.getJointAngle()
-            self.cocontractionReflex.updateExcitation(excitation)
             self.angle.setDesired(dAngle)
             aim = self.getBallisticAim(dAngle)
             self.ballisticModel.setAngle(aim)
             self.doUpdate()
         else:
-            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTo() command.")
+            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTest() command.")
 
     def moveTo(self, dEquilibrium, dCocontraction):
         self.velocity = False
@@ -165,6 +166,7 @@ class Antagonist:
         self.dEquilibrium = dEquilibrium
         self.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
+        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.doUpdate()
 
     def moveWith(self, dEquilibriumVel, dCocontraction):
@@ -174,6 +176,7 @@ class Antagonist:
         self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
         self.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
+        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.angle.setDesiredToEncoder()
         self.doUpdate()
 
@@ -184,6 +187,7 @@ class Antagonist:
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
         self.dCocontraction = dCocontraction  
+        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.cocontractionReflex.clear()
         self.doUpdate()
 
@@ -193,6 +197,7 @@ class Antagonist:
         self.feedForward = False
         self.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
+        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.doUpdate()
 
     def doUpdate(self):
@@ -209,7 +214,7 @@ class Antagonist:
 
                 self.cocontractionReflex.doDiscount()
                 cocontReflex = self.cocontractionReflex.getContribution()
-                sumCocontraction = self.dCocontraction + (1 - self.dCocontraction) * cocontReflex
+                sumCocontraction = cocontReflex
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
 
