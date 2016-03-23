@@ -129,11 +129,12 @@ class Antagonist:
             self.closedLoop = True
             excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
-                self.cocontractionReflex.setBaseContribution(dStartCocontraction)
-                self.cocontractionReflex.updateExcitation(excitation)
-                self.feedbackReflex.inhibit()
-                self.feedForward = True
-                self.deltaAngleBallistic = dAngle - self.getJointAngle()
+                if excitation > 0.261799:
+                    self.cocontractionReflex.setBaseContribution(dStartCocontraction)
+                    self.cocontractionReflex.updateExcitation(excitation)
+                    self.feedbackReflex.inhibit()
+                    self.feedForward = True
+                    self.deltaAngleBallistic = dAngle - self.getJointAngle()
             self.angle.setDesired(dAngle)
             aim = self.getBallisticAim(dAngle)
             self.ballisticModel.setAngle(aim)
@@ -147,11 +148,12 @@ class Antagonist:
             self.closedLoop = True
             excitation = abs(self.angle.getEncoder() - dAngle)
             if now:
-                self.cocontractionReflex.setBaseContribution(dStartCocontraction)
-                self.cocontractionReflex.updateExcitation(excitation)
-                self.feedbackReflex.inhibit()
-                self.feedForward = True
-                self.deltaAngleBallistic = dAngle - self.getJointAngle()
+                if excitation > 0.261799:
+                    self.cocontractionReflex.setBaseContribution(dStartCocontraction)
+                    self.cocontractionReflex.updateExcitation(excitation)
+                    self.feedbackReflex.inhibit()
+                    self.feedForward = True
+                    self.deltaAngleBallistic = dAngle - self.getJointAngle()
             self.angle.setDesired(dAngle)
             aim = self.getBallisticAim(dAngle)
             self.ballisticModel.setAngle(aim)

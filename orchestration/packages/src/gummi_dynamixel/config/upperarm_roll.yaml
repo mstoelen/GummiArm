@@ -4,7 +4,7 @@ upperarm_roll_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: upperarm_roll
-    joint_speed: 2
+    joint_speed: 3.0
     motor:
         id: 9
         init: 2048
