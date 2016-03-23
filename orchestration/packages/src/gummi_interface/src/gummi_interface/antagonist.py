@@ -187,8 +187,8 @@ class Antagonist:
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
         self.dCocontraction = dCocontraction  
-        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.cocontractionReflex.clear()
+        self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.doUpdate()
 
     def passiveHold(self, dCocontraction):

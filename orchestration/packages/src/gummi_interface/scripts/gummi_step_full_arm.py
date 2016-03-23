@@ -29,9 +29,10 @@ def main(args):
     
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(3)
-
-    for i in range(0, 400):
-        gummi.goRestingPose()
+    
+    gummi.goRestingPose(True)
+    for i in range(0,400):
+        gummi.goRestingPose(False)
         r.sleep()
 
     print("GummiArm is live!")
