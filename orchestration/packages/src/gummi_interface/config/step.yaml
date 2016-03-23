@@ -1,0 +1,7 @@
+numAttempts: 3
+outputPath: .
+elbowExtended: True
+jointNums: 
+- 2
+
+
