@@ -1,6 +1,6 @@
 numAttempts: 3
-outputPath: .
-elbowExtended: True
+outputPath: /home/mstoelen/Dropbox/LM2016/step/cocont
+elbowExtended: False
 jointNums: 
 - 2
 
