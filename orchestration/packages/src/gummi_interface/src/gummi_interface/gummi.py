@@ -160,6 +160,15 @@ class Gummi:
         self.forearmRoll.servoTo(0)
         self.wrist.goTo(0, self.wristCocont, now)
 
+    def passiveHold(self):
+        self.shoulderYaw.passiveHold(self.shoulderYawCocont)
+        self.shoulderRoll.passiveHold(self.shoulderRollCocont)
+        self.shoulderPitch.passiveHold(self.shoulderPitchCocont)
+        self.upperarmRoll.doUpdate()
+        self.elbow.passiveHold(self.elbowCocont)
+        self.forearmRoll.doUpdate()
+        self.wrist.passiveHold(self.wristCocont)
+
     def doGradualStartup(self):
         self.shoulderYaw.moveTo(-0.05, self.shoulderYawCocont)
         rospy.sleep(1)
