@@ -41,10 +41,10 @@ class Antagonist:
 
         self.range = self.maxAngle - self.minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
-        self.ballisticModel = JointModel(self.name)
+        self.inverseModel = JointModel(self.name)
 
         if self.calibrated is 1:
-            self.ballisticModel.loadCalibration()
+            self.inverseModel.loadCalibration()
 
         self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
         self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
@@ -137,7 +137,7 @@ class Antagonist:
                     self.deltaAngleBallistic = dAngle - self.getJointAngle()
             self.angle.setDesired(dAngle)
             aim = self.getBallisticAim(dAngle)
-            self.ballisticModel.setAngle(aim)
+            self.inverseModel.setAngle(aim)
             self.doUpdate()
         else:
             print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTest() command.")
@@ -201,15 +201,15 @@ class Antagonist:
                 if sumCocontraction > self.maxCocontraction:
                     sumCocontraction = self.maxCocontraction
 
-                self.ballisticModel.setCocontraction(sumCocontraction)
+                self.inverseModel.setCocontraction(sumCocontraction)
                 self.cCocontraction = sumCocontraction
 
                 if self.feedForward:
                     #now = rospy.get_time()
-                    if not self.ballisticModel.generateCommand():
+                    if not self.inverseModel.generateCommand():
                         print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
                     else:
-                        self.dEquilibrium = self.ballisticModel.getEquilibriumPoint()
+                        self.dEquilibrium = self.inverseModel.getEquilibriumPoint()
                     self.ballistic = 1
                     self.feedForward = False
                     #then = rospy.get_time()
@@ -224,7 +224,6 @@ class Antagonist:
                     self.doClosedLoop()      
                     self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
 
-            self.capEquilibrium()
             self.capCocontraction()
             self.createCommand()
             self.publishCommand()
@@ -276,13 +275,6 @@ class Antagonist:
         int_term = np.sum(self.errors) * self.iGain
 
         self.deltaEqFeedback = (prop_term  + vel_term + int_term) * self.signEquilibrium
-
-    def capEquilibrium(self):
-        if self.dEquilibrium > 2:
-                self.dEquilibrium = 2.0
-        else:
-            if self.dEquilibrium < -2:
-                self.dEquilibrium = -2.0
 
     def capCocontraction(self):
         if self.cCocontraction > self.maxCocontraction:
