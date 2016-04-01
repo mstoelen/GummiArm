@@ -123,25 +123,6 @@ class Antagonist:
         else:
             print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring servoTo() command.")
 
-    def goTest(self, dAngle, dStartCocontraction, now):
-        if self.calibrated is 1:
-            self.velocity = False
-            self.closedLoop = True
-            excitation = abs(self.angle.getEncoder() - dAngle)
-            if now:
-                if excitation > 0.261799:
-                    self.cocontractionReflex.setBaseContribution(dStartCocontraction)
-                    self.cocontractionReflex.updateExcitation(excitation)
-                    self.feedbackReflex.inhibit()
-                    self.feedForward = True
-                    self.deltaAngleBallistic = dAngle - self.getJointAngle()
-            self.angle.setDesired(dAngle)
-            aim = self.getBallisticAim(dAngle)
-            self.ballisticModel.setAngle(aim)
-            self.doUpdate()
-        else:
-            print("Warning: Joint " + self.name + " not listed as calibrated in .yaml config file. Ignoring goTest() command.")
-
     def goTo(self, dAngle, dStartCocontraction, now):
         if self.calibrated is 1:
             self.velocity = False

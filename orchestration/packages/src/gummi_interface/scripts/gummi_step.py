@@ -111,7 +111,7 @@ def main(args):
                                 if i == 600:
                                     now = True
                             #joint.servoTo(command * pi/180, cocont)
-                            joint.goTest(command * pi/180, cocont, now)
+                            joint.goTo(command * pi/180, cocont, now)
 
                         angle = joint.getJointAngle() * 180/pi
                         time2 = rospy.Time.now()
