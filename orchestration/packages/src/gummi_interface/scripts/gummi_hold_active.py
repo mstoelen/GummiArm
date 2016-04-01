@@ -14,9 +14,6 @@ def main(args):
     r = rospy.Rate(60)  
 
     cocont = 0.25
-    #desired = (0.77, 0.69, 0.64, 0.72, 0.10, -0.05, 0.01)
-    #desired = (0.0, 0.9, 0.25, 0.0, -0.2, 0.0, 0.01)
-    #desired = (0.0, 0.9, 0.3, 0.0, 0.15, 0.0, 0.01)
     desired = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
     gummi = Gummi()
@@ -51,7 +48,7 @@ def main(args):
     print("Test started, cocontraction: " + str(cocont) + ".")
      
     while True:
-        gummi.passiveHold()
+        gummi.goTo(desired, False)
         r.sleep()
             
 if __name__ == '__main__':

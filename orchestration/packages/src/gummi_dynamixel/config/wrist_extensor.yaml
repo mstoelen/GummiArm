@@ -4,7 +4,7 @@ wrist_extensor_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: wrist_extensor
-    joint_speed: 100
+    joint_speed: 6.28
     motor:
         id: 6
         init: 512
