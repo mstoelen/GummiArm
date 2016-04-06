@@ -172,6 +172,7 @@ class Antagonist:
         self.dCocontraction = dCocontraction  
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
+        self.feedbackReflex.removeInhibition()
         self.doUpdate()
 
     def passiveHold(self, dCocontraction):
@@ -191,31 +192,34 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            if self.calibrated is 1:
-                if self.isFeedbackDue():
-                    self.feedbackReflex.removeInhibition()
+            if self.velocity:
+               self.cCocontraction = self.dCocontraction
+            else:
+                if self.calibrated is 1:
+                    if self.isFeedbackDue():
+                        self.feedbackReflex.removeInhibition()
 
-                self.cocontractionReflex.doDiscount()
-                cocontReflex = self.cocontractionReflex.getContribution()
-                sumCocontraction = cocontReflex
-                if sumCocontraction > self.maxCocontraction:
-                    sumCocontraction = self.maxCocontraction
-
-                self.inverseModel.setCocontraction(sumCocontraction)
-                self.cCocontraction = sumCocontraction
-
-                if self.feedForward:
-                    #now = rospy.get_time()
-                    if not self.inverseModel.generateCommand():
-                        print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
-                    else:
-                        self.dEquilibrium = self.inverseModel.getEquilibriumPoint()
-                    self.ballistic = 1
-                    self.feedForward = False
-                    #then = rospy.get_time()
-                    #duration = then - now
-                    #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
-
+                    self.cocontractionReflex.doDiscount()
+                    cocontReflex = self.cocontractionReflex.getContribution()
+                    sumCocontraction = cocontReflex
+                    if sumCocontraction > self.maxCocontraction:
+                        sumCocontraction = self.maxCocontraction
+                        
+                    self.inverseModel.setCocontraction(sumCocontraction)
+                    self.cCocontraction = sumCocontraction
+                    
+                    if self.feedForward:
+                        #now = rospy.get_time()
+                        if not self.inverseModel.generateCommand():
+                            print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
+                        else:
+                            self.dEquilibrium = self.inverseModel.getEquilibriumPoint()
+                        self.ballistic = 1
+                        self.feedForward = False
+                        #then = rospy.get_time()
+                        #duration = then - now
+                        #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
+ 
             self.generateError()
 
             if self.closedLoop:
