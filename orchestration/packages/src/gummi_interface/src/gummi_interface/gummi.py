@@ -156,8 +156,8 @@ class Gummi:
         self.shoulderPitch.goTo(0, self.shoulderPitchCocont, now)
         self.upperarmRoll.servoTo(0)
         self.elbow.goTo(0, self.elbowCocont, now)
-        #self.forearmRoll.servoTo(self.pi/2)
-        self.forearmRoll.servoTo(0)
+        self.forearmRoll.servoTo(-self.pi/2)
+        #self.forearmRoll.servoTo(0)
         self.wrist.goTo(0, self.wristCocont, now)
 
     def passiveHold(self):
@@ -180,8 +180,8 @@ class Gummi:
         rospy.sleep(1)
         self.elbow.moveTo(-0.6, self.elbowCocont)
         rospy.sleep(1)
-        #self.forearmRoll.servoTo(self.pi/2)
-        self.forearmRoll.servoTo(0)
+        self.forearmRoll.servoTo(-self.pi/2)
+        #self.forearmRoll.servoTo(0)
         rospy.sleep(1)
         self.wrist.moveTo(0, self.wristCocont)
         rospy.sleep(1)
