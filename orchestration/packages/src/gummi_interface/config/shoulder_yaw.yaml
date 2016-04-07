@@ -1,15 +1,16 @@
 calibrated: 1
-signEquilibrium: -1
-signFlexor: 1
-signExtensor: -1
+equilibrium:
+    sign: -1
+    signFlexor: 1
+    signExtensor: -1
+    nameFlexor: "horizontal_abductor"
+    nameExtensor: "horizontal_adductor"
+    servoRange: 12.5664
+    servoOffset: 0
 signEncoder: 1
 signJoint: 1
 name: "shoulder_yaw"
-nameFlexor: "horizontal_abductor"
-nameExtensor: "horizontal_adductor"
 nameEncoder: "shoulder_yaw_encoder"
-servoRange: 12.5664
-servoOffset: 0
 minAngle: -0.52
 maxAngle: 1.04
 angleOffset: 0

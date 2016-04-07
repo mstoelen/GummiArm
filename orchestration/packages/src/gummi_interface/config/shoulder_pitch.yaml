@@ -1,15 +1,16 @@
 calibrated: 1
-signEquilibrium: -1
-signFlexor: -1
-signExtensor: -1
+equilibrium:
+    sign: -1
+    signFlexor: -1
+    signExtensor: -1
+    nameFlexor: "shoulder_abductor"
+    nameExtensor: "shoulder_adductor"
+    servoRange: 6.2832
+    servoOffset: 0
 signEncoder: 1
 signJoint: 1
 name: "shoulder_pitch"
-nameFlexor: "shoulder_abductor"
-nameExtensor: "shoulder_adductor"
 nameEncoder: "shoulder_pitch_encoder"
-servoRange: 6.2832
-servoOffset: 0
 minAngle: 0
 maxAngle: 1.1
 angleOffset: 0.7

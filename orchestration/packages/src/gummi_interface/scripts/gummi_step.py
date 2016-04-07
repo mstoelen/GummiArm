@@ -117,10 +117,10 @@ def main(args):
                         time2 = rospy.Time.now()
                         duration = time2-time1
                         delta = duration.to_sec()
-                        equilibrium = joint.getDesiredEquilibrium()
-                        cocontraction = joint.getCommandedCocontraction()
-                        flexor = joint.flexor.getJointAngle() * 180/pi
-                        extensor = joint.extensor.getJointAngle() * 180/pi
+                        equilibrium = joint.eqModel.dEquilibrium
+                        cocontraction = joint.eqModel.cCocontraction
+                        flexor = joint.eqModel.flexor.getJointAngle() * 180/pi
+                        extensor = joint.eqModel.extensor.getJointAngle() * 180/pi
                         ballistic = joint.ballistic
                         
                         writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor, ballistic])

@@ -66,7 +66,7 @@ def main(args):
 
             thetas.append(round(joint.angle.getEncoder(), 3))
             ccs.append(round(cocont, 3))
-            equilibriums.append(round(joint.getDesiredEquilibrium(), 3))
+            equilibriums.append(round(joint.eqModel.dEquilibrium, 3))
 
         for i in range (0,300):
             joint.servoTo(0, cocont)

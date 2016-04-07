@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-import wx
 import sys
 
 from geometry_msgs.msg import Twist

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from math import pi
-from xml.dom.minidom import parse
 import rospy
 import numpy as np
 
@@ -9,10 +8,10 @@ from std_msgs.msg import Float64
 from msg import Diagnostics
 from collections import deque
 
-from direct_drive import DirectDrive
 from helpers import fetchParam
 from joint_angle import JointAngle
 from joint_model import JointModel
+from equilibrium_model import EquilibriumModel
 from reflex import Reflex
 from dynamixel_controllers.srv import TorqueEnable
 
@@ -21,17 +20,10 @@ class Antagonist:
         self.name = name
 
         self.calibrated = rospy.get_param("~" + self.name + "/calibrated")
-        self.signEquilibrium = rospy.get_param("~" + self.name + "/signEquilibrium")
-        self.signFlexor = rospy.get_param("~" + self.name + "/signFlexor")
-        self.signExtensor = rospy.get_param("~" + self.name + "/signExtensor")
         self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
         self.signJoint = rospy.get_param("~" + self.name + "/signJoint")
         self.name = rospy.get_param("~" + self.name + "/name")
-        self.nameFlexor = rospy.get_param("~" + self.name + "/nameFlexor")
-        self.nameExtensor = rospy.get_param("~" + self.name + "/nameExtensor")
         self.nameEncoder = rospy.get_param("~" + self.name + "/nameEncoder")
-        self.servoRange = rospy.get_param("~" + self.name + "/servoRange")
-        self.servoOffset = rospy.get_param("~" + self.name + "/servoOffset")
         self.minAngle = rospy.get_param("~" + self.name + "/minAngle")
         self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
         self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
@@ -41,13 +33,12 @@ class Antagonist:
 
         self.range = self.maxAngle - self.minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
+
+        self.eqModel = EquilibriumModel(self.name)
         self.inverseModel = JointModel(self.name)
 
         if self.calibrated is 1:
             self.inverseModel.loadCalibration()
-    
-        self.flexor = DirectDrive(self.nameFlexor, self.servoRange)
-        self.extensor = DirectDrive(self.nameExtensor, self.servoRange)
 
         self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0, 0.0)
@@ -56,37 +47,24 @@ class Antagonist:
         self.initPublishers()
         self.initVariables()
         self.disableEncoderTorque()
-        self.flexor.setTorqueLimit(1)
-        self.extensor.setTorqueLimit(1)
-        self.calculateEqVelCalibration()
+
+        jointRange = self.angle.getMax() - self.angle.getMin()
+        self.eqModel.calculateEqVelCalibration(jointRange)
 
     def initVariables(self):
-        self.commandFlexor = 0
-        self.commandExtensor = 0
-        self.dEquilibrium = 0
         self.deltaAngleFeedback = 0
 
         self.errors = deque()
-        self.dCocontraction = 0
-        self.cCocontraction = 0
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.maxCocontraction = 1.0
         self.errorLast = 0.0
-        self.dEqVelCalibration = 1.0
         self.ballistic = 0
         self.deltaAngleBallistic = 0
         self.deltaEqFeedback = 0
 
         self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
-
-    def calculateEqVelCalibration(self):
-        joint_range = self.angle.getMax() - self.angle.getMin()
-        eq_range = 2 * 2.0
-        self.dEqVelCalibration = eq_range/joint_range;
-        print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
 
     def disableEncoderTorque(self):
         service_name = self.nameEncoder + "_controller/torque_enable"
@@ -105,7 +83,7 @@ class Antagonist:
             self.velocity = False
             self.closedLoop = True
             self.feedForward = False
-            self.dCocontraction = dCocontraction  
+            self.eqModel.dCocontraction = dCocontraction  
             self.angle.setDesired(dAngle)
             self.cocontractionReflex.clear()
             self.cocontractionReflex.setBaseContribution(dCocontraction)
@@ -136,8 +114,8 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.dEquilibrium = dEquilibrium
-        self.dCocontraction = dCocontraction
+        self.eqModel.dEquilibrium = dEquilibrium
+        self.eqModel.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.doUpdate()
@@ -146,8 +124,8 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.dEquilibrium = self.dEquilibrium + dEquilibriumVel * self.signEquilibrium * self.dEqVelCalibration;
-        self.dCocontraction = dCocontraction
+        self.eqModel.doEquilibriumIncrement(dEquilibriumVel)
+        self.eqModel.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.angle.setDesiredToEncoder()
@@ -159,7 +137,7 @@ class Antagonist:
         self.feedForward = False
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
-        self.dCocontraction = dCocontraction  
+        self.eqModel.dCocontraction = dCocontraction  
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.feedbackReflex.removeInhibition()
@@ -183,7 +161,7 @@ class Antagonist:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.velocity:
-               self.cCocontraction = self.dCocontraction
+               self.eqModel.cCocontraction = self.eqModel.dCocontraction
             else:
                 if self.calibrated is 1:
                     if self.isFeedbackDue():
@@ -192,18 +170,18 @@ class Antagonist:
                     self.cocontractionReflex.doDiscount()
                     cocontReflex = self.cocontractionReflex.getContribution()
                     sumCocontraction = cocontReflex
-                    if sumCocontraction > self.maxCocontraction:
-                        sumCocontraction = self.maxCocontraction
+                    if sumCocontraction > self.eqModel.maxCocontraction:
+                        sumCocontraction = self.eqModel.maxCocontraction
                         
                     self.inverseModel.setCocontraction(sumCocontraction)
-                    self.cCocontraction = sumCocontraction
+                    self.eqModel.cCocontraction = sumCocontraction
                     
                     if self.feedForward:
                         #now = rospy.get_time()
                         if not self.inverseModel.generateCommand():
                             print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
                         else:
-                            self.dEquilibrium = self.inverseModel.getEquilibriumPoint()
+                            self.eqModel.dEquilibrium = self.inverseModel.getEquilibriumPoint()
                         self.ballistic = 1
                         self.feedForward = False
                         #then = rospy.get_time()
@@ -216,11 +194,11 @@ class Antagonist:
                 if self.feedbackReflex.isZero() is False:
                     self.ballistic = 0
                     self.doClosedLoop()      
-                    self.dEquilibrium = self.dEquilibrium + self.deltaEqFeedback
+                    self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
 
-            self.capCocontraction()
-            self.createCommand()
-            self.publishCommand()
+            self.eqModel.capCocontraction()
+            self.eqModel.createCommand()
+            self.eqModel.publishCommand()
             self.publishDiagnostics()
 
     def getBallisticAim(self, desired):
@@ -237,16 +215,6 @@ class Antagonist:
 
     def doWeightedAverage(self, value1, weight1, value2, weight2):
         return (value1*weight1 + value2*weight2)
-
-    def createCommand(self):
-        equilibrium = self.dEquilibrium
-        cocontraction = self.cCocontraction
-
-        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
-        commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
-
-        self.commandFlexor = commandFlexor + self.servoOffset
-        self.commandExtensor = commandExtensor + self.servoOffset
 
     def generateError(self):
         encoderAngle = self.angle.getEncoder()
@@ -268,34 +236,17 @@ class Antagonist:
         vel_term = errorChange * self.vGain
         int_term = np.sum(self.errors) * self.iGain
 
-        self.deltaEqFeedback = (prop_term  + vel_term + int_term) * self.signEquilibrium
-
-    def capCocontraction(self):
-        if self.cCocontraction > self.maxCocontraction:
-            self.cCocontraction = self.maxCocontraction
-        else:
-            if self.cCocontraction < 0:
-                self.cCocontraction = 0.0
-
-    def publishCommand(self):
-        self.flexor.servoTo(self.commandFlexor)
-        self.extensor.servoTo(self.commandExtensor)
+        self.deltaEqFeedback = (prop_term  + vel_term + int_term) * self.eqModel.sign
 
     def publishDiagnostics(self):
         msg = Diagnostics()
-        msg.equilibrium = self.dEquilibrium
+        msg.equilibrium = self.eqModel.dEquilibrium
         msg.encoder = self.getJointAngle()
-        msg.alpha_flexor = self.flexor.getJointAngle()
-        msg.alpha_extensor = self.extensor.getJointAngle()
-        msg.cocontraction = self.cCocontraction
+        msg.alpha_flexor = self.eqModel.flexor.getJointAngle()
+        msg.alpha_extensor = self.eqModel.extensor.getJointAngle()
+        msg.cocontraction = self.eqModel.cCocontraction
         msg.ballistic = self.ballistic
         self.pubDiagnostics.publish(msg)
-
-    def getDesiredEquilibrium(self):
-        return self.dEquilibrium
-
-    def getCommandedCocontraction(self):
-        return self.cCocontraction
 
     def getJointAngle(self):
         return self.angle.getEncoder()
