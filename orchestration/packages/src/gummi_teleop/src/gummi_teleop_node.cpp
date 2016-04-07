@@ -95,7 +95,7 @@ GummiTeleop::GummiTeleop()
   button1_ = 0;
   button2_ = 0;
   passive_wrist_ = false;
-  equilibrium_control_ = false;
+  equilibrium_control_ = true;
   stiff_arm_  = false;
   time_last_button1_ = ros::Time::now();
   time_last_button2_ = ros::Time::now();
@@ -168,7 +168,7 @@ GummiTeleop::GummiTeleop()
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(0.3);
+    joint_stiffnesses_.push_back(-0.3);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
 

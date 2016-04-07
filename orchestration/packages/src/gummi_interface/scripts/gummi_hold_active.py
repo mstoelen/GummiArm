@@ -41,7 +41,7 @@ def main(args):
         r.sleep()
 
     print("Setting co-contraction - hold arm.")
-    for i in range (0,600):
+    for i in range (0,200):
         gummi.servoTo(desired)
         r.sleep()
 

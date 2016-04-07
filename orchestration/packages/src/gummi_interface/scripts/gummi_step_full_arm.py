@@ -31,7 +31,7 @@ def main(args):
     gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
-    rospy.sleep(3)
+    rospy.sleep(1)
     
     gummi.goRestingPose(True)
     for i in range(0,400):
