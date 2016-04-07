@@ -5,6 +5,7 @@ import wx
 import sys
 import random
 import time
+from math import pi
 
 from gummi_interface.gummi import Gummi
 
@@ -24,6 +25,10 @@ def main(args):
     gummi.goRestingPose(True)
     for i in range(0,400):
         gummi.goRestingPose(False)
+        r.sleep()
+
+    for i in range(0,100):
+        gummi.forearmRoll.servoTo(pi/2)
         r.sleep()
 
     print("GummiArm is live!")
