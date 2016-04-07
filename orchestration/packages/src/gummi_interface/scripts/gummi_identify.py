@@ -22,10 +22,11 @@ def main(args):
     gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
-    rospy.sleep(3)
+    rospy.sleep(1)
 
+    gummi.goRestingPose(True)
     for i in range(0, 400):
-        gummi.goRestingPose()
+        gummi.goRestingPose(False)
         r.sleep()
 
     print("GummiArm is live!")
@@ -53,7 +54,7 @@ def main(args):
         else:
             if secondsSinceStart > 15:
                 print("Done, moving to resting pose.")
-                gummi.goRestingPose()
+                gummi.goRestingPose(False)
             else:
                 vel = 0.0
                 if secondsSinceStart > 5:

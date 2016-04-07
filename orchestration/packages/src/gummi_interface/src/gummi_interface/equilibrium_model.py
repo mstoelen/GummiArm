@@ -19,8 +19,8 @@ class EquilibriumModel:
         self.servoRange = rospy.get_param("~" + self.name + "/equilibrium/servoRange")
         self.servoOffset = rospy.get_param("~" + self.name + "/equilibrium/servoOffset")
 
-        self.flexor = DirectDrive(self.nameFlexor, self.servoRange)
-        self.extensor = DirectDrive(self.nameExtensor, self.servoRange)
+        self.flexor = DirectDrive(self.nameFlexor, 1000)
+        self.extensor = DirectDrive(self.nameExtensor, 1000)
 
         self.initVariables()
         self.flexor.setTorqueLimit(1)
