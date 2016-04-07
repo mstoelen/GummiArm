@@ -35,15 +35,14 @@ class EquilibriumModel:
         self.cCocontraction = 0
  
         self.maxCocontraction = 1.0
-        self.maxEquilibrium = 2.0
         self.dEqVelCalibration = 1.0
 
     def createCommand(self):
         equilibrium = self.dEquilibrium
         cocontraction = self.cCocontraction
 
-        commandFlexor = self.signFlexor*(-0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
-        commandExtensor = self.signExtensor*(0.5*equilibrium*self.servoRange/2 + 0.5*cocontraction*pi)
+        commandFlexor = self.signFlexor*(-equilibrium*self.servoRange/4.0 + cocontraction*pi/2.0)
+        commandExtensor = self.signExtensor*(equilibrium*self.servoRange/4.0 + cocontraction*pi/2.0)
 
         self.commandFlexor = commandFlexor + self.servoOffset
         self.commandExtensor = commandExtensor + self.servoOffset
@@ -54,13 +53,6 @@ class EquilibriumModel:
         else:
             if self.cCocontraction < 0:
                 self.cCocontraction = 0.0
-
-    def capCocontraction(self):
-        if self.dEquilibrium > self.maxEquilibrium:
-            self.dEquilibrium = self.maxEquilibrium
-        else:
-            if self.dEquilibrium < -self.maxEquilibrium:
-                self.dEquilibrium = -self.maxEquilibrium
 
     def publishCommand(self):
         self.flexor.servoTo(self.commandFlexor)

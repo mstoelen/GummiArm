@@ -161,7 +161,7 @@ class Antagonist:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.velocity:
-               self.eqModel.cCocontraction = self.eqModel.dCocontraction
+               self.eqModel.cCocontraction = self.eqModel.dCocontraction                
             else:
                 if self.calibrated is 1:
                     if self.isFeedbackDue():
