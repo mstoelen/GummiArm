@@ -119,8 +119,8 @@ def main(args):
                         delta = duration.to_sec()
                         equilibrium = joint.getDesiredEquilibrium()
                         cocontraction = joint.getCommandedCocontraction()
-                        flexor = joint.getFlexorAngle()
-                        extensor = joint.getExtensorAngle()
+                        flexor = joint.flexor.getJointAngle() * 180/pi
+                        extensor = joint.extensor.getJointAngle() * 180/pi
                         ballistic = joint.ballistic
                         
                         writer.writerow([delta, command, angle, equilibrium, cocontraction, flexor, extensor, ballistic])

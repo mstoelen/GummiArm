@@ -55,8 +55,8 @@ def main(args):
                 elbow.moveTo(0, stiff)
                 
                 angle = elbow.getJointAngle() * 180/pi
-                flexorAngle = elbow.getFlexorAngle() * 180/pi
-                extensorAngle = elbow.getExtensorAngle() * 180/pi
+                flexor = joint.flexor.getJointAngle() * 180/pi
+                extensor = joint.extensor.getJointAngle() * 180/pi
                 time2 = rospy.Time.now()
                 duration = time2-time1
                 delta = duration.to_sec()

@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import Float64
 
 from joint_angle import JointAngle
+from dynamixel_controllers.srv import SetTorqueLimit
 
 class DirectDrive:
     def __init__(self, name, servoRange):
@@ -49,3 +50,12 @@ class DirectDrive:
 
     def getJointAngle(self):
         return self.angle.getEncoder()
+
+    def setTorqueLimit(self, limit):
+        service_name = self.name + "_controller/set_torque_limit"
+        rospy.wait_for_service(service_name)
+        try:
+            te = rospy.ServiceProxy(service_name, SetTorqueLimit)
+            te(limit)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e

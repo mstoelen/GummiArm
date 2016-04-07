@@ -9,12 +9,12 @@ from std_msgs.msg import Float64
 from msg import Diagnostics
 from collections import deque
 
-
+from direct_drive import DirectDrive
 from helpers import fetchParam
 from joint_angle import JointAngle
 from joint_model import JointModel
 from reflex import Reflex
-from dynamixel_controllers.srv import TorqueEnable, SetTorqueLimit
+from dynamixel_controllers.srv import TorqueEnable
 
 class Antagonist:
     def __init__(self, name):
@@ -45,9 +45,10 @@ class Antagonist:
 
         if self.calibrated is 1:
             self.inverseModel.loadCalibration()
+    
+        self.flexor = DirectDrive(self.nameFlexor, self.servoRange)
+        self.extensor = DirectDrive(self.nameExtensor, self.servoRange)
 
-        self.flexorAngle = JointAngle(self.nameFlexor, self.signFlexor, -1000, 1000, False)
-        self.extensorAngle = JointAngle(self.nameExtensor, self.signExtensor, -1000, 1000, False)
         self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0, 0.0)
         self.feedbackReflex.updateExcitation(1.0)
@@ -55,8 +56,8 @@ class Antagonist:
         self.initPublishers()
         self.initVariables()
         self.disableEncoderTorque()
-        self.setTorqueLimit(self.nameExtensor, 1)
-        self.setTorqueLimit(self.nameFlexor, 1)
+        self.flexor.setTorqueLimit(1)
+        self.extensor.setTorqueLimit(1)
         self.calculateEqVelCalibration()
 
     def initVariables(self):
@@ -87,15 +88,6 @@ class Antagonist:
         self.dEqVelCalibration = eq_range/joint_range;
         print("Equilibrium to joint velocity calibration: " + str(self.dEqVelCalibration) + ".")
 
-    def setTorqueLimit(self, name, limit):
-        service_name = name + "_controller/set_torque_limit"
-        rospy.wait_for_service(service_name)
-        try:
-            te = rospy.ServiceProxy(service_name, SetTorqueLimit)
-            te(limit)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
-
     def disableEncoderTorque(self):
         service_name = self.nameEncoder + "_controller/torque_enable"
         rospy.wait_for_service(service_name)
@@ -106,8 +98,6 @@ class Antagonist:
             print "Service call failed: %s"%e
 
     def initPublishers(self):
-        self.pubExtensor = rospy.Publisher(self.nameExtensor + "_controller/command", Float64, queue_size=5)
-        self.pubFlexor = rospy.Publisher(self.nameFlexor + "_controller/command", Float64, queue_size=5)
         self.pubDiagnostics = rospy.Publisher(self.name + "/diagnostics", Diagnostics, queue_size=5)
 
     def servoTo(self, dAngle, dCocontraction):
@@ -288,15 +278,15 @@ class Antagonist:
                 self.cCocontraction = 0.0
 
     def publishCommand(self):
-        self.pubExtensor.publish(self.commandExtensor)                
-        self.pubFlexor.publish(self.commandFlexor)
+        self.flexor.servoTo(self.commandFlexor)
+        self.extensor.servoTo(self.commandExtensor)
 
     def publishDiagnostics(self):
         msg = Diagnostics()
         msg.equilibrium = self.dEquilibrium
         msg.encoder = self.getJointAngle()
-        msg.alpha_flexor = self.getFlexorAngle()
-        msg.alpha_extensor = self.getExtensorAngle()
+        msg.alpha_flexor = self.flexor.getJointAngle()
+        msg.alpha_extensor = self.extensor.getJointAngle()
         msg.cocontraction = self.cCocontraction
         msg.ballistic = self.ballistic
         self.pubDiagnostics.publish(msg)
@@ -309,12 +299,6 @@ class Antagonist:
 
     def getJointAngle(self):
         return self.angle.getEncoder()
-
-    def getFlexorAngle(self):
-        return self.flexorAngle.getEncoder()
-
-    def getExtensorAngle(self):
-        return self.extensorAngle.getEncoder()
 
     def getName(self):
         return self.name
