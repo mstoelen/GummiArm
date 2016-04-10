@@ -24,15 +24,14 @@ class Antagonist:
         self.signJoint = rospy.get_param("~" + self.name + "/signJoint")
         self.name = rospy.get_param("~" + self.name + "/name")
         self.nameEncoder = rospy.get_param("~" + self.name + "/nameEncoder")
-        self.minAngle = rospy.get_param("~" + self.name + "/minAngle")
-        self.maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
-        self.angleOffset = rospy.get_param("~" + self.name + "/angleOffset")
+        minAngle = rospy.get_param("~" + self.name + "/minAngle")
+        maxAngle = rospy.get_param("~" + self.name + "/maxAngle")
         self.pGain = rospy.get_param("~" + self.name + "/gains/P")
         self.iGain = rospy.get_param("~" + self.name + "/gains/I")
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
 
-        self.range = self.maxAngle - self.minAngle
-        self.angle = JointAngle(self.nameEncoder, self.signEncoder, self.minAngle, self.maxAngle, True)
+        self.range = maxAngle - minAngle
+        self.angle = JointAngle(self.nameEncoder, self.signEncoder, minAngle, maxAngle, True)
 
         self.eqModel = EquilibriumModel(self.name)
         self.inverseModel = JointModel(self.name)
@@ -52,8 +51,6 @@ class Antagonist:
         self.eqModel.calculateEqVelCalibration(jointRange)
 
     def initVariables(self):
-        self.deltaAngleFeedback = 0
-
         self.errors = deque()
         self.velocity = False
         self.closedLoop = False
