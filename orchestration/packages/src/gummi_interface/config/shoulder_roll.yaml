@@ -13,7 +13,6 @@ name: "shoulder_roll"
 nameEncoder: "shoulder_roll_encoder"
 minAngle: -1.4
 maxAngle: 2.4
-angleOffset: 1.05
 gains:
     P: 0.01
     I: 0

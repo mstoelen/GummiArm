@@ -13,7 +13,6 @@ name: "wrist"
 nameEncoder: "wrist_encoder"
 minAngle: -0.75
 maxAngle: 0.5
-angleOffset: 0.0
 gains:
     P: 0.055
     I: 0.0005
