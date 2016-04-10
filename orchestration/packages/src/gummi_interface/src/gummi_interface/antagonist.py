@@ -210,9 +210,6 @@ class Antagonist:
         else:
             return False
 
-    def doWeightedAverage(self, value1, weight1, value2, weight2):
-        return (value1*weight1 + value2*weight2)
-
     def generateError(self):
         encoderAngle = self.angle.getEncoder()
         dAngle = self.angle.getDesired()
