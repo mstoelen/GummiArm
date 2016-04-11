@@ -29,6 +29,9 @@ class Reflex:
     def removeInhibition(self):
         self.inhibition = 0
 
+    def removeExcitation(self):
+        self.excitation = 0
+
     def isZero(self):
         if self.getContribution() < 0.001:
             return True

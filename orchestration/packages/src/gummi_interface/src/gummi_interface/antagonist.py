@@ -40,8 +40,7 @@ class Antagonist:
             self.inverseModel.loadCalibration()
 
         self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
-        self.feedbackReflex = Reflex(1.0, 0.0, 0.0)
-        self.feedbackReflex.updateExcitation(1.0)
+        self.feedbackReflex = Reflex(1.0, 0.0075, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -97,7 +96,7 @@ class Antagonist:
                 if excitation > 0.261799:
                     self.cocontractionReflex.setBaseContribution(dStartCocontraction)
                     self.cocontractionReflex.updateExcitation(excitation)
-                    self.feedbackReflex.inhibit()
+                    self.feedbackReflex.updateExcitation(1.0)
                     self.feedForward = True
                     self.deltaAngleBallistic = dAngle - self.getJointAngle()
             self.angle.setDesired(dAngle)
@@ -137,7 +136,7 @@ class Antagonist:
         self.eqModel.dCocontraction = dCocontraction  
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
-        self.feedbackReflex.removeInhibition()
+        self.feedbackReflex.removeExcitation()
         self.doUpdate()
 
     def passiveHold(self, dCocontraction):
@@ -161,8 +160,9 @@ class Antagonist:
                self.eqModel.cCocontraction = self.eqModel.dCocontraction                
             else:
                 if self.calibrated is 1:
+                    self.feedbackReflex.doDiscount()
                     if self.isFeedbackDue():
-                        self.feedbackReflex.removeInhibition()
+                        self.feedbackReflex.removeExcitation()
 
                     self.cocontractionReflex.doDiscount()
                     cocontReflex = self.cocontractionReflex.getContribution()
@@ -188,7 +188,7 @@ class Antagonist:
             self.generateError()
 
             if self.closedLoop:
-                if self.feedbackReflex.isZero() is False:
+                if self.feedbackReflex.getContribution() < 0.5:
                     self.ballistic = 0
                     self.doClosedLoop()      
                     self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
