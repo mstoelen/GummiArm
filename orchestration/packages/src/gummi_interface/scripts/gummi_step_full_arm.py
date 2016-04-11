@@ -13,7 +13,7 @@ def main(args):
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
     
-    cocontractionsToTry = (0.0, 0.5, 1.0)
+    cocontractionsToTry = (0.5, 1.0)
 
     #rest = (-0.13, -0.3, 0.89, -0.26, -0.05, 0.69, 0.6)
     #rest = (-0.29, -0.40, 0.68, -0.14, 0.14, -1.11, -0.39)

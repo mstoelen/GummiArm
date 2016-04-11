@@ -13,6 +13,7 @@ name: "elbow"
 nameEncoder: "elbow_encoder"
 minAngle: -0.85
 maxAngle: 0.65
+maxAbsForwardError: 0.325
 gains:
     P: 0.03
     I: 0.0002

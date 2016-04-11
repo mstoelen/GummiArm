@@ -16,7 +16,7 @@ def main(args):
 
     gummi = Gummi()
 
-    gummi.setCocontraction(0.5, 0.5, 0.5, 0.5, 0.5)
+    gummi.setCocontraction(0.75, 0.75, 0.75, 0.95, 0.8)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()

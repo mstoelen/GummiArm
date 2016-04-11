@@ -66,7 +66,7 @@ class Reflex:
         return contribution
 
     def updateExcitation(self, newExcitation):
-        if newExcitation > self.excitation:
+        if newExcitation > self.excitation * 1.2:
             self.excitation = newExcitation
             self.maxContribution = self.excitation * (1 - self.inhibition) * self.gain
             #print("New excitation: " + str(newExcitation))

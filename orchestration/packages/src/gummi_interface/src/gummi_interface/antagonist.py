@@ -30,20 +30,24 @@ class Antagonist:
         self.pGain = rospy.get_param("~" + self.name + "/gains/P")
         self.iGain = rospy.get_param("~" + self.name + "/gains/I")
         self.vGain = rospy.get_param("~" + self.name + "/gains/D")
+        self.maxAbsForwardError = rospy.get_param("~" + self.name + "/maxAbsForwardError")
 
         self.range = maxAngle - minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, minAngle, maxAngle, True)
 
         self.eqModel = EquilibriumModel(self.name)
         self.inverseModel = InverseModel(self.name)
+        self.inverseModelCollision = InverseModel(self.name)
         self.forwardModel = ForwardModel(self.name)
 
         if self.calibrated is 1:
             self.inverseModel.loadCalibration()
+            self.inverseModelCollision.loadCalibration()
             self.forwardModel.loadCalibration()
 
         self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0075, 0.0)
+        self.collisionReflex = Reflex(1.0, 0.0075, 0.0)
 
         self.initPublishers()
         self.initVariables()
@@ -161,16 +165,32 @@ class Antagonist:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.calibrated is 1:
+                self.collisionReflex.doDiscount()
                 self.generateForwardError()
-                if self.isOverloaded():
+
+                if self.collisionReflex.getContribution() > 0.5:
                     self.doUpdateOverloaded()
                 else:
                     self.doUpdateFree()
+                    if self.collisionReflex.getContribution() < 0.25:
+                        if self.isOverloaded():
+                            self.collisionReflex.updateExcitation(1.0)
+                            self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
+                            self.inverseModelCollision.setAngle(self.getJointAngle())
             else:
                 self.doUpdateFree()
 
+        self.eqModel.capCocontraction()
+        self.eqModel.createCommand()
+        self.eqModel.publishCommand()
+        self.publishDiagnostics()
+
     def doUpdateOverloaded(self):
-        print("hello")
+        self.feedbackReflex.removeExcitation()
+        if not self.inverseModelCollision.generateOk():
+            print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based collision reaction.")
+        else:
+            self.eqModel.dEquilibrium = self.inverseModelCollision.getEquilibriumPoint()
 
     def doUpdateFree(self):
         if self.velocity:
@@ -206,11 +226,6 @@ class Antagonist:
                 self.doClosedLoop()      
                 self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
 
-        self.eqModel.capCocontraction()
-        self.eqModel.createCommand()
-        self.eqModel.publishCommand()
-        self.publishDiagnostics()
-
     def generateForwardError(self):
         equivalentEq = self.eqModel.getEquilibriumForAlphas()
         equivalentCc = self.eqModel.getCocontractionForAlphas()
@@ -227,7 +242,7 @@ class Antagonist:
 
     def isOverloaded(self):
         absolute = abs(self.forwardError)
-        if  absolute > 0.3: #TODO
+        if  absolute > self.maxAbsForwardError:
             print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ".")
             return True
         else:
