@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 from scipy.interpolate import griddata
 
-class JointModel:
+class InverseModel:
     def __init__(self, name):
         self.name = name
         self.p = 0.0
@@ -21,7 +21,7 @@ class JointModel:
         self.thetas = thetas
         self.ccs = ccs
 
-    def generateCommand(self):
+    def generateOk(self):
         self.p = griddata((self.thetas, self.ccs), self.equilibriums, (self.angle, self.cocontraction))
         if np.isnan(self.p):
             return False

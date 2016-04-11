@@ -37,6 +37,12 @@ class EquilibriumModel:
         self.maxCocontraction = 1.0
         self.dEqVelCalibration = 1.0
 
+    def getEquilibriumForAlphas(self):
+        return (self.extensor.getJointAngle()*self.signExtensor - self.flexor.getJointAngle()*self.signFlexor)*2/self.servoRange
+
+    def getCocontractionForAlphas(self):
+        return (self.extensor.getJointAngle()*self.signExtensor + self.flexor.getJointAngle()*self.signFlexor)/pi
+        
     def createCommand(self):
         equilibrium = self.dEquilibrium
         cocontraction = self.cCocontraction

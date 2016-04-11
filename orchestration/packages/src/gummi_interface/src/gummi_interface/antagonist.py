@@ -10,7 +10,8 @@ from collections import deque
 
 from helpers import fetchParam
 from joint_angle import JointAngle
-from joint_model import JointModel
+from inverse_model import InverseModel
+from forward_model import ForwardModel
 from equilibrium_model import EquilibriumModel
 from reflex import Reflex
 from dynamixel_controllers.srv import TorqueEnable
@@ -34,10 +35,12 @@ class Antagonist:
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, minAngle, maxAngle, True)
 
         self.eqModel = EquilibriumModel(self.name)
-        self.inverseModel = JointModel(self.name)
+        self.inverseModel = InverseModel(self.name)
+        self.forwardModel = ForwardModel(self.name)
 
         if self.calibrated is 1:
             self.inverseModel.loadCalibration()
+            self.forwardModel.loadCalibration()
 
         self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0075, 0.0)
@@ -55,9 +58,10 @@ class Antagonist:
         self.closedLoop = False
         self.feedForward = False
         self.errorLast = 0.0
-        self.ballistic = 0
-        self.deltaAngleBallistic = 0
-        self.deltaEqFeedback = 0
+        self.ballistic = 0.0
+        self.deltaAngleBallistic = 0.0
+        self.deltaEqFeedback = 0.0
+        self.forwardError = 0.0
 
         self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
@@ -156,47 +160,78 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            if self.velocity:
-               self.eqModel.cCocontraction = self.eqModel.dCocontraction                
+            if self.calibrated is 1:
+                self.generateForwardError()
+                if self.isOverloaded():
+                    self.doUpdateOverloaded()
+                else:
+                    self.doUpdateFree()
             else:
-                if self.calibrated is 1:
-                    self.feedbackReflex.doDiscount()
-                    if self.isFeedbackDue():
-                        self.feedbackReflex.removeExcitation()
+                self.doUpdateFree()
 
-                    self.cocontractionReflex.doDiscount()
-                    cocontReflex = self.cocontractionReflex.getContribution()
-                    sumCocontraction = cocontReflex
-                    if sumCocontraction > self.eqModel.maxCocontraction:
-                        sumCocontraction = self.eqModel.maxCocontraction
-                        
-                    self.inverseModel.setCocontraction(sumCocontraction)
-                    self.eqModel.cCocontraction = sumCocontraction
+    def doUpdateOverloaded(self):
+        print("hello")
+
+    def doUpdateFree(self):
+        if self.velocity:
+            self.eqModel.cCocontraction = self.eqModel.dCocontraction                
+        else:
+            if self.calibrated is 1:
+                self.feedbackReflex.doDiscount()
+                if self.isFeedbackDue():
+                    self.feedbackReflex.removeExcitation()
                     
-                    if self.feedForward:
-                        #now = rospy.get_time()
-                        if not self.inverseModel.generateCommand():
-                            print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
-                        else:
-                            self.eqModel.dEquilibrium = self.inverseModel.getEquilibriumPoint()
-                        self.ballistic = 1
-                        self.feedForward = False
-                        #then = rospy.get_time()
-                        #duration = then - now
-                        #print("Call to inverse model for joint " + self.name + " took: " + str(duration) + " seconds.")
- 
-            self.generateError()
+                self.cocontractionReflex.doDiscount()
+                cocontReflex = self.cocontractionReflex.getContribution()
+                sumCocontraction = cocontReflex
+                if sumCocontraction > self.eqModel.maxCocontraction:
+                    sumCocontraction = self.eqModel.maxCocontraction
+                    
+                self.inverseModel.setCocontraction(sumCocontraction)
+                self.eqModel.cCocontraction = sumCocontraction
+                
+                if self.feedForward:
+                    if not self.inverseModel.generateOk():
+                        print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
+                    else:
+                        self.eqModel.dEquilibrium = self.inverseModel.getEquilibriumPoint()
+                    self.ballistic = 1
+                    self.feedForward = False
+                    
+        self.generateError()
 
-            if self.closedLoop:
-                if self.feedbackReflex.getContribution() < 0.5:
-                    self.ballistic = 0
-                    self.doClosedLoop()      
-                    self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
+        if self.closedLoop:
+            if self.feedbackReflex.getContribution() < 0.5:
+                self.ballistic = 0
+                self.doClosedLoop()      
+                self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
 
-            self.eqModel.capCocontraction()
-            self.eqModel.createCommand()
-            self.eqModel.publishCommand()
-            self.publishDiagnostics()
+        self.eqModel.capCocontraction()
+        self.eqModel.createCommand()
+        self.eqModel.publishCommand()
+        self.publishDiagnostics()
+
+    def generateForwardError(self):
+        equivalentEq = self.eqModel.getEquilibriumForAlphas()
+        equivalentCc = self.eqModel.getCocontractionForAlphas()
+        self.forwardModel.setEquilibrium(equivalentEq)
+        self.forwardModel.setCocontraction(equivalentCc)
+        if not self.forwardModel.generateOk():
+            print("Warning: Outside load calibration data for joint " + self.name + ", not estimating load.")
+            self.forwardError = 0.0
+            return False
+        else:
+            modelAngle = self.forwardModel.getJointAngle()
+            self.forwardError = abs(modelAngle - self.getJointAngle())
+            return True
+
+    def isOverloaded(self):
+        absolute = abs(self.forwardError)
+        if  absolute > 0.3: #TODO
+            print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ".")
+            return True
+        else:
+            return False
 
     def getBallisticAim(self, desired):
         delta = desired - self.getJointAngle()
@@ -240,6 +275,7 @@ class Antagonist:
         msg.alpha_extensor = self.eqModel.extensor.getJointAngle()
         msg.cocontraction = self.eqModel.cCocontraction
         msg.ballistic = self.ballistic
+        msg.forward_error = self.forwardError
         self.pubDiagnostics.publish(msg)
 
     def getJointAngle(self):
