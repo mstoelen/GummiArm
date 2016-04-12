@@ -168,15 +168,16 @@ class Antagonist:
                 self.collisionReflex.doDiscount()
                 self.generateForwardError()
 
+                if self.isOverloaded():
+                    self.collisionReflex.updateExcitation(1.0)
+
                 if self.collisionReflex.getContribution() > 0.5:
+                    if self.collisionReflex.getContribution() > 0.99:
+                        self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
+                        self.inverseModelCollision.setAngle(self.getJointAngle())
                     self.doUpdateOverloaded()
                 else:
                     self.doUpdateFree()
-                    if self.collisionReflex.getContribution() < 0.25:
-                        if self.isOverloaded():
-                            self.collisionReflex.updateExcitation(1.0)
-                            self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
-                            self.inverseModelCollision.setAngle(self.getJointAngle())
             else:
                 self.doUpdateFree()
 

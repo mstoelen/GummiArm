@@ -176,6 +176,7 @@ GummiTeleop::GummiTeleop()
       printf("Debug: Joint %d found: %s.\n", i,  joint_names_.at(i).c_str());
     }
   }
+  joint_stiffnesses_.at(6) = -0.6;
 
   gripper_pub_ = nh_.advertise<std_msgs::Float64>("teleop/gripper", 1);
   joint_cmd_pub_ = nh_.advertise<sensor_msgs::JointState>("teleop/joint_commands", 1);
