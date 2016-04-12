@@ -66,6 +66,7 @@ class Antagonist:
         self.deltaAngleBallistic = 0.0
         self.deltaEqFeedback = 0.0
         self.forwardError = 0.0
+        self.lastAbsForwardError = 0.0
 
         self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
@@ -243,8 +244,11 @@ class Antagonist:
 
     def isOverloaded(self):
         absolute = abs(self.forwardError)
-        if  absolute > self.maxAbsForwardError:
-            print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ".")
+        rate = absolute - self.lastAbsForwardError
+        self.lastAbsForwardError = absolute
+        print rate
+        if  absolute > self.maxAbsForwardError and rate > 0.05:
+            print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ", rate: " + str(round(rate,4)) + ".")
             return True
         else:
             return False
