@@ -13,7 +13,7 @@ name: "shoulder_yaw"
 nameEncoder: "shoulder_yaw_encoder"
 minAngle: -0.52
 maxAngle: 1.04
-maxAbsForwardError: 0.25
+maxAbsForwardError: 0.3
 gains:
     P: 0.015
     I: 0

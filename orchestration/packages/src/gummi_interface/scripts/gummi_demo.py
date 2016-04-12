@@ -11,7 +11,7 @@ def main(args):
     pi = 3.1416
 
     cocontractionsToTry = (0.33, 0.66, 1.0)
-    jointNums = (0,1,2,4,6)
+    jointNums = (6,1,2,4,0)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  

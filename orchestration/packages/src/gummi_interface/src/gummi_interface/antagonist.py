@@ -171,9 +171,9 @@ class Antagonist:
 
                 if self.isOverloaded():
                     self.collisionReflex.updateExcitation(1.0)
-
+                    
                 if self.collisionReflex.getContribution() > 0.5:
-                    if self.collisionReflex.getContribution() > 0.99:
+                    if self.collisionReflex.getContribution() > 0.9:
                         self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
                         self.inverseModelCollision.setAngle(self.getJointAngle())
                     self.doUpdateOverloaded()
@@ -188,10 +188,10 @@ class Antagonist:
         self.publishDiagnostics()
 
     def doUpdateOverloaded(self):
-        self.feedbackReflex.removeExcitation()
         if not self.inverseModelCollision.generateOk():
             print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based collision reaction.")
         else:
+            self.feedbackReflex.removeExcitation()
             self.eqModel.dEquilibrium = self.inverseModelCollision.getEquilibriumPoint()
 
     def doUpdateFree(self):
@@ -246,8 +246,7 @@ class Antagonist:
         absolute = abs(self.forwardError)
         rate = absolute - self.lastAbsForwardError
         self.lastAbsForwardError = absolute
-        print rate
-        if  absolute > self.maxAbsForwardError and rate > 0.05:
+        if  (absolute > self.maxAbsForwardError) or (absolute > self.maxAbsForwardError/3.0 and rate > 0.1):
             print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ", rate: " + str(round(rate,4)) + ".")
             return True
         else:

@@ -168,7 +168,7 @@ GummiTeleop::GummiTeleop()
   assert(joint_names_.size() == num_joints_);
 
   for(int i = 0; i < num_joints_; i++) {
-    joint_stiffnesses_.push_back(-0.3);
+    joint_stiffnesses_.push_back(-0.2);
     desired_joint_velocities_.push_back(0.0);
     current_joint_positions_.push_back(0.0);
 
@@ -176,7 +176,7 @@ GummiTeleop::GummiTeleop()
       printf("Debug: Joint %d found: %s.\n", i,  joint_names_.at(i).c_str());
     }
   }
-  joint_stiffnesses_.at(6) = -0.6;
+  joint_stiffnesses_.at(6) = -0.75;
 
   gripper_pub_ = nh_.advertise<std_msgs::Float64>("teleop/gripper", 1);
   joint_cmd_pub_ = nh_.advertise<sensor_msgs::JointState>("teleop/joint_commands", 1);
