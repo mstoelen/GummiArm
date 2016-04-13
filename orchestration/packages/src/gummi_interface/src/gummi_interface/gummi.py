@@ -184,5 +184,12 @@ class Gummi:
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)
+
+    def setCollisionResponses(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
+        self.shoulderYaw.setCollisionResponse(shoulderYaw)
+        self.shoulderRoll.setCollisionResponse(shoulderRoll)
+        self.shoulderPitch.setCollisionResponse(shoulderPitch)
+        self.elbow.setCollisionResponse(elbow)
+        self.wrist.setCollisionResponse(wrist)
     
         

@@ -61,12 +61,13 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
+        self.collisionResponse = False
         self.errorLast = 0.0
         self.ballistic = 0.0
         self.deltaAngleBallistic = 0.0
         self.deltaEqFeedback = 0.0
-        self.forwardError = 0.0
         self.lastAbsForwardError = 0.0
+        self.forwardErrors = deque()
 
         self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
@@ -165,7 +166,7 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            if self.calibrated is 1:
+            if (self.calibrated is 1) and self.collisionResponse:
                 self.collisionReflex.doDiscount()
                 self.generateForwardError()
 
@@ -235,15 +236,18 @@ class Antagonist:
         self.forwardModel.setCocontraction(equivalentCc)
         if not self.forwardModel.generateOk():
             print("Warning: Outside load calibration data for joint " + self.name + ", not estimating load.")
-            self.forwardError = 0.0
+            #self.forwardError = 0.0 #TODO
             return False
         else:
             modelAngle = self.forwardModel.getJointAngle()
-            self.forwardError = abs(modelAngle - self.getJointAngle())
+            self.forwardErrors.appendleft(modelAngle - self.getJointAngle())
+            if len(self.forwardErrors) > 3:
+                self.forwardErrors.pop()
             return True
 
     def isOverloaded(self):
-        absolute = abs(self.forwardError)
+        median = np.median(self.forwardErrors) 
+        absolute = abs(median)
         rate = absolute - self.lastAbsForwardError
         self.lastAbsForwardError = absolute
         if  (absolute > self.maxAbsForwardError) or (absolute > self.maxAbsForwardError/3.0 and rate > 0.1):
@@ -294,7 +298,7 @@ class Antagonist:
         msg.alpha_extensor = self.eqModel.extensor.getJointAngle()
         msg.cocontraction = self.eqModel.cCocontraction
         msg.ballistic = self.ballistic
-        msg.forward_error = self.forwardError
+        msg.forward_error = np.median(self.forwardErrors)
         self.pubDiagnostics.publish(msg)
 
     def getJointAngle(self):
@@ -302,3 +306,6 @@ class Antagonist:
 
     def getName(self):
         return self.name
+
+    def setCollisionResponse(self, response):
+        self.collisionResponse = response

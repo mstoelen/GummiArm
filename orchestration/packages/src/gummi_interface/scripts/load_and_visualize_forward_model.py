@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from gummi_interface.joint_model import JointModel
+from gummi_interface.forward_model import ForwardModel
 
 def main(args):
 
@@ -17,13 +17,11 @@ def main(args):
     print("Please enter joint name:")
     joint = raw_input()
 
-    print("Please enter min angle:")
-    minAngle = float(raw_input())
-    minAngle_deg = minAngle * 180/pi
+    print("Please enter min eqilibrium:")
+    minEq = float(raw_input())
 
-    print("Please enter max angle:")
-    maxAngle = float(raw_input())
-    maxAngle_deg = maxAngle * 180/pi
+    print("Please enter max equilibrium:")
+    maxEq = float(raw_input())
 
     fileName = path + "/calibration_" + joint + ".yaml"
  
@@ -40,14 +38,18 @@ def main(args):
         theta *= 180/pi
         thetas_deg.append(round(theta,1))
 
-    jm = JointModel("test")
-    jm.setCalibration(thetas, ccs, equilibriums)
-    gridX, gridY = np.mgrid[minAngle:maxAngle:0.01, 0:1:0.01]
+    jm = ForwardModel("test")
+    jm.setCalibration(thetas_deg, ccs, equilibriums)
+    gridX, gridY = np.mgrid[minEq:maxEq:0.01, 0:1:0.01]
     map = jm.getMap(gridX, gridY)
-    plt.imshow(map.T, extent=(minAngle_deg, maxAngle_deg, 0, 100), aspect='auto')
-    plt.xlabel('Joint angle (degrees)', fontsize=18)
+
+    ax = plt.imshow(map.T, extent=(minEq, maxEq, 0, 100), aspect='auto')
+    plt.xlabel('Equilibrium point', fontsize=18)
     plt.ylabel('Co-contraction (%)', fontsize=18)
     plt.tick_params(axis='both', which='major', labelsize=18)
+    cbar = plt.colorbar(ax)
+    cbar.set_label('Joint angle (degrees)', size=18)
+    cbar.ax.tick_params(labelsize=18) 
     plt.tight_layout()
     plt.show()
 

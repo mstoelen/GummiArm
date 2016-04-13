@@ -15,6 +15,7 @@ def main(args):
     r = rospy.Rate(60)  
 
     gummi = Gummi()
+    gummi.setCollisionResponses(True, True, True, True, False)
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
