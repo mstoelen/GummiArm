@@ -166,36 +166,47 @@ class Antagonist:
         if delay.to_sec() > 0.25:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
-            if (self.calibrated is 1) and self.collisionResponse:
-                self.collisionReflex.doDiscount()
-                self.generateForwardError()
-
-                if self.isOverloaded():
-                    self.collisionReflex.updateExcitation(1.0)
-                    
-                if self.collisionReflex.getContribution() > 0.5:
-                    if self.collisionReflex.getContribution() > 0.9:
-                        self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
-                        self.inverseModelCollision.setAngle(self.getJointAngle())
-                    self.doUpdateOverloaded()
-                else:
-                    self.doUpdateFree()
+            if self.angle.isBeyondMin() or self.angle.isBeyondMax():
+                self.doUpdateWhenLimit()
             else:
-                self.doUpdateFree()
+                if (self.calibrated is 1) and self.collisionResponse:
+                    self.collisionReflex.doDiscount()
+                    self.generateForwardError()
+
+                    if self.isOverloaded():
+                        self.collisionReflex.updateExcitation(1.0)
+                        
+                    if self.collisionReflex.getContribution() > 0.5:
+                        if self.collisionReflex.getContribution() > 0.9:
+                            self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
+                            self.inverseModelCollision.setAngle(self.getJointAngle())
+                        self.doUpdateWhenCollision()
+
+                    else:
+                        self.doUpdateWhenFree()
+
+            else:
+                self.doUpdateWhenFree()
 
         self.eqModel.capCocontraction()
         self.eqModel.createCommand()
         self.eqModel.publishCommand()
         self.publishDiagnostics()
 
-    def doUpdateOverloaded(self):
+    def doUpdateWhenLimit(self):
+        if self.angle.isBeyondMin():
+            self.eqModel.doEquilibriumIncrement(0.05)
+        if self.angle.isBeyondMax():
+            self.eqModel.doEquilibriumIncrement(-0.05)
+
+    def doUpdateWhenCollision(self):
         if not self.inverseModelCollision.generateOk():
             print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based collision reaction.")
         else:
             self.feedbackReflex.removeExcitation()
             self.eqModel.dEquilibrium = self.inverseModelCollision.getEquilibriumPoint()
 
-    def doUpdateFree(self):
+    def doUpdateWhenFree(self):
         if self.velocity:
             self.eqModel.cCocontraction = self.eqModel.dCocontraction
         else:

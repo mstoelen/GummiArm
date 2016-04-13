@@ -27,7 +27,6 @@ class JointAngle:
         self.dAngle = 0
         self.dVelocity = 0
         self.lastAngle = 0
-        self.atLimit = False
 
     def encoderCallback(self, msg):
         angle = msg.current_pos * self.sign
@@ -61,14 +60,11 @@ class JointAngle:
         return self.dAngle
 
     def capDesired(self):
-        self.atLimit = False
         if self.dAngle > self.maxAngle:
             self.dAngle = self.maxAngle
-            self.atLimit = True
         else:
             if self.dAngle < self.minAngle:
                 self.dAngle = self.minAngle
-                self.atLimit = True
 
     def getEncoder(self):
         return self.encoderAngle
@@ -84,3 +80,13 @@ class JointAngle:
 
     def getMsgTime(self):
         return self.msgTime
+
+    def isBeyondMin(self):
+        if self.encoderAngle < self.minAngle:
+            return True
+        return False
+
+    def isBeyondMax(self):
+        if self.encoderAngle > self.maxAngle:
+            return True
+        return False

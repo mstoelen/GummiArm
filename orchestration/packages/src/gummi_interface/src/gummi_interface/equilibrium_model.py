@@ -77,5 +77,6 @@ class EquilibriumModel:
 
     def getCommandedCocontraction(self):
         return self.cCocontraction
+        
 
 
