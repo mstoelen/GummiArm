@@ -197,7 +197,7 @@ class Antagonist:
 
     def doUpdateFree(self):
         if self.velocity:
-            self.eqModel.cCocontraction = self.eqModel.dCocontraction                
+            self.eqModel.cCocontraction = self.eqModel.dCocontraction
         else:
             if self.calibrated is 1:
                 self.feedbackReflex.doDiscount()
@@ -236,7 +236,8 @@ class Antagonist:
         self.forwardModel.setCocontraction(equivalentCc)
         if not self.forwardModel.generateOk():
             print("Warning: Outside load calibration data for joint " + self.name + ", not estimating load.")
-            #self.forwardError = 0.0 #TODO
+            self.forwardErrors.appendleft(0.0)
+            self.lastAbsForwardError = 0.0
             return False
         else:
             modelAngle = self.forwardModel.getJointAngle()
