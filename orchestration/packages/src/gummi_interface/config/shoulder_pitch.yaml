@@ -13,7 +13,7 @@ name: "shoulder_pitch"
 nameEncoder: "shoulder_pitch_encoder"
 minAngle: -0.15
 maxAngle: 1.1
-maxAbsForwardError: 0.3
+maxAbsForwardError: 0.25
 gains:
     P: 0.065
     I: 0.00001

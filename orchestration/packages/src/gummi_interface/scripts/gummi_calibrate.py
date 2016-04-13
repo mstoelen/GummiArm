@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from gummi_interface.joint_model import JointModel
+from gummi_interface.inverse_model import InverseModel
 from gummi_interface.antagonist import Antagonist
 from gummi_interface.gummi import Gummi
 
@@ -20,7 +20,7 @@ def main(args):
     r = rospy.Rate(60)  
     
     gummi = Gummi()
-    joint = gummi.wrist
+    joint = gummi.elbow
     numSteps = 7
 
     minAngle = joint.angle.getMin()
@@ -87,7 +87,7 @@ def main(args):
         outfile.write(text)
         print("Calibration data written to: " + fileName)
 
-    jm = JointModel("test")
+    jm = InverseModel("test")
     jm.setCalibration(thetas, ccs, equilibriums)
     gridX, gridY = np.mgrid[minAngle:maxAngle:0.01, 0:1:0.01]
     map = jm.getMap(gridX, gridY)

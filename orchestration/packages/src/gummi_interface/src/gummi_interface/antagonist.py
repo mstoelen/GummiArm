@@ -66,8 +66,8 @@ class Antagonist:
         self.ballistic = 0.0
         self.deltaAngleBallistic = 0.0
         self.deltaEqFeedback = 0.0
-        self.lastAbsForwardError = 0.0
-        self.forwardErrors = deque()
+        self.lastForwardError = 0.0
+        self.forwardError = 0.0
 
         self.ballisticRatio = 0.85
         self.feedbackRatio = 0.5
@@ -130,7 +130,8 @@ class Antagonist:
         self.velocity = False
         self.closedLoop = False
         self.feedForward = False
-        self.eqModel.doEquilibriumIncrement(dEquilibriumVel)
+        if (not self.angle.isBeyondMin()) and (not self.angle.isBeyondMax()):
+            self.eqModel.doEquilibriumIncrement(dEquilibriumVel)
         self.eqModel.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
@@ -167,11 +168,12 @@ class Antagonist:
             print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.angle.isBeyondMin() or self.angle.isBeyondMax():
+                self.collisionReflex.removeExcitation()
                 self.doUpdateWhenLimit()
             else:
                 if (self.calibrated is 1) and self.collisionResponse:
-                    self.collisionReflex.doDiscount()
                     self.generateForwardError()
+                    self.collisionReflex.doDiscount()
 
                     if self.isOverloaded():
                         self.collisionReflex.updateExcitation(1.0)
@@ -181,12 +183,10 @@ class Antagonist:
                             self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
                             self.inverseModelCollision.setAngle(self.getJointAngle())
                         self.doUpdateWhenCollision()
-
                     else:
                         self.doUpdateWhenFree()
-
-            else:
-                self.doUpdateWhenFree()
+                else:
+                    self.doUpdateWhenFree()
 
         self.eqModel.capCocontraction()
         self.eqModel.createCommand()
@@ -195,13 +195,14 @@ class Antagonist:
 
     def doUpdateWhenLimit(self):
         if self.angle.isBeyondMin():
-            self.eqModel.doEquilibriumIncrement(0.05)
+            self.eqModel.doEquilibriumIncrement(0.002)
         if self.angle.isBeyondMax():
-            self.eqModel.doEquilibriumIncrement(-0.05)
+            self.eqModel.doEquilibriumIncrement(-0.002)
 
     def doUpdateWhenCollision(self):
         if not self.inverseModelCollision.generateOk():
             print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based collision reaction.")
+            self.collisionReflex.removeExcitation()
         else:
             self.feedbackReflex.removeExcitation()
             self.eqModel.dEquilibrium = self.inverseModelCollision.getEquilibriumPoint()
@@ -247,22 +248,19 @@ class Antagonist:
         self.forwardModel.setCocontraction(equivalentCc)
         if not self.forwardModel.generateOk():
             print("Warning: Outside load calibration data for joint " + self.name + ", not estimating load.")
-            self.forwardErrors.appendleft(0.0)
-            self.lastAbsForwardError = 0.0
+            self.forwardError = 0.0
+            self.lastForwardError = 0.0
             return False
         else:
             modelAngle = self.forwardModel.getJointAngle()
-            self.forwardErrors.appendleft(modelAngle - self.getJointAngle())
-            if len(self.forwardErrors) > 3:
-                self.forwardErrors.pop()
+            self.lastForwardError = self.forwardError
+            self.forwardError = modelAngle - self.getJointAngle()
             return True
 
     def isOverloaded(self):
-        median = np.median(self.forwardErrors) 
-        absolute = abs(median)
-        rate = absolute - self.lastAbsForwardError
-        self.lastAbsForwardError = absolute
-        if  (absolute > self.maxAbsForwardError) or (absolute > self.maxAbsForwardError/3.0 and rate > 0.1):
+        absolute = abs(self.forwardError)
+        rate = absolute - abs(self.lastForwardError)
+        if  (absolute > self.maxAbsForwardError) or (absolute > self.maxAbsForwardError/3.0 and rate > 0.15):
             print("Warning: Overloading joint " + self.name + ", absolute forward error: " + str(round(absolute,2)) + ", rate: " + str(round(rate,4)) + ".")
             return True
         else:
@@ -310,7 +308,7 @@ class Antagonist:
         msg.alpha_extensor = self.eqModel.extensor.getJointAngle()
         msg.cocontraction = self.eqModel.cCocontraction
         msg.ballistic = self.ballistic
-        msg.forward_error = np.median(self.forwardErrors)
+        msg.forward_error = self.forwardError
         self.pubDiagnostics.publish(msg)
 
     def getJointAngle(self):
