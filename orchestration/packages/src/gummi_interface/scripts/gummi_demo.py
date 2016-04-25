@@ -11,7 +11,7 @@ def main(args):
     pi = 3.1416
 
     cocontractionsToTry = (0.33, 0.66, 1.0)
-    jointNums = (6,1,2,4,0)
+    jointNums = (0,1,2,4,6)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -60,21 +60,21 @@ def main(args):
             
         for cocont in cocontractionsToTry: 
                 
-            for i in range (0,1000):
+            for i in range (0,500):
                        
-                if i < 350:
+                if i < 200:
                     command = rest
                     joint.servoTo(command * pi/180, cocont)
                 else:
-                    if i < 600:
+                    if i < 400:
                         command = desired
                         now = False
-                        if i == 350:
+                        if i == 200:
                             now = True
                     else:
                         command = rest
                         now = False
-                        if i == 600:
+                        if i == 400:
                             now = True
                     joint.goTo(command * pi/180, cocont, now)
                 r.sleep()
