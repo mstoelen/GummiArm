@@ -10,7 +10,7 @@ def main(args):
 
     pi = 3.1416
 
-    cocontractionsToTry = (0.33, 0.66, 1.0)
+    cocontractionsToTry = (0.25, 0.25)
     jointNums = (0,1,2,4,6)
 
     rospy.init_node('gummi', anonymous=True)
