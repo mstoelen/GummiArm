@@ -1,0 +1,3 @@
+[submodule "media/docs"]
+	path = media/docs
+	url = https://github.com/mstoelen/GummiArm.wiki.git
