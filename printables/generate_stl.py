@@ -9,7 +9,7 @@ import glob
 import FreeCAD
 import Mesh
 
-rootdir = '/Users/mstoelen/github/GummiArm/printables' # point to printables folder
+rootdir = '/home/mstoelen/github/GummiArm/printables' # point to printables folder
 
 for subdir, dirs, files in os.walk(rootdir):
     for filename in glob.glob(os.path.join(subdir, '*.FCStd')):
