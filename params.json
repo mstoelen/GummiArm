@@ -1,7 +1,7 @@
 {
   "name": "GummiArm",
   "tagline": "A compliant and printable robot arm.",
-  "body": "![The GummiArm](https://raw.githubusercontent.com/mstoelen/GummiArm/master/media/web/gummi_mug_small.jpg)\r\n\r\n\r\nWelcome to the GummiArm project! Checkout the [repository](https://github.com/mstoelen/GummiArm) for the latest code and printables.\r\n\r\nVideos: https://plus.google.com/collection/oGXbV\r\n\r\nPart of the DeCoRo project at Plymouth University: http://www.tech.plym.ac.uk/SoCCE/CRNS/decoro/\r\n",
+  "body": "![The GummiArm](https://raw.githubusercontent.com/mstoelen/GummiArm/master/media/web/gummi_mug_small.jpg)\r\n\r\n\r\nWelcome to the GummiArm project! \r\n\r\nCheckout the [repository](https://github.com/mstoelen/GummiArm) for the latest code and printables, and the [wiki](https://github.com/mstoelen/GummiArm/wiki) for documentation.\r\n\r\nVideos: https://plus.google.com/collection/oGXbV\r\n\r\nPart of the DeCoRo project at Plymouth University: http://www.tech.plym.ac.uk/SoCCE/CRNS/decoro/\r\n",
   "google": "UA-71960553-1",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
