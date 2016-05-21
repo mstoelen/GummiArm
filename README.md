@@ -1,7 +1,7 @@
 # GummiArm
 Repository for the GummiArm robot project: http://mstoelen.github.io/GummiArm/
 
-Wiki: https://github.com/mstoelen/GummiArm/wiki
+Documentation in the wiki: https://github.com/mstoelen/GummiArm/wiki
 
 Videos: https://plus.google.com/collection/oGXbV
 
