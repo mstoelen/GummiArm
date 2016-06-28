@@ -9,13 +9,13 @@
                     port_name: "/dev/ttyUSB0"
                     baud_rate: 1000000
                     min_motor_id: 1
-                    max_motor_id: 25
+                    max_motor_id: 10
                     update_rate: 20
                 gummi_port_body:
                     port_name: "/dev/ttyUSB1"
                     baud_rate: 1000000
-                    min_motor_id: 1
-                    max_motor_id: 25
+                    min_motor_id: 11
+                    max_motor_id: 19
                     update_rate: 60
         </rosparam>
     </node>
