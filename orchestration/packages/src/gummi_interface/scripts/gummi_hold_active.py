@@ -31,8 +31,6 @@ def main(args):
 
     print("GummiArm is live!")
 
-
-    gummi.setCocontraction(cocont, cocont, cocont, cocont, 0.4)
       
     print("Moving arm into place.")
     gummi.goTo(desired, True)
@@ -41,6 +39,7 @@ def main(args):
         r.sleep()
 
     print("Setting co-contraction - hold arm.")
+    gummi.setCocontraction(cocont, cocont, cocont, cocont, 0.4)
     for i in range (0,200):
         gummi.servoTo(desired)
         r.sleep()
