@@ -6,7 +6,7 @@ shoulder_yaw_encoder_controller:
     joint_name: shoulder_yaw_encoder
     joint_speed: 0.5
     motor:
-        id: 18
+        id: 8
         init: 512
         min: 0
         max: 1023

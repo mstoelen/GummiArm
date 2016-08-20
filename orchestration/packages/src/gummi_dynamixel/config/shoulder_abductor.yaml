@@ -6,7 +6,7 @@ shoulder_abductor_controller:
     joint_name: shoulder_abductor
     joint_speed: 100
     motor:
-        id: 11
+        id: 2
         init: 6143
         min: 0
         max: 12287

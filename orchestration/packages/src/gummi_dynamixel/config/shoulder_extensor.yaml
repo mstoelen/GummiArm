@@ -6,7 +6,7 @@ shoulder_extensor_controller:
     joint_name: shoulder_extensor
     joint_speed: 100
     motor:
-        id: 14
+        id: 4
         init: 6143
         min: 0
         max: 12287

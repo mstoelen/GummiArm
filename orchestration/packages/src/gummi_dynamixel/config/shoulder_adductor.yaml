@@ -6,7 +6,7 @@ shoulder_adductor_controller:
     joint_name: shoulder_adductor
     joint_speed: 100
     motor:
-        id: 12
+        id: 3
         init: 6143
         min: 0
         max: 12287

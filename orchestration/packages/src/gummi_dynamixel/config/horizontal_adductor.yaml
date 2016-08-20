@@ -6,7 +6,7 @@ horizontal_adductor_controller:
     joint_name: horizontal_adductor
     joint_speed: 100
     motor:
-        id: 17
+        id: 7
         init: 6143
         min: 0
         max: 12287

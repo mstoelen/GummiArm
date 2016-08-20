@@ -6,7 +6,7 @@ horizontal_abductor_controller:
     joint_name: horizontal_abductor
     joint_speed: 100
     motor:
-        id: 16
+        id: 6
         init: 6143
         min: 0
         max: 12287

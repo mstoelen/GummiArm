@@ -6,7 +6,7 @@ head_yaw_controller:
     joint_name: head_yaw
     joint_speed: 1.5
     motor:
-        id: 19
+        id: 101
         init: 512
         min: 0
         max: 1023
