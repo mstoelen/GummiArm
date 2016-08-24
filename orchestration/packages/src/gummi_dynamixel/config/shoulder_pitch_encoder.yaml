@@ -6,7 +6,7 @@ shoulder_pitch_encoder_controller:
     joint_name: shoulder_pitch_encoder
     joint_speed: 0.5
     motor:
-        id: 10
+        id: 11
         init: 512
         min: 0
         max: 1023

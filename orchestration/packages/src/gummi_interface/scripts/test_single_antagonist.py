@@ -14,6 +14,11 @@ def main(args):
     name = raw_input("Enter name of antagonist joint to test:  ")
     joint = Antagonist(name)
 
+    print("Moving to zero equilibirum.")
+    for i in range(0,400):
+        joint.moveTo(0,0)
+        r.sleep()
+
     cocont = float(raw_input("Enter co-contraction level:  "))
 
     minAngle = joint.angle.getMin()
@@ -28,9 +33,9 @@ def main(args):
             start = rospy.Time.now()
         else:
             if secondsSinceStart > 5:
-                joint.servoTo(minAngle + 0.1,cocont)
+                joint.servoTo(maxAngle - 0.2,cocont)
             else:
-                joint.servoTo(maxAngle - 0.1,cocont)
+                joint.servoTo(minAngle + 0.2,cocont)
                
         r.sleep()
   

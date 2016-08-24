@@ -6,7 +6,7 @@ shoulder_roll_encoder_controller:
     joint_name: shoulder_roll_encoder
     joint_speed: 0.5
     motor:
-        id: 15
+        id: 1
         init: 512
         min: 0
         max: 1023

@@ -3,8 +3,8 @@ equilibrium:
     sign: -1
     signFlexor: -1
     signExtensor: -1
-    nameFlexor: "shoulder_abductor"
-    nameExtensor: "shoulder_adductor"
+    nameFlexor: "shoulder_adductor"
+    nameExtensor: "shoulder_abductor"
     servoRange: 6.2832
     servoOffset: 0
 signEncoder: 1
