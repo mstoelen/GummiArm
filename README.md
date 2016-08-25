@@ -3,6 +3,8 @@ Repository for the GummiArm robot project: http://mstoelen.github.io/GummiArm/
 
 Documentation in the wiki: https://github.com/mstoelen/GummiArm/wiki
 
+NEW! Detailed build instructions on the way. See progress here: http://htmlpreview.github.com/?https://github.com/mstoelen/GummiArm/blob/master/media/instructions/build.html
+
 Videos: https://plus.google.com/collection/oGXbV
 
 
