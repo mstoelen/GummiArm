@@ -6,7 +6,7 @@ wrist_extensor_controller:
     joint_name: wrist_extensor
     joint_speed: 6.28
     motor:
-        id: 6
+        id: 23
         init: 512
         min: 0
         max: 1023

@@ -6,7 +6,7 @@ triceps_controller:
     joint_name: triceps
     joint_speed: 100.0
     motor:
-        id: 2
+        id: 14
         init: 6143
         min: 0
         max: 12287

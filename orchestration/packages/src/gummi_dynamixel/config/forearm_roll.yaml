@@ -6,7 +6,7 @@ forearm_roll_controller:
     joint_name: forearm_roll
     joint_speed: 3.0
     motor:
-        id: 4
+        id: 21
         init: 512
         min: 0
         max: 1023

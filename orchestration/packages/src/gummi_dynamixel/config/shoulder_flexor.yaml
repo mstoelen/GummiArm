@@ -6,7 +6,7 @@ shoulder_flexor_controller:
     joint_name: shoulder_flexor
     joint_speed: 100
     motor:
-        id: 5
+        id: 4
         init: 6143
         min: 0
         max: 12287

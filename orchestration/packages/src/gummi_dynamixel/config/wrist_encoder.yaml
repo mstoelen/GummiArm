@@ -6,7 +6,7 @@ wrist_encoder_controller:
     joint_name: wrist_encoder
     joint_speed: 0.5
     motor:
-        id: 8
+        id: 25
         init: 512
         min: 0
         max: 1023

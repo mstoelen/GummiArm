@@ -26,9 +26,9 @@ def main(args):
         gummi.goRestingPose(False)
         r.sleep()
 
-    for i in range(0,100):
-        gummi.forearmRoll.servoTo(pi/2)
-        r.sleep()
+    #for i in range(0,100):
+    #    gummi.forearmRoll.servoTo(pi/2)
+    #    r.sleep()
 
     gummi.setCollisionResponses(True, True, True, True, False)
     print("GummiArm is live!")

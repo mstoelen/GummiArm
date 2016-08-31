@@ -6,7 +6,7 @@ elbow_encoder_controller:
     joint_name: elbow_encoder
     joint_speed: 0.5
     motor:
-        id: 3
+        id: 15
         init: 512
         min: 0
         max: 1023

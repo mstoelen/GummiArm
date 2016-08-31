@@ -6,7 +6,7 @@ wrist_flexor_controller:
     joint_name: wrist_flexor
     joint_speed: 6.28
     motor:
-        id: 5
+        id: 24
         init: 512
         min: 0
         max: 1023

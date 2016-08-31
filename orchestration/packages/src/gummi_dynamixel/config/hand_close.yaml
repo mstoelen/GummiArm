@@ -6,7 +6,7 @@ hand_close_controller:
     joint_name: hand_close
     joint_speed: 10
     motor:
-        id: 7
+        id: 22
         init: 512
         min: 0
         max: 1023
