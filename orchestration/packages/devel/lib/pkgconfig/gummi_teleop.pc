@@ -1,8 +1,0 @@
-prefix=/home/gummi/GummiArm/orchestration/packages/devel
-
-Name: gummi_teleop
-Description: Description of gummi_teleop
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/gummi/GummiArm/orchestration/packages/devel/lib 
-Requires: 
