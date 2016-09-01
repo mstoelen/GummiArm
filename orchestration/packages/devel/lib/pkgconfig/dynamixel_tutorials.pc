@@ -1,0 +1,8 @@
+prefix=/home/gummi/GummiArm/orchestration/packages/devel
+
+Name: dynamixel_tutorials
+Description: Description of dynamixel_tutorials
+Version: 0.4.0
+Cflags: 
+Libs: -L/home/gummi/GummiArm/orchestration/packages/devel/lib 
+Requires: dynamixel_controllers

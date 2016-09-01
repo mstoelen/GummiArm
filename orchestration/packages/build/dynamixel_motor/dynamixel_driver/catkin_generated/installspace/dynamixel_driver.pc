@@ -1,0 +1,8 @@
+prefix=/home/gummi/GummiArm/orchestration/packages/install
+
+Name: dynamixel_driver
+Description: Description of dynamixel_driver
+Version: 0.4.0
+Cflags: 
+Libs: -L/home/gummi/GummiArm/orchestration/packages/install/lib 
+Requires: rospy diagnostic_msgs

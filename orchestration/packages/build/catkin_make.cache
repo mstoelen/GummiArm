@@ -1,0 +1,2 @@
+dynamixel_motor/dynamixel_controllers:dynamixel_motor/dynamixel_driver:dynamixel_motor/dynamixel_motor:dynamixel_motor/dynamixel_msgs:dynamixel_motor/dynamixel_tutorials:gummi_description:gummi_dynamixel:gummi_ikfast_right_plugin:gummi_interface:gummi_moveit_config:gummi_teleop
+-DCATKIN_DEVEL_PREFIX=/home/gummi/GummiArm/orchestration/packages/devel -DCMAKE_INSTALL_PREFIX=/home/gummi/GummiArm/orchestration/packages/install -G Unix Makefiles

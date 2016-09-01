@@ -1,0 +1,8 @@
+prefix=/home/gummi/GummiArm/orchestration/packages/install
+
+Name: gummi_ikfast_right_plugin
+Description: Description of gummi_ikfast_right_plugin
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/gummi/GummiArm/orchestration/packages/install/lib 
+Requires: moveit_core pluginlib roscpp tf_conversions
