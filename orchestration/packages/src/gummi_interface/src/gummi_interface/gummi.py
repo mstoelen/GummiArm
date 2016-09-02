@@ -58,7 +58,17 @@ class Gummi:
             self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
             self.doVelocityUpdate()
         else:
-            print("WARNING: Receiving desired joint velocities, but ignoring as not in teleop mode. Check gummi.yaml file.")
+            self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
+            self.servoTo(msg.position) #TODO: CHECK NAMES
+
+    def doUpdate(self):
+        self.shoulderYaw.doUpdate()
+        self.shoulderRoll.doUpdate()
+        self.shoulderPitch.doUpdate()
+        self.upperarmRoll.doUpdate()
+        self.elbow.doUpdate()
+        self.forearmRoll.doUpdate()
+        self.wrist.doUpdate()
 
     def doVelocityUpdate(self):
         if self.shoulderYawCocont < 0:

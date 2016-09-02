@@ -34,6 +34,9 @@ def main(args):
     print("GummiArm is live!")
 
     while not rospy.is_shutdown():
+        if gummi.teleop == 0:
+            gummi.doUpdate()
+
         gummi.publishJointState()
         r.sleep()
   
