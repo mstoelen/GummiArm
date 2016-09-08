@@ -20,8 +20,8 @@ def main(args):
     r = rospy.Rate(60)  
     
     gummi = Gummi()
-    joint = gummi.elbow
-    numSteps = 7
+    joint = gummi.shoulderPitch
+    numSteps = 9
 
     minAngle = joint.angle.getMin()
     maxAngle = joint.angle.getMax()

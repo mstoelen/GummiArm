@@ -30,7 +30,7 @@ def main(args):
     #    gummi.forearmRoll.servoTo(pi/2)
     #    r.sleep()
 
-    gummi.setCollisionResponses(True, True, True, True, False)
+    gummi.setCollisionResponses(False, False, False, False, False)
     print("GummiArm is live!")
 
     while not rospy.is_shutdown():
