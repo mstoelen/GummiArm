@@ -76,17 +76,17 @@ class MyFrame(wx.Frame):
         self.sld7 = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~wrist/minAngle")* (180/pi), maxValue = rospy.get_param("~wrist/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sldc = wx.Slider(panel, value = 0, minValue = 0, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sldc = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sld2c = wx.Slider(panel, value = 0, minValue = 0, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld2c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-        self.sld3c = wx.Slider(panel, value = 0, minValue = 0, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld3c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sld4c = wx.Slider(panel, value = 0, minValue = 0, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld4c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-        self.sld5c = wx.Slider(panel, value = 0, minValue = 0, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld5c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
         self.sld.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
@@ -135,6 +135,9 @@ class MyFrame(wx.Frame):
         vbox7.Add(self.sld5c, 1 , wx.ALIGN_CENTRE)
         vbox7.Add(text_c, 1 , wx.ALIGN_CENTRE)
 
+        cb1 = wx.CheckBox(panel, label = 'Passive', pos = wx.DefaultPosition) 
+        cb1.Bind(wx.EVT_CHECKBOX,self.onChecked) 
+
         btn1 = wx.Button(panel, 12, 'Save')
         wx.EVT_BUTTON(self, 12, self.OnSave)
 
@@ -153,17 +156,56 @@ class MyFrame(wx.Frame):
         panel.SetSizer(lastbox)
         lastbox.Fit(panel)
 
+    def onChecked(self, e): 
+        cb = e.GetEventObject() 
+        if cb.GetValue():
+            self.sld.Enable(False)
+            self.sld2.Enable(False)
+            self.sld3.Enable(False)
+            self.sld4.Enable(False)
+            self.sld5.Enable(False)
+            self.sld6.Enable(False)
+            self.sld7.Enable(False)
+            self.sldc.Enable(False)
+            self.sld2c.Enable(False)
+            self.sld3c.Enable(False)
+            self.sld4c.Enable(False)
+            self.sld5c.Enable(False)
+            self.sendCommand(False)
+        else:
+            self.sld.Enable(True)
+            self.sld2.Enable(True)
+            self.sld3.Enable(True)
+            self.sld4.Enable(True)
+            self.sld5.Enable(True)
+            self.sld6.Enable(True)
+            self.sld7.Enable(True)
+            self.sldc.Enable(True)
+            self.sld2c.Enable(True)
+            self.sld3c.Enable(True)
+            self.sld4c.Enable(True)
+            self.sld5c.Enable(True)
+            self.sendCommand(True)
+        
+
     def OnSave(self,evt) :
         with codecs.open("demo.xls") as file :
             file.writelines([self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)])
 
 
     def OnSliderScroll(self,evt) :
+        self.sendCommand(True)
+
+    def sendCommand(self, active):
+      if active:
+          sign = 1
+      else:
+          sign = -1
       current_position = [self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)]
       msg = JointState()
       msg.header.stamp = rospy.Time.now()
       msg.position = current_position
-      msg.effort = [self.sldc.GetValue()/100.0,self.sld2c.GetValue()/100.0,self.sld3c.GetValue()/100.0,0,self.sld4c.GetValue()/100.0,0,self.sld5c.GetValue()/100.0]
+      msg.effort = [sign*self.sldc.GetValue()/100.0,sign*self.sld2c.GetValue()/100.0,sign*self.sld3c.GetValue()/100.0,0,sign*self.sld4c.GetValue()/100.0,0,sign*self.sld5c.GetValue()/100.0]
       self.jointStatePub.publish(msg)
       self.r.sleep()
 

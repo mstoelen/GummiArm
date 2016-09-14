@@ -58,8 +58,11 @@ class Gummi:
             self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
             self.doVelocityUpdate()
         else:
-            self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
-            self.servoTo(msg.position) #TODO: CHECK NAMES
+            self.setCocontraction(abs(msg.effort[0]), abs(msg.effort[1]), abs(msg.effort[2]), abs(msg.effort[4]), abs(msg.effort[6]))
+            if (msg.effort[0] >= 0) and (msg.effort[1] >= 0) and (msg.effort[2] >= 0) and (msg.effort[4] >= 0) and (msg.effort[6] >= 0):
+                self.servoTo(msg.position) #TODO: CHECK NAMES
+            else:
+                self.passiveHold()
 
     def doUpdate(self):
         self.shoulderYaw.doUpdate()
