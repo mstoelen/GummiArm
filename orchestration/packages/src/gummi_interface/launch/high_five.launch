@@ -1,0 +1,15 @@
+<launch>	
+  <node name="gummi" pkg="gummi_interface" type="gummi_high_five.py" output="screen">	
+  	<rosparam file="$(find gummi_interface)/config/gummi.yaml" command="load"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_roll.yaml" command="load" ns="shoulder_roll"/>
+	<rosparam file="$(find gummi_interface)/config/calibration_shoulder_roll.yaml" command="load" ns="shoulder_roll/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_pitch.yaml" command="load" ns="shoulder_pitch"/>
+	<rosparam file="$(find gummi_interface)/config/calibration_shoulder_pitch.yaml" command="load" ns="shoulder_pitch/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/shoulder_yaw.yaml" command="load" ns="shoulder_yaw"/>
+	<rosparam file="$(find gummi_interface)/config/calibration_shoulder_yaw.yaml" command="load" ns="shoulder_yaw/calib"/>
+	<rosparam file="$(find gummi_interface)/config/elbow.yaml" command="load" ns="elbow"/>	
+	<rosparam file="$(find gummi_interface)/config/calibration_elbow.yaml" command="load" ns="elbow/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/wrist.yaml" command="load" ns="wrist"/>	
+	<rosparam file="$(find gummi_interface)/config/calibration_wrist.yaml" command="load" ns="wrist/calib"/>	
+  </node>
+</launch>
