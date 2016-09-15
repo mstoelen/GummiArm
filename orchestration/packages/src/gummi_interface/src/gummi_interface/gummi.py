@@ -185,7 +185,7 @@ class Gummi:
         rospy.sleep(1)
         self.shoulderRoll.moveTo(-0.75, self.shoulderRollCocont)
         rospy.sleep(1)
-        self.shoulderPitch.moveTo(0.5, self.shoulderPitchCocont)
+        self.shoulderPitch.moveTo(-0.2, self.shoulderPitchCocont)
         rospy.sleep(1)
         self.upperarmRoll.servoTo(0)
         rospy.sleep(1)
