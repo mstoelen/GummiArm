@@ -20,7 +20,7 @@ def main(args):
     r = rospy.Rate(60)  
     
     gummi = Gummi()
-    joint = gummi.shoulderPitch
+    joint = gummi.elbow
     numSteps = 9
 
     minAngle = joint.angle.getMin()
@@ -44,7 +44,7 @@ def main(args):
         r.sleep()
 
     for i in range(0,100):
-        gummi.forearmRoll.servoTo(pi/2)
+        gummi.forearmRoll.servoTo(-pi/2)
         r.sleep()
 
     print("GummiArm is live!")
