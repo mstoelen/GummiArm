@@ -3,6 +3,7 @@
 
 import wx
 import rospy
+import csv
 import sys
 import random, codecs
 import time
@@ -145,6 +146,9 @@ class MyFrame(wx.Frame):
         hbox.Add(vbox2, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox3, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox4, 1 , wx.ALIGN_CENTRE)
+
+        self.textFile = wx.TextCtrl(panel, size=(140, -1), value='out.csv')
+
         hbox.Add(vbox5, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox6, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox7, 1 , wx.ALIGN_CENTRE)
@@ -152,6 +156,7 @@ class MyFrame(wx.Frame):
         lastbox.Add(hbox, 1 , wx.ALIGN_CENTRE)
         lastbox.Add(hboxc, 1 , wx.ALIGN_TOP)
         lastbox.Add(btn1, 0 ,wx.ALIGN_CENTRE |wx.ALL, 10)
+        lastbox.Add(self.textFile, 0 ,wx.ALIGN_LEFT |wx.ALL, 10)
 
         panel.SetSizer(lastbox)
         lastbox.Fit(panel)
@@ -189,9 +194,10 @@ class MyFrame(wx.Frame):
         
 
     def OnSave(self,evt) :
-        with codecs.open("demo.xls") as file :
-            file.writelines([self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)])
-
+       fileName = self.textFile.GetValue()
+       with open(fileName, 'wb') as csvfile:
+           writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+           writer.writerow([self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)])
 
     def OnSliderScroll(self,evt) :
         self.sendCommand(True)
