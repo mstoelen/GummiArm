@@ -1,6 +1,6 @@
 calibrated: 1
 equilibrium:
-    sign: -1
+    sign: 1
     signFlexor: -1
     signExtensor: -1
     nameFlexor: "shoulder_adductor"

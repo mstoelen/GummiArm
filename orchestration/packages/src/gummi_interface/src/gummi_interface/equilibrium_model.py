@@ -8,7 +8,7 @@ from direct_drive import DirectDrive
 from helpers import fetchParam
 
 class EquilibriumModel:
-    def __init__(self, name):
+    def __init__(self, name, dummy):
         self.name = name
 
         self.sign = rospy.get_param("~" + self.name + "/equilibrium/sign")
@@ -23,8 +23,10 @@ class EquilibriumModel:
         self.extensor = DirectDrive(self.nameExtensor, 1000)
 
         self.initVariables()
-        self.flexor.setTorqueLimit(1)
-        self.extensor.setTorqueLimit(1)
+
+        if not dummy:
+            self.flexor.setTorqueLimit(1)
+            self.extensor.setTorqueLimit(1)
 
     def initVariables(self):
         self.commandFlexor = 0

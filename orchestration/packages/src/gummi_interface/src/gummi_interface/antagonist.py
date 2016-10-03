@@ -17,7 +17,7 @@ from reflex import Reflex
 from dynamixel_controllers.srv import TorqueEnable
 
 class Antagonist:
-    def __init__(self, name):
+    def __init__(self, name, dummy):
         self.name = name
 
         self.calibrated = rospy.get_param("~" + self.name + "/calibrated")
@@ -35,7 +35,7 @@ class Antagonist:
         self.range = maxAngle - minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, minAngle, maxAngle, True)
 
-        self.eqModel = EquilibriumModel(self.name)
+        self.eqModel = EquilibriumModel(self.name, dummy)
         self.inverseModel = InverseModel(self.name)
         self.inverseModelCollision = InverseModel(self.name)
         self.forwardModel = ForwardModel(self.name)
@@ -51,7 +51,9 @@ class Antagonist:
 
         self.initPublishers()
         self.initVariables()
-        self.disableEncoderTorque()
+
+        if not dummy:
+            self.disableEncoderTorque()
 
         jointRange = self.angle.getMax() - self.angle.getMin()
         self.eqModel.calculateEqVelCalibration(jointRange)
