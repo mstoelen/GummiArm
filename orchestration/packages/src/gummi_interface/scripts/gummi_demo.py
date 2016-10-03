@@ -4,30 +4,28 @@ import rospy
 import sys
 import csv
 
-from gummi_interface.gummi import Gummi
+from gummi_interface.gummi_shoulder import GummiShoulder
 
 def main(args):
 
     pi = 3.1416
 
-    cocontractionsToTry = (0.25, 0.25)
-    jointNums = (0,1,2,4,6)
+    cocontractionsToTry = (0.3, 0.3)
+    jointNums = (2,1,2,1,2,1)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
-    gummi = Gummi()
-
-    gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.8)
+    gummi = GummiShoulder()
     
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
-    rospy.sleep(3)
+    rospy.sleep(1)
     
     gummi.goRestingPose(True)
-    for i in range(0,400):
+    for i in range(0,200):
         gummi.goRestingPose(False)
         r.sleep()
         
@@ -60,26 +58,26 @@ def main(args):
             
         for cocont in cocontractionsToTry: 
                 
-            for i in range (0,500):
+            for i in range (0,1000):
                        
-                if i < 200:
+                if i < 300:
                     command = rest
                     joint.servoTo(command * pi/180, cocont)
                 else:
-                    if i < 400:
+                    if i < 600:
                         command = desired
                         now = False
-                        if i == 200:
+                        if i == 300:
                             now = True
                     else:
                         command = rest
                         now = False
-                        if i == 400:
+                        if i == 600:
                             now = True
                     joint.goTo(command * pi/180, cocont, now)
                 r.sleep()
 
-        for i in range(0,400):
+        for i in range(0,200):
             gummi.goRestingPose(False)
             r.sleep()
             

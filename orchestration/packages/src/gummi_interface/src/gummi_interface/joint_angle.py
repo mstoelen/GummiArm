@@ -82,11 +82,11 @@ class JointAngle:
         return self.msgTime
 
     def isBeyondMin(self):
-        if self.encoderAngle < self.minAngle:
+        if self.encoderAngle < (self.minAngle - 0.05):
             return True
         return False
 
     def isBeyondMax(self):
-        if self.encoderAngle > self.maxAngle:
+        if self.encoderAngle > (self.maxAngle + 0.05):
             return True
         return False

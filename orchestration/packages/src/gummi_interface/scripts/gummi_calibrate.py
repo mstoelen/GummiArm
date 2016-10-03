@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from gummi_interface.inverse_model import InverseModel
 from gummi_interface.antagonist import Antagonist
-from gummi_interface.gummi import Gummi
+from gummi_interface.gummi_shoulder import GummiShoulder
 
 def main(args):
 
@@ -19,8 +19,8 @@ def main(args):
     rospy.init_node('gummiCalibrate', anonymous=True)
     r = rospy.Rate(60)  
     
-    gummi = Gummi()
-    joint = gummi.elbow
+    gummi = GummiShoulder()
+    joint = gummi.shoulderRoll
     numSteps = 9
 
     minAngle = joint.angle.getMin()

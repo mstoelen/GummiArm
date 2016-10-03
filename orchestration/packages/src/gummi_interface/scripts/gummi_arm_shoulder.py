@@ -22,7 +22,7 @@ def main(args):
     rospy.sleep(1)
 
     gummi.goRestingPose(True)
-    for i in range(0,400):
+    for i in range(0,200):
         gummi.goRestingPose(False)
         r.sleep()
 

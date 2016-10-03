@@ -62,7 +62,7 @@ class MyFrame(wx.Frame):
         self.sld2 = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~shoulder_roll/minAngle")* (180/pi), maxValue = rospy.get_param("~shoulder_roll/maxAngle")* (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sld3 = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~shoulder_pitch/minAngle")* (180/pi), maxValue = rospy.get_param("~shoulder_pitch/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
+        self.sld3 = wx.Slider(panel, value = 0.1* (180/pi), minValue = rospy.get_param("~shoulder_pitch/minAngle")* (180/pi), maxValue = rospy.get_param("~shoulder_pitch/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
         self.sld4 = wx.Slider(panel, value = 0* (180/pi), minValue = - (pi/2) *  (180/pi), maxValue = (pi/2) * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
