@@ -19,6 +19,7 @@ from dynamixel_controllers.srv import TorqueEnable
 class Antagonist:
     def __init__(self, name, dummy):
         self.name = name
+        self.dummy = dummy
 
         self.calibrated = rospy.get_param("~" + self.name + "/calibrated")
         self.signEncoder = rospy.get_param("~" + self.name + "/signEncoder")
@@ -35,7 +36,7 @@ class Antagonist:
         self.range = maxAngle - minAngle
         self.angle = JointAngle(self.nameEncoder, self.signEncoder, minAngle, maxAngle, True)
 
-        self.eqModel = EquilibriumModel(self.name, dummy)
+        self.eqModel = EquilibriumModel(self.name, self.dummy)
         self.inverseModel = InverseModel(self.name)
         self.inverseModelCollision = InverseModel(self.name)
         self.forwardModel = ForwardModel(self.name)
@@ -52,7 +53,7 @@ class Antagonist:
         self.initPublishers()
         self.initVariables()
 
-        if not dummy:
+        if not self.dummy:
             self.disableEncoderTorque()
 
         jointRange = self.angle.getMax() - self.angle.getMin()
@@ -167,7 +168,8 @@ class Antagonist:
         delay = currentTime - msgTime
 
         if delay.to_sec() > 0.25:
-            print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
+            if not self.dummy:
+                print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.angle.isBeyondMin() or self.angle.isBeyondMax():
                 self.collisionReflex.removeExcitation()
