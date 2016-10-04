@@ -10,7 +10,7 @@ def main(args):
 
     pi = 3.1416
 
-    cocontractionsToTry = (0.3, 0.4)
+    cocontractionsToTry = (0.3, 0.5)
     jointNums = (1,2)
 
     rospy.init_node('gummi', anonymous=True)
@@ -55,7 +55,7 @@ def main(args):
             rangeAngle = maxAngle - minAngle
             
             rest = minAngle + rangeAngle/4
-            desired = maxAngle - rangeAngle/4
+            desired = maxAngle - rangeAngle/5
             
             for cocont in cocontractionsToTry: 
                 
