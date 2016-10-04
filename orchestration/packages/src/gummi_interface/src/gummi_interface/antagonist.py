@@ -46,7 +46,7 @@ class Antagonist:
             self.inverseModelCollision.loadCalibration()
             self.forwardModel.loadCalibration()
 
-        self.cocontractionReflex = Reflex(2.0, 0.0015, 0.0)
+        self.cocontractionReflex = Reflex(2.0, 0.0075, 0.0)
         self.feedbackReflex = Reflex(1.0, 0.0075, 0.0)
         self.collisionReflex = Reflex(1.0, 0.0075, 0.0)
 
