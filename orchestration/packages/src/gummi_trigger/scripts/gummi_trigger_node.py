@@ -17,9 +17,6 @@ from std_msgs.msg import Bool
 import sensor_msgs
 import numpy as np
 
-#Global variable (don't change this value)
-TRIGGER = False 
-
 #Global variable for distance and time
 #Set this variable to change the time/distance 
 #necessary to take up an down the trigger
@@ -38,14 +35,15 @@ COLUMNS = 30
 #pull the trigger, also the rate can be changed
 #if necessary. The trigger is activated when the
 #internal counter>=TIME*RATE
-TIME = 1.0 #in seconds
+#TIME = 1.0 #in seconds
 RATE = 10 #in Hz
 #Enable the debug only if necessary
 DEBUG = False #set to True for an heavy print
 
-##
-# This function is called when data from the 
-# /kinet_scan topic receive some data
+#Publisher used in the callback
+pub = rospy.Publisher('/trigger_status', Bool, queue_size=10)
+
+#Callback for the listener
 def callback(data):
     pass
     if(DEBUG == True): rospy.loginfo("range min: %.2f; range Max: %.2f" % (data.range_min, data.range_max))
@@ -56,42 +54,20 @@ def callback(data):
     mean_value = np.mean(ranges_array[320-COLUMNS:320+COLUMNS]) #320 is the centre 640 is the size
     if(DEBUG == True): print("Mean: " + str(mean_value))
     if(mean_value >= DISTANCE_MIN and mean_value <= DISTANCE_MAX):
-        TRIGGER = True
+        pub.publish(True)
         rospy.loginfo("Person detected at %.2f meters " % (mean_value))
     else:
-        TRIGGER = False
-
-##
-# Listening to the kinect_scan topic
-#
-def laser_listener():
-    pass
-    rospy.init_node('laser_listener', anonymous=True)
-    rospy.Subscriber("/kinect_scan", sensor_msgs.msg.LaserScan, callback)  #,20)    
-    rospy.spin() #Keeps the node running
+        pub.publish(False)
 
 #Main function
 if __name__ == '__main__':
-    rospy.init_node('gummi_trigger', anonymous=True)
-    rospy.loginfo("Init the listener for the '/kinect_scan' topic") 
-    sub = rospy.Subscriber("/kinect_scan", sensor_msgs.msg.LaserScan, callback)  #,20)
-    rospy.loginfo("Init the publisher '/trigger_status'")
-    pub = rospy.Publisher('/trigger_status', Bool, queue_size=10)
-    ros_rate = rospy.Rate(RATE)
-    rospy.loginfo("Init the gummi_trigger node at %.2f Hz"  % (RATE))
-    counter = 0
-    while not rospy.is_shutdown():
-            #If the TRIGGER is ON it augment the counter
-            if(TRIGGER == True): counter = counter + 1
-
-            #Check the value of the counter
-            if(counter >= RATE*TIME):
-                pub.publish(True)
-                if(DEBUG == True): rospy.loginfo("Trigger True")
-                counter = 0
-            else:
-                pub.publish(False)
-                if(DEBUG == True): rospy.loginfo("Trigger False")
-
-            #pub.publish(hello_str)
+	rospy.init_node('gummi_trigger', anonymous=True)
+	rospy.loginfo("Init the listener for the '/kinect_scan' topic") 
+	sub = rospy.Subscriber("/kinect_scan", sensor_msgs.msg.LaserScan, callback)  #,20)
+	rospy.loginfo("Init the publisher '/trigger_status'")
+	ros_rate = rospy.Rate(RATE)
+	rospy.loginfo("Init the gummi_trigger node at %.2f Hz"  % (RATE))
+	counter = 0
+        #Cycle that regulate the rate
+        while not rospy.is_shutdown():
             ros_rate.sleep()
