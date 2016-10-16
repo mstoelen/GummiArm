@@ -183,9 +183,9 @@ class Gummi:
     def doGradualStartup(self):
         self.shoulderYaw.moveTo(-0.05, self.shoulderYawCocont)
         rospy.sleep(1)
-        self.shoulderRoll.moveTo(-0.75, self.shoulderRollCocont)
+        self.shoulderRoll.moveTo(-0.25, self.shoulderRollCocont)
         rospy.sleep(1)
-        self.shoulderPitch.moveTo(-0.2, self.shoulderPitchCocont)
+        self.shoulderPitch.moveTo(0.2, self.shoulderPitchCocont)
         rospy.sleep(1)
         self.upperarmRoll.servoTo(0)
         rospy.sleep(1)
