@@ -45,6 +45,7 @@ class Gummi:
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
         self.wrist = Antagonist("wrist")
         self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
+        self.handClose = DirectDrive("hand_close", 1.5*self.pi)
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
@@ -194,6 +195,8 @@ class Gummi:
         self.forearmRoll.servoTo(0)
         rospy.sleep(1)
         self.wrist.moveTo(0, self.wristCocont)
+        rospy.sleep(1)
+        self.handClose.servoTo(0)
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)

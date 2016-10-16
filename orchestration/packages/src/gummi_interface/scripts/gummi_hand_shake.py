@@ -84,6 +84,7 @@ def main(args):
 
     for i in range(0,100):
         gummi.forearmRoll.servoTo(-pi/2)
+        gummi.handClose.servoTo(-2.2)
         r.sleep()
         
     print("GummiArm is live!")
