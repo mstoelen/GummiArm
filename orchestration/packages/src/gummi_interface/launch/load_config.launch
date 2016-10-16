@@ -1,0 +1,14 @@
+<launch>
+  <arg name="clone" default="default"/>	  	
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/gummi.yaml" command="load"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/shoulder_roll.yaml" command="load" ns="shoulder_roll"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/calibration_shoulder_roll.yaml" command="load" ns="shoulder_roll/calib"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/shoulder_pitch.yaml" command="load" ns="shoulder_pitch"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/calibration_shoulder_pitch.yaml" command="load" ns="shoulder_pitch/calib"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/shoulder_yaw.yaml" command="load" ns="shoulder_yaw"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/calibration_shoulder_yaw.yaml" command="load" ns="shoulder_yaw/calib"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/elbow.yaml" command="load" ns="elbow"/>	
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/calibration_elbow.yaml" command="load" ns="elbow/calib"/>
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/wrist.yaml" command="load" ns="wrist"/>	
+  <rosparam file="$(find gummi_interface)/config/$(arg clone)/calibration_wrist.yaml" command="load" ns="wrist/calib"/>	
+</launch>
