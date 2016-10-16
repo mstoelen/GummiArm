@@ -101,10 +101,12 @@ def main(args):
             print "Do hand shake"
             for i in range (0,60):
                 gummi.setCocontraction(0.6, 0.6, 0.85, 0.6, 0.2)
+                gummi.headYaw.servoTo(-0.1)
                 gummi.goTo(mid, False)
                 r.sleep()
             for i in range (0,1000):
                 gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
+                gummi.headYaw.servoTo(-0.1)
                 gummi.goTo(desired, False) # TODO: TOUCH, PASSIVE AND SIN
                 r.sleep()
             hand_shake.done()
@@ -113,6 +115,7 @@ def main(args):
         else:
            print "Do rest"
            gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+           gummi.headYaw.servoTo(0.0)
            gummi.goTo(rest, False) # TODO: PASSIVE
             
         r.sleep()
