@@ -59,32 +59,32 @@ class HandShake:
 def main(args):
 
     pi = 3.1416
-    rest = (-0.5,0.6632251157578453,0.5410520681182421,-0.12217304763960307,0.5585053606381855,-2.4085543677521746,-0.7330382858376184)
-    mid = (0.05,1.8,0.2792526803190927,-0.17453292519943295,0.4014257279586958,-2.3736477827122884,-0.7330382858376184)
-    desired = (0.1,1.8500490071139892,0.20943951023931956,-0.24434609527920614,-0.45,-2.7,-0.2617993877991494)
+    rest = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, 0.0, -0.0051132692929521375)
+    mid = (0.0, 0.10737865515199489, 0.14317154020265985, -0.21475731030398976, -0.4755340442445488, 0.05113269292952138, 0.0)
+    desired = (0.3170226961630325, 0.5777994301035916, 0.22498384888989406, -0.2684466378799872, -0.3681553890925539, 0.29656961899122397, 0.0)
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
 
     hand_shake = HandShake()
 
-    #gummi = Gummi()
-    #gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+    gummi = Gummi()
+    gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
     
-    #print('WARNING: Moving joints sequentially to equilibrium positions.')
-    #gummi.doGradualStartup()
-   # 
-   # print('WARNING: Moving to resting pose, hold arm!')
-   # rospy.sleep(3)
-   # 
-   # gummi.goRestingPose(True)
-   # for i in range(0,400):
-   #     gummi.goRestingPose(False)
-   #     r.sleep()
-#
-#    for i in range(0,100):
-#        gummi.forearmRoll.servoTo(-pi/2)
-#        r.sleep()
+    print('WARNING: Moving joints sequentially to equilibrium positions.')
+    gummi.doGradualStartup()
+    
+    print('WARNING: Moving to resting pose, hold arm!')
+    rospy.sleep(3)
+    
+    gummi.goRestingPose(True)
+    for i in range(0,400):
+        gummi.goRestingPose(False)
+        r.sleep()
+
+    for i in range(0,100):
+        gummi.forearmRoll.servoTo(-pi/2)
+        r.sleep()
         
     print("GummiArm is live!")
 
@@ -99,22 +99,21 @@ def main(args):
 
         if do_shake_hand:
             print "Do hand shake"
-            for i in range (0,500):
-            #    gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
-            #    gummi.goTo(rest, False)
-                r.sleep()
-            #    
             for i in range (0,60):
-            #    gummi.setCocontraction(0.6, 0.6, 0.85, 0.6, 0.2)
-            #    gummi.goTo(mid, False)
+                gummi.setCocontraction(0.6, 0.6, 0.85, 0.6, 0.2)
+                gummi.goTo(mid, False)
+                r.sleep()
+            for i in range (0,1000):
+                gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
+                gummi.goTo(desired, False) # TODO
                 r.sleep()
             hand_shake.done()
             do_shake_hand = False
                 
         else:
            print "Do rest"
-            #gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
-            #gummi.goTo(desired, True)
+           gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+           gummi.goTo(rest, False) # TODO
             
         r.sleep()
             
