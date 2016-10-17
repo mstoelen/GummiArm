@@ -3,9 +3,10 @@
 import rospy
 import sys
 import csv
+import math
 
 from std_msgs.msg import Bool
-from std_msgs.msg import Int16
+from std_msgs.msg import UInt16
 
 from gummi_interface.gummi import Gummi
 
@@ -15,12 +16,13 @@ class HandShake:
         self.hand_shake_done = False
         self.touch_data_palm = 0
         self.person_counter = 0
+        self.touch_counter = 0
 
         rospy.Subscriber('~person', Bool, self.personCallback)
-        rospy.Subscriber('~touch', Int16, self.touchCallback)
+        rospy.Subscriber('~touch', UInt16, self.touchCallback)
 
-        pwm1_pub = rospy.Publisher("~pwm1", Int16,  queue_size=10) 
-        pwm2_pub = rospy.Publisher("~pwm2", Int16,  queue_size=10) 
+        self.pwm1_pub = rospy.Publisher("~pwm1", UInt16,  queue_size=10) 
+        self.pwm2_pub = rospy.Publisher("~pwm2", UInt16,  queue_size=10) 
 
     def personCallback(self, msg):
         self.person_in_front = msg.data
@@ -41,8 +43,29 @@ class HandShake:
             self.person_counter = 0
         print "Person counter: " + str(self.person_counter)
 
+        if self.haveTouch():
+            if self.touch_counter < 100:
+                self.touch_counter = self.touch_counter + 5
+        else:
+            self.touch_counter = self.touch_counter - 15
+        if self.touch_counter < 0:
+            self.touch_counter = 0
+        print "Touch counter: " + str(self.touch_counter)
+
     def havePersistentPerson(self):
         if self.person_counter == 100:
+            return True
+        else:
+            return False
+
+    def haveTouch(self):
+        if self.touch_data_palm > 350:
+            return True
+        else:
+            return False
+
+    def havePersistentTouch(self):
+        if self.touch_counter == 100:
             return True
         else:
             return False
@@ -56,12 +79,30 @@ class HandShake:
     def done(self):
         self.hand_shake_done = True
 
+    def closeHand(self):
+        print "Closing hand"
+        #self.closePwm1()
+        #self.closePwm2()
+
+    def closePwm1(self):
+        msg = UInt16()
+        msg.data = 10
+        self.pwm1_pub.publish(msg)
+
+    def closePwm2(self):
+        msg = UInt16()
+        msg.data = 10
+        self.pwm2_pub.publish(msg)
+
 def main(args):
 
     pi = 3.1416
     rest = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
     mid = (0.0, 0.10737865515199489, 0.14317154020265985, -0.21475731030398976, -0.4755340442445488, -1.55, 0.0)
     desired = (0.3170226961630325, 0.5777994301035916, 0.22498384888989406, -0.2684466378799872, -0.3681553890925539, -1.25, 0.0)
+
+    width = 0.6
+    frequency = 4.0
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -75,43 +116,56 @@ def main(args):
     gummi.doGradualStartup()
     
     print('WARNING: Moving to resting pose, hold arm!')
-    rospy.sleep(3)
+    rospy.sleep(1)
     
-    gummi.goRestingPose(True)
-    for i in range(0,400):
-        gummi.goRestingPose(False)
-        r.sleep()
-
-    for i in range(0,100):
-        gummi.forearmRoll.servoTo(-pi/2)
-        gummi.handClose.servoTo(-2.2)
-        r.sleep()
         
     print("GummiArm is live!")
 
     do_shake_hand = False
+    hand_is_closed = False
+    time_counter = 1
     while True:
 
         hand_shake.doUpdate()
-        
-        if hand_shake.haveNewPerson():
-            if hand_shake.havePersistentPerson():
-                do_shake_hand = True
 
         if do_shake_hand:
-            print "Do hand shake"
-            for i in range (0,60):
+            if time_counter < 60:
+                print "Moving, first step"
                 gummi.setCocontraction(0.6, 0.6, 0.85, 0.6, 0.2)
-                gummi.headYaw.servoTo(-0.1)
                 gummi.goTo(mid, False)
                 r.sleep()
-            for i in range (0,1000):
-                gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
-                gummi.headYaw.servoTo(-0.1)
-                gummi.goTo(desired, False) # TODO: TOUCH, PASSIVE AND SIN
-                r.sleep()
-            hand_shake.done()
-            do_shake_hand = False
+            else:
+                if time_counter < 250:
+                    print "Moving, second step"
+                    gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
+                    gummi.goTo(desired, False) # TODO: CALIB
+                    r.sleep()
+                else:
+                    print "Waiting..."
+
+                    if time_counter < 1150:
+                        if not hand_is_closed:
+                            if hand_shake.havePersistentTouch():
+                                print "Closing hand"
+                                gummi.handClose.servoTo(1.5)
+                                elbow_waiting = gummi.elbow.angle.getEncoder()
+                                hand_is_closed = True
+                                time_counter = 750
+                        else:
+                            elbow = elbow_waiting + width/2 * math.sin(frequency * time_counter/60.0)
+                            gummi.elbow.servoTo(elbow, 0.3)
+                    else:
+                        print "Opening hand"
+                        gummi.handClose.servoTo(-2.0)
+                        hand_is_closed = False
+
+                    if time_counter >= 1350:
+                        print "Done with hand shake"
+                        hand_shake.done()
+                        do_shake_hand = False
+                        time_counter = 0
+
+            time_counter = time_counter + 1
                 
         else:
            print "Do rest"
@@ -119,6 +173,11 @@ def main(args):
            gummi.headYaw.servoTo(0.0)
            gummi.goTo(rest, False) # TODO: PASSIVE
             
+           if hand_shake.haveNewPerson():
+               if hand_shake.havePersistentPerson():
+                   do_shake_hand = True
+                   print "Do hand shake"
+
         r.sleep()
             
 if __name__ == '__main__':

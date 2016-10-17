@@ -1,0 +1,12 @@
+<launch>	
+  <arg name="clone" default="default"/>	
+  <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi">
+    <arg name="clone" value="$(arg clone)"/>
+  </include>
+  <node name="gummi" pkg="gummi_interface" type="gummi_hand_shake.py" output="screen">
+    <remap from="~person" to="/trigger_status"/>
+    <remap from="~touch" to="/FSR"/>
+    <remap from="~pwm1" to="/servo_Index"/>
+    <remap from="~pwm2" to="/servo_Pinky"/>
+  </node>  
+</launch>
