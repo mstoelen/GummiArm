@@ -1,0 +1,3 @@
+<launch>	
+  <node name="gummi_trigger_node" pkg="gummi_trigger" type="gummi_trigger_node.py" output="screen"/>
+</launch>
