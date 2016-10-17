@@ -102,7 +102,7 @@ def main(args):
     desired = (0.3170226961630325, 0.5777994301035916, 0.22498384888989406, -0.2684466378799872, -0.3681553890925539, -1.25, 0.0)
 
     width = 0.6
-    frequency = 4.0
+    frequency = 5.0
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -137,7 +137,7 @@ def main(args):
             else:
                 if time_counter < 250:
                     print "Moving, second step"
-                    gummi.setCocontraction(0.8, 0.5, 1.0, 0.3, 0.2)
+                    gummi.setCocontraction(0.5, 0.4, 0.6, 0.3, 0.2)
                     gummi.goTo(desired, False) # TODO: CALIB
                     r.sleep()
                 else:
@@ -156,7 +156,7 @@ def main(args):
                             gummi.elbow.servoTo(elbow, 0.3)
                     else:
                         print "Opening hand"
-                        gummi.handClose.servoTo(-2.0)
+                        gummi.handClose.servoTo(-2.2)
                         hand_is_closed = False
 
                     if time_counter >= 1350:

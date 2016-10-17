@@ -196,7 +196,7 @@ class Gummi:
         rospy.sleep(1)
         self.wrist.moveTo(0, self.wristCocont)
         rospy.sleep(1)
-        self.handClose.servoTo(-2.0)
+        self.handClose.servoTo(-2.2)
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)
