@@ -11,8 +11,8 @@ signEncoder: 1
 signJoint: 1
 name: "elbow"
 nameEncoder: "elbow_encoder"
-minAngle: -0.85
-maxAngle: 0.65
+minAngle: -0.8
+maxAngle: 0.6
 maxAbsForwardError: 0.7
 gains:
     P: 0.03
