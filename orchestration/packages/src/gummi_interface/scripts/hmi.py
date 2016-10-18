@@ -77,17 +77,16 @@ class MyFrame(wx.Frame):
         self.sld7 = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~wrist/minAngle")* (180/pi), maxValue = rospy.get_param("~wrist/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sldc = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sldc = wx.Slider(panel, value = 30, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
-        self.sld2c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld2c = wx.Slider(panel, value = 30, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-        self.sld3c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld3c = wx.Slider(panel, value = 30, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-
-        self.sld4c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld4c = wx.Slider(panel, value = 30, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
-        self.sld5c = wx.Slider(panel, value = 1, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
+        self.sld5c = wx.Slider(panel, value = 60, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
         self.sld.Bind(wx.EVT_SCROLL, self.OnSliderScroll)

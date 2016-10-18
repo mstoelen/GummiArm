@@ -117,7 +117,10 @@ def main(args):
     
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(1)
-    
+
+    for i in range(0,400):
+        gummi.goTo(rest, False)
+        r.sleep()
         
     print("GummiArm is live!")
 
@@ -155,23 +158,26 @@ def main(args):
                             elbow = elbow_waiting + width/2 * math.sin(frequency * time_counter/60.0)
                             gummi.elbow.servoTo(elbow, 0.3)
                     else:
-                        print "Opening hand"
-                        gummi.handClose.servoTo(-2.2)
-                        hand_is_closed = False
-
-                    if time_counter >= 1350:
-                        print "Done with hand shake"
-                        hand_shake.done()
-                        do_shake_hand = False
-                        time_counter = 0
+                        if time_counter < 1350:
+                            print "Opening hand"
+                            gummi.handClose.servoTo(-2.2)
+                            hand_is_closed = False
+                        else:
+                            if time_counter < 1600:
+                                print "Go to rest"
+                                gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+                                gummi.goTo(rest, False)
+                            else:
+                                print "Done with hand shake"
+                                hand_shake.done()
+                                do_shake_hand = False
+                                time_counter = 0
 
             time_counter = time_counter + 1
                 
         else:
-           print "Do rest"
-           gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
-           gummi.headYaw.servoTo(0.0)
-           gummi.goTo(rest, False) # TODO: PASSIVE
+           print "Passive hold"
+           gummi.passiveHold()
             
            if hand_shake.haveNewPerson():
                if hand_shake.havePersistentPerson():

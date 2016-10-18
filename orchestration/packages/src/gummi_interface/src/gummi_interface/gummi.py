@@ -31,7 +31,7 @@ class Gummi:
         self.forearmRollVel = 0
         self.wristVel = 0
         self.shoulderRollCocont = 0.3
-        self.shoulderPitchCocont = 0
+        self.shoulderPitchCocont = 0.3
         self.shoulderYawCocont = 0.3
         self.elbowCocont = 0.3
         self.wristCocont = 0.6
