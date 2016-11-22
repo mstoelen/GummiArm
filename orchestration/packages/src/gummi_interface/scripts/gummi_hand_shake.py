@@ -101,8 +101,8 @@ def main(args):
     mid = (0.0, 0.10737865515199489, 0.14317154020265985, -0.21475731030398976, -0.4755340442445488, -1.55, 0.0)
     desired = (0.3170226961630325, 0.5777994301035916, 0.22498384888989406, -0.2684466378799872, -0.3681553890925539, -1.25, 0.0)
 
-    width = 0.6
-    frequency = 5.0
+    width = 1.2 #0.6
+    frequency = 4.5
 
     rospy.init_node('gummi', anonymous=True)
     r = rospy.Rate(60)  
@@ -140,7 +140,7 @@ def main(args):
             else:
                 if time_counter < 250:
                     print "Moving, second step"
-                    gummi.setCocontraction(0.5, 0.4, 0.6, 0.3, 0.2)
+                    gummi.setCocontraction(0.5, 0.4, 0.6, 0.55, 0.2)
                     gummi.goTo(desired, False) # TODO: CALIB
                     r.sleep()
                 else:

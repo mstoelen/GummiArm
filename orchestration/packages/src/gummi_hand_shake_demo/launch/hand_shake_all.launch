@@ -7,7 +7,7 @@
   <include file="$(find depthimage_to_laserscan)/scan.launch"/>
   <include file="$(find gummi_trigger)/launch/trigger.launch"/>	
 
-  <node name="arduino_hand" pkg="rosserial_python" type="serial_node.py" output="screen" args="/dev/ttyUSB5"/>	
+  <node name="arduino_hand" pkg="rosserial_python" type="serial_node.py" output="screen" args="/dev/ttyUSB2"/>	
 
   <include file="$(find gummi_interface)/launch/hand_shake.launch">
     <arg name="clone" value="$(arg clone)"/>
