@@ -12,7 +12,7 @@ signJoint: 1
 name: "wrist"
 nameEncoder: "wrist_encoder"
 minAngle: -0.75
-maxAngle: 0.5
+maxAngle: 0.75
 maxAbsForwardError: 5.0
 gains:
     P: 0.055

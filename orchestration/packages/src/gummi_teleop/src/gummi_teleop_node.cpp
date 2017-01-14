@@ -247,6 +247,8 @@ void GummiTeleop::doUpdate()
     received_joint_positions_ = false;
     have_started_integrating_ = false;
   }
+
+  ros::Duration(0.01).sleep();
   
 }
 
@@ -454,8 +456,6 @@ void GummiTeleop::calculateDesiredJointVelocity(geometry_msgs::Twist desired)
       desired_joint_velocities_.at(i) = qdot(i);
     }
   }
-
-  ros::Duration(0.01).sleep();
   
 }
 
@@ -567,7 +567,7 @@ bool GummiTeleop::checkIfConnectedToRobot()
   ros::Duration difference = now-joint;
   double timePassedMs = difference.toSec()*1000;
   
-  if(debug_mode_) printf("Debug: Time since last joint state received: %6.2f ms.\n",timePassedMs);
+  if(debug_mode_) printf("Debug: Time since last joint state received: %6.4f ms.\n",timePassedMs);
 
   if(timePassedMs > 200) {
     return false;

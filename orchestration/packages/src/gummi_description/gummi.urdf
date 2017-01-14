@@ -155,7 +155,7 @@
 
   <link name="wrist">
     <visual>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
 	<cylinder length="0.04" radius="0.02" />
       </geometry>
@@ -164,7 +164,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <origin rpy="1.57080 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <cylinder length="0.04" radius="0.02" />
       </geometry>
@@ -268,8 +268,8 @@
     <origin rpy=" 0.0 1.57079 0.0" xyz="0.0 0.0 0.15"/>
     <parent link="lowerarm"/>
     <child link="wrist"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.75" upper="0.5" velocity="1.0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0" lower="-0.75" upper="0.75" velocity="1.0"/>
   </joint>
   <joint name="wrist_to_coupling" type="fixed">
     <origin rpy="0.0 0.0 3.14159" xyz="-0.0281 0.0 0.0"/>
