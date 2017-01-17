@@ -21,7 +21,7 @@ class MyFrame(wx.Frame):
 
         self.encoder_position = list()
         self.jointStatePub = rospy.Publisher("gummi/joint_commands", JointState,  queue_size=10) 
-        self.suscribe = rospy.Subscriber('gummi/joint_state', JointState, self.cmdCallback)
+        self.suscribe = rospy.Subscriber('gummi/joint_states', JointState, self.cmdCallback)
 
         lastbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
