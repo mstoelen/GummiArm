@@ -10,7 +10,7 @@
                     baud_rate: 1000000
                     min_motor_id: 10
                     max_motor_id: 110
-                    update_rate: 20
+                    update_rate: 60
                 gummi_port_body:
                     port_name: "/dev/ttyUSB0"
                     baud_rate: 1000000

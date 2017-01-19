@@ -22,7 +22,7 @@ class Gummi:
         self.initSubscribers()
 
     def initVariables(self):
-        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch")
+        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
         self.shoulderRollVel = 0
         self.shoulderPitchVel = 0
         self.shoulderYawVel = 0
@@ -30,6 +30,7 @@ class Gummi:
         self.elbowVel = 0
         self.forearmRollVel = 0
         self.wristVel = 0
+        self.handDOF1Vel = 0
         self.shoulderRollCocont = 0.3
         self.shoulderPitchCocont = 0.3
         self.shoulderYawCocont = 0.3
@@ -45,7 +46,7 @@ class Gummi:
         self.forearmRoll = DirectDrive("forearm_roll", 1.75*self.pi)
         self.wrist = Antagonist("wrist")
         self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
-        self.handClose = DirectDrive("hand_close", 1.5*self.pi)
+        self.handDOF1 = DirectDrive("hand_dof1", 1.5*self.pi)
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
@@ -73,6 +74,7 @@ class Gummi:
         self.elbow.doUpdate()
         self.forearmRoll.doUpdate()
         self.wrist.doUpdate()
+        self.handDOF1.doUpdate()
 
     def doVelocityUpdate(self):
         if self.shoulderYawCocont < 0:
@@ -100,6 +102,7 @@ class Gummi:
                 self.wrist.moveWith(self.wristVel, abs(self.wristCocont))
             else:
                 self.wrist.servoWith(self.wristVel, self.wristCocont)
+        self.armDOF1.servoWith(self.armDOF1Vel)
         
         self.publishJointState()
 
@@ -119,6 +122,7 @@ class Gummi:
         angles.append(self.elbow.getJointAngle())
         angles.append(self.forearmRoll.getJointAngle())
         angles.append(self.wrist.getJointAngle())
+        angles.append(self.handDOF1.getJointAngle())
         return angles
 
     def setVelocity(self, velocities):
@@ -129,6 +133,7 @@ class Gummi:
         self.elbowVel = velocities[4]
         self.forearmRollVel = velocities[5]
         self.wristVel = velocities[6]
+        self.handDOF1Vel = velocities[7]
 
     def setCocontraction(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
         self.shoulderYawCocont = shoulderYaw
@@ -146,6 +151,7 @@ class Gummi:
             self.elbow.servoTo(positions[4], self.elbowCocont)
             self.forearmRoll.servoTo(positions[5])
             self.wrist.servoTo(positions[6], self.wristCocont)
+            self.handDOF1.servoTo(positions[7])
             self.publishJointState()
         else:
             print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
@@ -159,6 +165,7 @@ class Gummi:
             self.elbow.goTo(positions[4], self.elbowCocont, now)
             self.forearmRoll.servoTo(positions[5])
             self.wrist.goTo(positions[6], self.wristCocont, now)
+            self.handDOF1.servoTo(positions[7])
             self.publishJointState()
         else:
             print("WARNING: Asked to go to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
@@ -171,6 +178,7 @@ class Gummi:
         self.elbow.goTo(0, self.elbowCocont, now)
         self.forearmRoll.servoTo(0)
         self.wrist.goTo(0, self.wristCocont, now)
+        self.handDOF1.servoTo(0)
 
     def passiveHold(self):
         self.shoulderYaw.passiveHold(self.shoulderYawCocont)
@@ -180,6 +188,7 @@ class Gummi:
         self.elbow.passiveHold(self.elbowCocont)
         self.forearmRoll.doUpdate()
         self.wrist.passiveHold(self.wristCocont)
+        self.handDOF1.doUpdate()
 
     def doGradualStartup(self):
         self.shoulderYaw.moveTo(-0.05, self.shoulderYawCocont)
@@ -196,7 +205,7 @@ class Gummi:
         rospy.sleep(1)
         self.wrist.moveTo(0, self.wristCocont)
         rospy.sleep(1)
-        self.handClose.servoTo(-2.2)
+        self.handDOF1.servoTo(-2.2)
         rospy.sleep(1)
         self.headYaw.servoTo(0)
         rospy.sleep(1)
