@@ -102,7 +102,7 @@ class Gummi:
                 self.wrist.moveWith(self.wristVel, abs(self.wristCocont))
             else:
                 self.wrist.servoWith(self.wristVel, self.wristCocont)
-        self.armDOF1.servoWith(self.armDOF1Vel)
+        self.handDOF1.servoWith(self.handDOF1Vel)
         
         self.publishJointState()
 
