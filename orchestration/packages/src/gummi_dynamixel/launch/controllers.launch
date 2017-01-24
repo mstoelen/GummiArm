@@ -28,11 +28,11 @@
                 forearm_roll_controller"
           output="screen"/>
 
-   <rosparam file="$(find gummi_dynamixel)/config/hand_close.yaml" command="load"/>
-    <node name="hand_close_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+   <rosparam file="$(find gummi_dynamixel)/config/hand_dof1.yaml" command="load"/>
+    <node name="hand_dof1_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
                 --port gummi_port_arm
-                hand_close_controller"
+                hand_dof1_controller"
           output="screen"/>
 
     <rosparam file="$(find gummi_dynamixel)/config/wrist_flexor.yaml" command="load"/>

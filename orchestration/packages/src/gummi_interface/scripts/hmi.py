@@ -33,14 +33,16 @@ class MyFrame(wx.Frame):
         vbox5 = wx.BoxSizer(wx.VERTICAL)
         vbox6 = wx.BoxSizer(wx.VERTICAL)
         vbox7 = wx.BoxSizer(wx.VERTICAL)
+        vbox8 = wx.BoxSizer(wx.VERTICAL)
 
         name1 = "Shoulder yaw"
         name2 = "Shoulder roll"
         name3 = "Shoulder pitch"
         name4 = "Upper arm roll"
-        name5 = "elbow"
-        name6 = "forearm"
-        name7 = "wrist" 
+        name5 = "Elbow"
+        name6 = "Forearm"
+        name7 = "Wrist" 
+        name8 = "Hand DOF1" 
 
         rospy.init_node('GummiHMI', anonymous=True)
         self.r = rospy.Rate(60) 
@@ -55,6 +57,7 @@ class MyFrame(wx.Frame):
         text5 = wx.StaticText(panel, label= name5, pos= wx.DefaultPosition)
         text6 = wx.StaticText(panel, label= name6, pos= wx.DefaultPosition)
         text7 = wx.StaticText(panel, label= name7, pos= wx.DefaultPosition)   
+        text8 = wx.StaticText(panel, label= name8, pos= wx.DefaultPosition)  
 
         self.sld = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~shoulder_yaw/minAngle") * (180/pi), maxValue = rospy.get_param("~shoulder_yaw/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
@@ -77,6 +80,9 @@ class MyFrame(wx.Frame):
         self.sld7 = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~wrist/minAngle")* (180/pi), maxValue = rospy.get_param("~wrist/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
+        self.sld8 = wx.Slider(panel, value = 0* (180/pi), minValue = -1.75/2*pi* (180/pi), maxValue = 1.75/2*pi* (180/pi), pos = wx.DefaultPosition, size = (150, -1),
+                              style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
+
         self.sldc = wx.Slider(panel, value = 30, minValue = 1, maxValue = 100, pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
 
@@ -96,6 +102,7 @@ class MyFrame(wx.Frame):
         self.sld5.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
         self.sld6.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
         self.sld7.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
+        self.sld8.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
 
         self.sldc.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
         self.sld2c.Bind(wx.EVT_SCROLL, self.OnSliderScroll)
@@ -134,6 +141,9 @@ class MyFrame(wx.Frame):
         vbox7.Add(text_a,1 , wx.ALIGN_CENTRE)
         vbox7.Add(self.sld5c, 1 , wx.ALIGN_CENTRE)
         vbox7.Add(text_c, 1 , wx.ALIGN_CENTRE)
+        vbox8.Add(text8,1 , wx.ALIGN_CENTRE)
+        vbox8.Add(self.sld8, 1 , wx.ALIGN_CENTRE)
+        vbox8.Add(text_a,1 , wx.ALIGN_CENTRE)
 
         cb1 = wx.CheckBox(panel, label = 'Passive', pos = wx.DefaultPosition) 
         cb1.Bind(wx.EVT_CHECKBOX,self.onChecked) 
@@ -151,6 +161,7 @@ class MyFrame(wx.Frame):
         hbox.Add(vbox5, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox6, 1 , wx.ALIGN_CENTRE)
         hbox.Add(vbox7, 1 , wx.ALIGN_CENTRE)
+        hbox.Add(vbox8, 1 , wx.ALIGN_CENTRE)
 
         lastbox.Add(hbox, 1 , wx.ALIGN_CENTRE)
         lastbox.Add(hboxc, 1 , wx.ALIGN_TOP)
@@ -170,6 +181,7 @@ class MyFrame(wx.Frame):
             self.sld5.Enable(False)
             self.sld6.Enable(False)
             self.sld7.Enable(False)
+            self.sld8.Enable(False)
             self.sldc.Enable(False)
             self.sld2c.Enable(False)
             self.sld3c.Enable(False)
@@ -184,6 +196,7 @@ class MyFrame(wx.Frame):
             self.sld5.Enable(True)
             self.sld6.Enable(True)
             self.sld7.Enable(True)
+            self.sld8.Enable(True)
             self.sldc.Enable(True)
             self.sld2c.Enable(True)
             self.sld3c.Enable(True)
@@ -196,7 +209,7 @@ class MyFrame(wx.Frame):
        fileName = self.textFile.GetValue()
        with open(fileName, 'wb') as csvfile:
            writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-           writer.writerow([self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)])
+           writer.writerow([self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0),self.sld8.GetValue()*(pi/180.0)])
 
     def OnSliderScroll(self,evt) :
         self.sendCommand(True)
@@ -206,7 +219,7 @@ class MyFrame(wx.Frame):
           sign = 1
       else:
           sign = -1
-      current_position = [self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0)]
+      current_position = [self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0),self.sld8.GetValue()*(pi/180.0)]
       msg = JointState()
       msg.header.stamp = rospy.Time.now()
       msg.position = current_position
