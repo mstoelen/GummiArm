@@ -129,7 +129,7 @@
     <rosparam file="$(find gummi_dynamixel)/config/head_yaw.yaml" command="load"/>
     <node name="head_yaw_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
-                --port gummi_port_arm
+                --port gummi_port_body
                 head_yaw_controller"
           output="screen"/>
 

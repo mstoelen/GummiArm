@@ -20,7 +20,7 @@ def main(args):
     r = rospy.Rate(60)  
     
     gummi = Gummi()
-    joint = gummi.wrist
+    joint = gummi.shoulderYaw
     numSteps = 9
 
     minAngle = joint.angle.getMin()
@@ -58,13 +58,13 @@ def main(args):
     equilibriums = list()
     for cocont in cocontractionsToTry: 
 
-        for i in range (0,300):
+        for i in range (0,350):
             joint.servoTo(0, cocont)
             r.sleep()
 
         for angle in anglesToTry:
             print("Moving joint to angle: " + str(angle) + " and cocontraction: " + str(cocont) + ".")
-            for i in range (0,300):
+            for i in range (0,350):
                 joint.servoTo(angle, cocont)
                 r.sleep()
 
@@ -72,7 +72,7 @@ def main(args):
             ccs.append(round(cocont, 3))
             equilibriums.append(round(joint.eqModel.dEquilibrium, 3))
 
-        for i in range (0,300):
+        for i in range (0,350):
             joint.servoTo(0, cocont)
             r.sleep()
 
