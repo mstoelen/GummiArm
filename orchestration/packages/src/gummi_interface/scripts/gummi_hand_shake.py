@@ -132,13 +132,13 @@ def main(args):
         hand_shake.doUpdate()
 
         if do_shake_hand:
-            if time_counter < 60:
+            if time_counter < 40:
                 print "Moving, first step"
                 gummi.setCocontraction(0.6, 0.6, 0.85, 0.6, 0.2)
                 gummi.goTo(mid, False)
                 r.sleep()
             else:
-                if time_counter < 250:
+                if time_counter < 200:
                     print "Moving, second step"
                     gummi.setCocontraction(0.5, 0.4, 0.6, 0.3, 0.2)
                     gummi.goTo(desired, False) # TODO: CALIB
