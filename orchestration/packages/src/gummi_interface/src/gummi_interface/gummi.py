@@ -14,7 +14,7 @@ class Gummi:
     def __init__(self):
         self.teleop = rospy.get_param("~teleop", 1)
         print("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
-        
+
         self.pi = 3.1416
         self.initVariables()
         self.initJoints()
@@ -49,7 +49,7 @@ class Gummi:
         self.handDOF1 = DirectDrive("hand_dof1", 1.5*self.pi)
 
     def initPublishers(self):
-        self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
+        self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10)
 
     def initSubscribers(self):
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
@@ -103,7 +103,7 @@ class Gummi:
             else:
                 self.wrist.servoWith(self.wristVel, self.wristCocont)
         self.handDOF1.servoWith(self.handDOF1Vel)
-        
+
         self.publishJointState()
 
     def publishJointState(self):
@@ -111,6 +111,14 @@ class Gummi:
         msg.header.stamp = rospy.Time.now()
         msg.name = self.jointNames
         msg.position = self.getJointAngles()
+        # msg.velocity =
+        msg.effort = [self.shoulderYawCocont,
+                      self.shoulderRollCocont,
+                      self.shoulderPitchCocont,
+                      0.0,
+                      self.elbowCocont,
+                      0.0,
+                      self.wristCocont]
         self.jointStatePub.publish(msg)
 
     def getJointAngles(self):
@@ -216,5 +224,3 @@ class Gummi:
         self.shoulderPitch.setCollisionResponse(shoulderPitch)
         self.elbow.setCollisionResponse(elbow)
         self.wrist.setCollisionResponse(wrist)
-    
-        
