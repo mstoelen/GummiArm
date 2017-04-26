@@ -160,14 +160,14 @@ class Gummi:
             for joint_name, joint_angle in zip(msg.name, msg.position):
                 self.lastJointAngles[joint_name] = joint_angle
 
-            self.shoulderYaw.servoTo(lastJointAngles['shoulder_yaw'], self.shoulderYawCocont)
-            self.shoulderRoll.servoTo(lastJointAngles['shoulder_roll'], self.shoulderRollCocont)
-            self.shoulderPitch.servoTo(lastJointAngles['shoulder_pitch'], self.shoulderPitchCocont)
-            self.upperarmRoll.servoTo(lastJointAngles['upperarm_roll'])
-            self.elbow.servoTo(lastJointAngles['elbow'], self.elbowCocont)
-            self.forearmRoll.servoTo(lastJointAngles['forearm_roll'])
-            self.wrist.servoTo(lastJointAngles['wrist_pitch'], self.wristCocont)
-            self.handDOF1.servoTo(lastJointAngles['hand_dof1'])
+            self.shoulderYaw.servoTo(self.lastJointAngles['shoulder_yaw'], self.shoulderYawCocont)
+            self.shoulderRoll.servoTo(self.lastJointAngles['shoulder_roll'], self.shoulderRollCocont)
+            self.shoulderPitch.servoTo(self.lastJointAngles['shoulder_pitch'], self.shoulderPitchCocont)
+            self.upperarmRoll.servoTo(self.lastJointAngles['upperarm_roll'])
+            self.elbow.servoTo(self.lastJointAngles['elbow'], self.elbowCocont)
+            self.forearmRoll.servoTo(self.lastJointAngles['forearm_roll'])
+            self.wrist.servoTo(self.lastJointAngles['wrist_pitch'], self.wristCocont)
+            self.handDOF1.servoTo(self.lastJointAngles['hand_dof1'])
 
 
 
