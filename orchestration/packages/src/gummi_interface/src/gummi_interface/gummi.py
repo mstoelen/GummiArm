@@ -48,6 +48,8 @@ class Gummi:
         self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
         self.handDOF1 = DirectDrive("hand_dof1", 1.5*self.pi)
 
+        self.lastJointAngles = dict(zip(self.jointNames, self.getJointAngles()))
+
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10)
 
@@ -62,7 +64,7 @@ class Gummi:
         else:
             self.setCocontraction(abs(msg.effort[0]), abs(msg.effort[1]), abs(msg.effort[2]), abs(msg.effort[4]), abs(msg.effort[6]))
             if (msg.effort[0] >= 0) and (msg.effort[1] >= 0) and (msg.effort[2] >= 0) and (msg.effort[4] >= 0) and (msg.effort[6] >= 0):
-                self.servoTo(msg.position) #TODO: CHECK NAMES
+                self.servoTo(msg)  # Names will be checked inside servoTo
             else:
                 self.passiveHold()
 
@@ -121,6 +123,8 @@ class Gummi:
                       self.wristCocont]
         self.jointStatePub.publish(msg)
 
+        self.lastJointAngles = dict(zip(msg.name, msg.position))
+
     def getJointAngles(self):
         angles = list()
         angles.append(self.shoulderYaw.getJointAngle())
@@ -150,16 +154,23 @@ class Gummi:
         self.elbowCocont = elbow
         self.wristCocont = wrist
 
-    def servoTo(self, positions):
+    def servoTo(self, msg):
         if self.teleop == 0:
-            self.shoulderYaw.servoTo(positions[0], self.shoulderYawCocont)
-            self.shoulderRoll.servoTo(positions[1], self.shoulderRollCocont)
-            self.shoulderPitch.servoTo(positions[2], self.shoulderPitchCocont)
-            self.upperarmRoll.servoTo(positions[3])
-            self.elbow.servoTo(positions[4], self.elbowCocont)
-            self.forearmRoll.servoTo(positions[5])
-            self.wrist.servoTo(positions[6], self.wristCocont)
-            self.handDOF1.servoTo(positions[7])
+
+            for joint_name, joint_angle in zip(msg.name, msg.position):
+                self.lastJointAngles[joint_name] = joint_angle
+
+            self.shoulderYaw.servoTo(lastJointAngles['shoulder_yaw'], self.shoulderYawCocont)
+            self.shoulderRoll.servoTo(lastJointAngles['shoulder_roll'], self.shoulderRollCocont)
+            self.shoulderPitch.servoTo(lastJointAngles['shoulder_pitch'], self.shoulderPitchCocont)
+            self.upperarmRoll.servoTo(lastJointAngles['upperarm_roll'])
+            self.elbow.servoTo(lastJointAngles['elbow'], self.elbowCocont)
+            self.forearmRoll.servoTo(lastJointAngles['forearm_roll'])
+            self.wrist.servoTo(lastJointAngles['wrist_pitch'], self.wristCocont)
+            self.handDOF1.servoTo(lastJointAngles['hand_dof1'])
+
+
+
             self.publishJointState()
         else:
             print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
