@@ -1,5 +1,8 @@
 <launch>
+
 <group ns="moveit">
+  <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.1" />
+
   <node name="my_right_arm_controller" pkg="gummi_moveit_config" type="follow_joint_trajectory.py" output="screen"/>
 
   <!-- By default, we do not start a database (it can be large) -->
@@ -42,4 +45,5 @@
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find gummi_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
 </group>
+
 </launch>
