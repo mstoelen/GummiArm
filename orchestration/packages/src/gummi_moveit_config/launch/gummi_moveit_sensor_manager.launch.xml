@@ -1,3 +1,27 @@
 <launch>
+    <!-- camera_link_pose => x     y    z  yaw pitch roll  parent_frame -->
+   <arg name="camera_link_pose" default="0.11 0.0 0.39 0.0 0.38 0.0"/>
+   <arg name="kinect" default="true"/>
+   <group if="$(arg kinect)" >
+       <!-- launch openni to talk to kinect -->
+       <!-- <include file="$(find freenect_launch)/launch/freenect.launch"> -->
+           <!-- These args are workarounds for tf_prefix issues in freenect.launch -->
+           <!-- <arg name="rgb_frame_id" value="camera_rgb_optical_frame"/> -->
+           <!-- <arg name="depth_frame_id" value="camera_depth_optical_frame"/> -->
+       <!-- </include> -->
+       <!-- Users update this to set transform between camera and robot -->
+       <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster"
+             args="$(arg camera_link_pose) /base_link /camera_link 40" />
 
+       <!-- octomap parameters for moveit -->
+       <rosparam command="load" file="$(find gummi_moveit_config)/config/kinect_sensor.yaml" />
+   </group>
+
+
+   <!-- Octomap settings common to both sensors -->
+   <group ns="/moveit/move_group" >
+     <param name="octomap_frame" type="string" value="camera_link" />
+     <param name="octomap_resolution" type="double" value="0.02" />
+     <param name="max_range" type="double" value="5.0" />
+   </group>
 </launch>
