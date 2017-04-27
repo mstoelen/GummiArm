@@ -1,7 +1,6 @@
 <launch>
     <!-- camera_link_pose => x     y    z  yaw pitch roll  parent_frame -->
    <arg name="camera_link_pose" default="0.11 0.0 0.39 0.0 0.38 0.0"/>
-   <arg name="kinect" default="true"/>
    <group if="$(arg kinect)" >
        <!-- launch openni to talk to kinect -->
        <!-- <include file="$(find freenect_launch)/launch/freenect.launch"> -->
@@ -21,7 +20,9 @@
    <!-- Octomap settings common to both sensors -->
    <group ns="/moveit/move_group" >
      <param name="octomap_frame" type="string" value="camera_link" />
-     <param name="octomap_resolution" type="double" value="0.02" />
-     <param name="max_range" type="double" value="5.0" />
+     <!-- <param name="octomap_resolution" type="double" value="0.02" /> -->
+     <param name="octomap_resolution" type="double" value="0.04" />
+     <!-- <param name="max_range" type="double" value="5.0" /> -->
+     <param name="max_range" type="double" value="2.0" />
    </group>
 </launch>

@@ -35,6 +35,7 @@
   <!-- Sensors Functionality -->
   <include ns="move_group" file="$(find gummi_moveit_config)/launch/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
     <arg name="moveit_sensor_manager" value="gummi" />
+    <arg name="moveit_sensor_manager" value="$(arg kinect)" />
   </include>
 
   <!-- Start the actual move_group node/action server -->
