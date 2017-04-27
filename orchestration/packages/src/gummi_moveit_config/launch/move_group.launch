@@ -33,9 +33,11 @@
   </include>
 
   <!-- Sensors Functionality -->
+  <arg name="kinect" default="false" />
   <include ns="move_group" file="$(find gummi_moveit_config)/launch/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
+    <!-- Load the robot specific sensor manager; this sets the moveit_sensor_manager ROS parameter -->
     <arg name="moveit_sensor_manager" value="gummi" />
-    <arg name="moveit_sensor_manager" value="$(arg kinect)" />
+    <arg name="kinect" value="$(arg kinect)" />
   </include>
 
   <!-- Start the actual move_group node/action server -->
