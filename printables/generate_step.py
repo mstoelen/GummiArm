@@ -7,7 +7,6 @@
 import os
 import glob
 import FreeCAD
-import Mesh
 
 rootdir = '/Users/mstoelen/Git/GummiArm/printables' # point to printables folder
 
@@ -15,6 +14,8 @@ for subdir, dirs, files in os.walk(rootdir):
     for filename in glob.glob(os.path.join(subdir, '*.FCStd')):
         document = FreeCAD.openDocument(filename)
         objects = [ document.ActiveObject ]
-        outname = filename[:-5] + "stl"
-        Mesh.export(objects, outname)
+        outname = filename[:-5] + "step"
+        shape = objects[0].Shape
+        shape.exportStep(outname) # export to STEP
         FreeCAD.closeDocument(document.Name)
+
