@@ -15,11 +15,12 @@ from sensor_msgs.msg import JointState
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
+        self.gui = False  # True when the GUI object is available
+        self.received = False  # True when the first joint_states were received
 
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, (1400,700))
         panel = wx.Panel(self, -1)
 
-        self.encoder_position = list()
         self.jointStatePub = rospy.Publisher("gummi/joint_commands", JointState,  queue_size=10)
         self.suscribe = rospy.Subscriber('gummi/joint_states', JointState, self.cmdCallback)
 
@@ -45,6 +46,7 @@ class MyFrame(wx.Frame):
         name8 = "Hand DOF1"
 
         self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
+        self.encoder_position = dict(zip(self.jointNames,[None]*len(self.jointNames)))
 
         rospy.init_node('GummiHMI', anonymous=True)
         self.r = rospy.Rate(60)
@@ -173,6 +175,22 @@ class MyFrame(wx.Frame):
         panel.SetSizer(lastbox)
         lastbox.Fit(panel)
 
+        self.sld.Enable(False)
+        self.sld2.Enable(False)
+        self.sld3.Enable(False)
+        self.sld4.Enable(False)
+        self.sld5.Enable(False)
+        self.sld6.Enable(False)
+        self.sld7.Enable(False)
+        self.sld8.Enable(False)
+        self.sldc.Enable(False)
+        self.sld2c.Enable(False)
+        self.sld3c.Enable(False)
+        self.sld4c.Enable(False)
+        self.sld5c.Enable(False)
+
+        self.gui = True
+
     def onChecked(self, e):
         cb = e.GetEventObject()
         if cb.GetValue():
@@ -217,23 +235,54 @@ class MyFrame(wx.Frame):
         self.sendCommand(True)
 
     def sendCommand(self, active):
-      if active:
-          sign = 1
-      else:
-          sign = -1
-      current_position = [self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0),self.sld8.GetValue()*(pi/180.0)]
-      msg = JointState()
-      msg.header.stamp = rospy.Time.now()
-      msg.position = current_position
-      msg.name = self.jointNames
-      msg.effort = [sign*self.sldc.GetValue()/100.0,sign*self.sld2c.GetValue()/100.0,sign*self.sld3c.GetValue()/100.0,0,sign*self.sld4c.GetValue()/100.0,0,sign*self.sld5c.GetValue()/100.0]
-      self.jointStatePub.publish(msg)
-      self.r.sleep()
+      if self.received:
+          if active:
+              sign = 1
+          else:
+              sign = -1
+          current_position = [self.sld.GetValue()*(pi/180.0),self.sld2.GetValue()*(pi/180.0),self.sld3.GetValue()*(pi/180.0),self.sld4.GetValue()*(pi/180.0),self.sld5.GetValue()*(pi/180.0),self.sld6.GetValue()*(pi/180.0),self.sld7.GetValue()*(pi/180.0),self.sld8.GetValue()*(pi/180.0)]
+          msg = JointState()
+          msg.header.stamp = rospy.Time.now()
+          msg.position = current_position
+          msg.name = self.jointNames
+          msg.effort = [sign*self.sldc.GetValue()/100.0,sign*self.sld2c.GetValue()/100.0,sign*self.sld3c.GetValue()/100.0,0,sign*self.sld4c.GetValue()/100.0,0,sign*self.sld5c.GetValue()/100.0]
+          self.jointStatePub.publish(msg)
+          self.r.sleep()
 
 
     def cmdCallback(self, msg):
-      self.encoder_position = msg.position#TODO: CHECK NAMES
-      self.received = True
+      if self.gui:
+        for name,pos in zip(msg.name,msg.position):
+              self.encoder_position[name] = pos
+
+
+        if not self.received:
+            # Considering the jointNames are these ones:
+            # ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
+            self.sld.SetValue(self.encoder_position[self.jointNames[0]]*(pi/180.0))
+            self.sld2.SetValue(self.encoder_position[self.jointNames[1]]*(pi/180.0))
+            self.sld3.SetValue(self.encoder_position[self.jointNames[2]]*(pi/180.0))
+            self.sld4.SetValue(self.encoder_position[self.jointNames[3]]*(pi/180.0))
+            self.sld5.SetValue(self.encoder_position[self.jointNames[4]]*(pi/180.0))
+            self.sld6.SetValue(self.encoder_position[self.jointNames[5]]*(pi/180.0))
+            self.sld7.SetValue(self.encoder_position[self.jointNames[6]]*(pi/180.0))
+            self.sld8.SetValue(self.encoder_position[self.jointNames[7]]*(pi/180.0))
+
+            self.sld.Enable(True)
+            self.sld2.Enable(True)
+            self.sld3.Enable(True)
+            self.sld4.Enable(True)
+            self.sld5.Enable(True)
+            self.sld6.Enable(True)
+            self.sld7.Enable(True)
+            self.sld8.Enable(True)
+            self.sldc.Enable(True)
+            self.sld2c.Enable(True)
+            self.sld3c.Enable(True)
+            self.sld4c.Enable(True)
+            self.sld5c.Enable(True)
+
+            self.received = True
 
 class MyApp(wx.App):
     def OnInit(self):
