@@ -15,7 +15,7 @@ from sensor_msgs.msg import JointState
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        self.gui = False  # True when the GUI object is available
+        self.gui_available = False  # True when the GUI object is available
         self.received = False  # True when the first joint_states were received
 
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, (1400,700))
@@ -189,7 +189,7 @@ class MyFrame(wx.Frame):
         self.sld4c.Enable(False)
         self.sld5c.Enable(False)
 
-        self.gui = True
+        self.gui_available = True
 
     def onChecked(self, e):
         cb = e.GetEventObject()
@@ -251,7 +251,7 @@ class MyFrame(wx.Frame):
 
 
     def cmdCallback(self, msg):
-      if self.gui:
+      if self.gui_available:
         for name,pos in zip(msg.name,msg.position):
               self.encoder_position[name] = pos
 
@@ -259,15 +259,6 @@ class MyFrame(wx.Frame):
         if not self.received:
             # Considering the jointNames are these ones:
             # ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
-            self.sld.SetValue(self.encoder_position[self.jointNames[0]]*(pi/180.0))
-            self.sld2.SetValue(self.encoder_position[self.jointNames[1]]*(pi/180.0))
-            self.sld3.SetValue(self.encoder_position[self.jointNames[2]]*(pi/180.0))
-            self.sld4.SetValue(self.encoder_position[self.jointNames[3]]*(pi/180.0))
-            self.sld5.SetValue(self.encoder_position[self.jointNames[4]]*(pi/180.0))
-            self.sld6.SetValue(self.encoder_position[self.jointNames[5]]*(pi/180.0))
-            self.sld7.SetValue(self.encoder_position[self.jointNames[6]]*(pi/180.0))
-            self.sld8.SetValue(self.encoder_position[self.jointNames[7]]*(pi/180.0))
-
             self.sld.Enable(True)
             self.sld2.Enable(True)
             self.sld3.Enable(True)
@@ -281,6 +272,15 @@ class MyFrame(wx.Frame):
             self.sld3c.Enable(True)
             self.sld4c.Enable(True)
             self.sld5c.Enable(True)
+
+            self.sld.SetValue(int(self.encoder_position[self.jointNames[0]]*(pi/180.0)))
+            self.sld2.SetValue(int(self.encoder_position[self.jointNames[1]]*(pi/180.0)))
+            self.sld3.SetValue(int(self.encoder_position[self.jointNames[2]]*(pi/180.0)))
+            self.sld4.SetValue(int(self.encoder_position[self.jointNames[3]]*(pi/180.0)))
+            self.sld5.SetValue(int(self.encoder_position[self.jointNames[4]]*(pi/180.0)))
+            self.sld6.SetValue(int(self.encoder_position[self.jointNames[5]]*(pi/180.0)))
+            self.sld7.SetValue(int(self.encoder_position[self.jointNames[6]]*(pi/180.0)))
+            self.sld8.SetValue(int(self.encoder_position[self.jointNames[7]]*(pi/180.0)))
 
             self.received = True
 
