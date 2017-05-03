@@ -14,7 +14,7 @@ class Gummi:
     def __init__(self):
         self.teleop = rospy.get_param("~teleop", 1)
         print("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
-        
+
         self.pi = 3.1416
         self.initVariables()
         self.initJoints()
@@ -48,8 +48,10 @@ class Gummi:
         self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
         self.handDOF1 = DirectDrive("hand_dof1", 1.5*self.pi)
 
+        self.lastJointAngles = dict(zip(self.jointNames, self.getJointAngles()))
+
     def initPublishers(self):
-        self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10) 
+        self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10)
 
     def initSubscribers(self):
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
@@ -62,7 +64,7 @@ class Gummi:
         else:
             self.setCocontraction(abs(msg.effort[0]), abs(msg.effort[1]), abs(msg.effort[2]), abs(msg.effort[4]), abs(msg.effort[6]))
             if (msg.effort[0] >= 0) and (msg.effort[1] >= 0) and (msg.effort[2] >= 0) and (msg.effort[4] >= 0) and (msg.effort[6] >= 0):
-                self.servoTo(msg.position) #TODO: CHECK NAMES
+                self.servoTo(msg)  # Names will be checked inside servoTo
             else:
                 self.passiveHold()
 
@@ -103,7 +105,7 @@ class Gummi:
             else:
                 self.wrist.servoWith(self.wristVel, self.wristCocont)
         self.handDOF1.servoWith(self.handDOF1Vel)
-        
+
         self.publishJointState()
 
     def publishJointState(self):
@@ -111,7 +113,18 @@ class Gummi:
         msg.header.stamp = rospy.Time.now()
         msg.name = self.jointNames
         msg.position = self.getJointAngles()
+        # msg.velocity =
+        msg.effort = [self.shoulderYawCocont,
+                      self.shoulderRollCocont,
+                      self.shoulderPitchCocont,
+                      0.0,
+                      self.elbowCocont,
+                      0.0,
+                      self.wristCocont,
+                      0.0]
         self.jointStatePub.publish(msg)
+
+        self.lastJointAngles = dict(zip(msg.name, msg.position))
 
     def getJointAngles(self):
         angles = list()
@@ -142,16 +155,23 @@ class Gummi:
         self.elbowCocont = elbow
         self.wristCocont = wrist
 
-    def servoTo(self, positions):
+    def servoTo(self, msg):
         if self.teleop == 0:
-            self.shoulderYaw.servoTo(positions[0], self.shoulderYawCocont)
-            self.shoulderRoll.servoTo(positions[1], self.shoulderRollCocont)
-            self.shoulderPitch.servoTo(positions[2], self.shoulderPitchCocont)
-            self.upperarmRoll.servoTo(positions[3])
-            self.elbow.servoTo(positions[4], self.elbowCocont)
-            self.forearmRoll.servoTo(positions[5])
-            self.wrist.servoTo(positions[6], self.wristCocont)
-            self.handDOF1.servoTo(positions[7])
+
+            for joint_name, joint_angle in zip(msg.name, msg.position):
+                self.lastJointAngles[joint_name] = joint_angle
+
+            self.shoulderYaw.servoTo(self.lastJointAngles['shoulder_yaw'], self.shoulderYawCocont)
+            self.shoulderRoll.servoTo(self.lastJointAngles['shoulder_roll'], self.shoulderRollCocont)
+            self.shoulderPitch.servoTo(self.lastJointAngles['shoulder_pitch'], self.shoulderPitchCocont)
+            self.upperarmRoll.servoTo(self.lastJointAngles['upperarm_roll'])
+            self.elbow.servoTo(self.lastJointAngles['elbow'], self.elbowCocont)
+            self.forearmRoll.servoTo(self.lastJointAngles['forearm_roll'])
+            self.wrist.servoTo(self.lastJointAngles['wrist_pitch'], self.wristCocont)
+            self.handDOF1.servoTo(self.lastJointAngles['hand_dof1'])
+
+
+
             self.publishJointState()
         else:
             print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
@@ -216,5 +236,3 @@ class Gummi:
         self.shoulderPitch.setCollisionResponse(shoulderPitch)
         self.elbow.setCollisionResponse(elbow)
         self.wrist.setCollisionResponse(wrist)
-    
-        

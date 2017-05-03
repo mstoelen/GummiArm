@@ -1,0 +1,56 @@
+<launch>
+
+<group ns="moveit">
+  <!--  this solves the error messages Moveit! was generating when the arm is not in a very stable position -->
+  <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.1" />
+
+  <node name="my_right_arm_controller" pkg="gummi_moveit_config" type="follow_joint_trajectory.py" output="screen"/>
+
+  <!-- By default, we do not start a database (it can be large) -->
+  <arg name="db" default="false" />
+
+  <!-- By default, we are not in debug mode -->
+  <arg name="debug" default="false" />
+
+  <!-- By default, we are not using kinect -->
+  <arg name="kinect" default="false" />
+
+  <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+  <include file="$(find gummi_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <!-- If needed, broadcast static tf for robot root -->
+
+  <!-- If the joint_states published by gummi.py are the same as the Moveit! model, relay can be used -->
+  <!-- <node name="redirect" pkg="topic_tools" type="relay" args="/gummi/joint_states joint_states" output="screen"/> -->
+
+  <!-- It will be necessary to use the transform until the hand is not modelled inside Moveit! -->
+  <node name="redirect" pkg="topic_tools" type="transform" args="/gummi/joint_states joint_states sensor_msgs/JointState 'sensor_msgs.msg.JointState(header=m.header,name=m.name[:-1],position=m.position[:-1],effort=m.effort)' --import sensor_msgs" output="screen"/>
+
+  <!--<remap from="/gummi/joint_states" to="/joint_states"/> -->
+
+
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+  <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
+  <include file="$(find gummi_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="kinect" value="$(arg kinect)"/>
+  </include>
+
+  <!-- Run Rviz and load the default config to see the state of the move_group node -->
+  <include file="$(find gummi_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+
+  <!-- If database loading was enabled, start mongodb as well -->
+  <include file="$(find gummi_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
+</group>
+
+</launch>
