@@ -20,7 +20,7 @@ class MyFrame(wx.Frame):
         panel = wx.Panel(self, -1)
 
         self.encoder_position = list()
-        self.jointStatePub = rospy.Publisher("gummi/joint_commands", JointState,  queue_size=10) 
+        self.jointStatePub = rospy.Publisher("gummi/joint_commands", JointState,  queue_size=10)
         self.suscribe = rospy.Subscriber('gummi/joint_states', JointState, self.cmdCallback)
 
         lastbox = wx.BoxSizer(wx.VERTICAL)
@@ -41,11 +41,13 @@ class MyFrame(wx.Frame):
         name4 = "Upper arm roll"
         name5 = "Elbow"
         name6 = "Forearm"
-        name7 = "Wrist" 
-        name8 = "Hand DOF1" 
+        name7 = "Wrist"
+        name8 = "Hand DOF1"
+
+        self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
 
         rospy.init_node('GummiHMI', anonymous=True)
-        self.r = rospy.Rate(60) 
+        self.r = rospy.Rate(60)
 
         text_a = wx.StaticText(panel, label= "Joint angle", pos= wx.DefaultPosition)
         text_c = wx.StaticText(panel, label= "Co-contraction", pos= wx.DefaultPosition)
@@ -56,8 +58,8 @@ class MyFrame(wx.Frame):
         text4 = wx.StaticText(panel, label= name4, pos= wx.DefaultPosition)
         text5 = wx.StaticText(panel, label= name5, pos= wx.DefaultPosition)
         text6 = wx.StaticText(panel, label= name6, pos= wx.DefaultPosition)
-        text7 = wx.StaticText(panel, label= name7, pos= wx.DefaultPosition)   
-        text8 = wx.StaticText(panel, label= name8, pos= wx.DefaultPosition)  
+        text7 = wx.StaticText(panel, label= name7, pos= wx.DefaultPosition)
+        text8 = wx.StaticText(panel, label= name8, pos= wx.DefaultPosition)
 
         self.sld = wx.Slider(panel, value = 0* (180/pi), minValue = rospy.get_param("~shoulder_yaw/minAngle") * (180/pi), maxValue = rospy.get_param("~shoulder_yaw/maxAngle") * (180/pi), pos = wx.DefaultPosition, size = (150, -1),
                               style = wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_LABELS)
@@ -145,8 +147,8 @@ class MyFrame(wx.Frame):
         vbox8.Add(self.sld8, 1 , wx.ALIGN_CENTRE)
         vbox8.Add(text_a,1 , wx.ALIGN_CENTRE)
 
-        cb1 = wx.CheckBox(panel, label = 'Passive', pos = wx.DefaultPosition) 
-        cb1.Bind(wx.EVT_CHECKBOX,self.onChecked) 
+        cb1 = wx.CheckBox(panel, label = 'Passive', pos = wx.DefaultPosition)
+        cb1.Bind(wx.EVT_CHECKBOX,self.onChecked)
 
         btn1 = wx.Button(panel, 12, 'Save')
         wx.EVT_BUTTON(self, 12, self.OnSave)
@@ -171,8 +173,8 @@ class MyFrame(wx.Frame):
         panel.SetSizer(lastbox)
         lastbox.Fit(panel)
 
-    def onChecked(self, e): 
-        cb = e.GetEventObject() 
+    def onChecked(self, e):
+        cb = e.GetEventObject()
         if cb.GetValue():
             self.sld.Enable(False)
             self.sld2.Enable(False)
@@ -203,7 +205,7 @@ class MyFrame(wx.Frame):
             self.sld4c.Enable(True)
             self.sld5c.Enable(True)
             self.sendCommand(True)
-        
+
 
     def OnSave(self,evt) :
        fileName = self.textFile.GetValue()
@@ -223,6 +225,7 @@ class MyFrame(wx.Frame):
       msg = JointState()
       msg.header.stamp = rospy.Time.now()
       msg.position = current_position
+      msg.name = self.jointNames
       msg.effort = [sign*self.sldc.GetValue()/100.0,sign*self.sld2c.GetValue()/100.0,sign*self.sld3c.GetValue()/100.0,0,sign*self.sld4c.GetValue()/100.0,0,sign*self.sld5c.GetValue()/100.0]
       self.jointStatePub.publish(msg)
       self.r.sleep()
