@@ -24,6 +24,7 @@
      <group ns="/moveit/move_group" >
        <param name="octomap_frame" type="string" value="camera_link" />
        <!-- <param name="octomap_resolution" type="double" value="0.02" /> -->
+       <!--  If octomap_resolution is <=0.02, it gets too slow -->
        <param name="octomap_resolution" type="double" value="0.04" />
        <!-- <param name="max_range" type="double" value="5.0" /> -->
        <param name="max_range" type="double" value="2.0" />
