@@ -64,6 +64,10 @@ from control_msgs.msg import FollowJointTrajectoryResult  # it's only passaed to
 
 from control_msgs.msg import FollowJointTrajectoryActionFeedback
 
+from actionlib_msgs.msg import GoalStatus
+
+from std_msgs.msg import Header
+
 
 class Segment():
     def __init__(self, num_joints):
@@ -153,15 +157,17 @@ class JointTrajectoryActionController():
 
         # Message containing current state for all controlled joints
         # control_msgs/FollowJointTrajectoryFeedback
-        self.msg = FollowJointTrajectoryFeedback()
-        self.msg.joint_names = self.joint_names
-        self.msg.desired.positions = [0.0] * self.num_joints
-        self.msg.desired.velocities = [0.0] * self.num_joints
-        self.msg.desired.accelerations = [0.0] * self.num_joints
-        self.msg.actual.positions = [0.0] * self.num_joints
-        self.msg.actual.velocities = [0.0] * self.num_joints
-        self.msg.error.positions = [0.0] * self.num_joints
-        self.msg.error.velocities = [0.0] * self.num_joints
+        self.feedback = FollowJointTrajectoryFeedback()
+        self.feedback.joint_names = self.joint_names
+        self.feedback.desired.positions = [0.0] * self.num_joints
+        self.feedback.desired.velocities = [0.0] * self.num_joints
+        self.feedback.desired.accelerations = [0.0] * self.num_joints
+        self.feedback.actual.positions = [0.0] * self.num_joints
+        self.feedback.actual.velocities = [0.0] * self.num_joints
+        self.feedback.error.positions = [0.0] * self.num_joints
+        self.feedback.error.velocities = [0.0] * self.num_joints
+
+        self.goal_status = GoalStatus()  # for the update_feedback
 
         return True
 
@@ -179,20 +185,23 @@ class JointTrajectoryActionController():
 
         self.action_server.start()
 
-        Thread(target=self.update_feedback).start()  # This thread is responsible for publishing the FollowJointTrajectoryFeedback
+        # Not sure if this FollowJointTrajectoryActionFeedback will be really necessary in the near future...
+        # Thread(target=self.update_feedback).start()  # This thread is responsible for publishing the FollowJointTrajectoryFeedback
 
 
-    def update_feedback(self):
-        '''
-	    DEBUG...
-        '''
-
-        rate = rospy.Rate(self.update_feedback_rate)
-        msg = FollowJointTrajectoryActionFeedback()
-        msg.status.text = "Is it working????"
-        while not rospy.is_shutdown():
-            self.action_server.publish_feedback(msg.status,msg.feedback)
-            rate.sleep()
+    # def update_feedback(self):
+    #     '''
+    #
+    #     '''
+    #
+    #     rate = rospy.Rate(self.update_feedback_rate)
+    #     msg = FollowJointTrajectoryActionFeedback()
+    #     msg.feedback = self.feedback
+    #     msg.status = self.goal_status
+    #     while not rospy.is_shutdown():
+    #         msg.header.stamp = rospy.Time.now()
+    #         self.action_server.publish_feedback(msg.status,msg.feedback)
+    #         rate.sleep()
 
 
     def cancel(self, goal):
@@ -238,7 +247,7 @@ class JointTrajectoryActionController():
         # Make sure the joints in the goal (trajectory_msgs/JointTrajectory) match
         # the joints of the controller
         if set(self.joint_names) != set(traj.joint_names):
-        # A Python set is always created only with unique items, therefore set
+        # A Python set is always created only with unique items, therefore a set
         # eliminates duplicates, but it also sort them.
             res = FollowJointTrajectoryResult()
             res.error_code=FollowJointTrajectoryResult.INVALID_JOINTS
@@ -264,7 +273,7 @@ class JointTrajectoryActionController():
         # correlate the joints we're commanding to the joints in the message
         # map from an index of joint in the controller to an index in the trajectory
         lookup = [traj.joint_names.index(joint) for joint in self.joint_names]
-	durations = [0.0] * num_points
+        durations = [0.0] * num_points
 
         # find out the duration of each segment in the trajectory
         durations[0] = traj.points[0].time_from_start.to_sec()
@@ -368,16 +377,16 @@ class JointTrajectoryActionController():
                 desired_position = trajectory[seg].positions[j]
                 joint_values[joint]=desired_position
 
-	    # the commands will always obey the joint name order
+            # the commands will always obey the joint name order
             self.sendCommand2Gummi(joint_values)
 
             # Verifies trajectory constraints
             for j, joint in enumerate(self.joint_names):
-                if self.trajectory_constraints[j] > 0 and self.msg.error.positions[j] > self.trajectory_constraints[j]:
+                if self.trajectory_constraints[j] > 0 and self.feedback.error.positions[j] > self.trajectory_constraints[j]:
                     res = FollowJointTrajectoryResult()
                     res.error_code=FollowJointTrajectoryResult.PATH_TOLERANCE_VIOLATED
                     msg = 'Unsatisfied position constraint for %s, trajectory point %d, %f is larger than %f' % \
-                           (joint, seg, self.msg.error.positions[j], self.trajectory_constraints[j])
+                           (joint, seg, self.feedback.error.positions[j], self.trajectory_constraints[j])
                     rospy.logwarn(msg)
                     self.action_server.set_aborted(result=res, text=msg)
                     return
@@ -389,7 +398,7 @@ class JointTrajectoryActionController():
             rospy.logdebug('desired pos was %f, actual pos is %f, error is %f' % (trajectory[-1].positions[i], self.joint_states[joint], self.joint_states[joint] - trajectory[-1].positions[i]))
 
         # Checks that we have ended inside the goal constraints
-        for (joint, pos_error, pos_constraint) in zip(self.joint_names, self.msg.error.positions, self.goal_constraints):
+        for (joint, pos_error, pos_constraint) in zip(self.joint_names, self.feedback.error.positions, self.goal_constraints):
             if pos_constraint > 0 and abs(pos_error) > pos_constraint:
                 res = FollowJointTrajectoryResult()
                 res.error_code=FollowJointTrajectoryResult.GOAL_TOLERANCE_VIOLATED
@@ -420,6 +429,7 @@ if __name__ == '__main__':
     without the use of a controller_manager/spawner.
     '''
 
+    # The controllers below must match the ones from Moveit!
     controllers = ['shoulder_yaw','shoulder_roll','shoulder_pitch','upperarm_roll','elbow','forearm_roll','wrist_pitch']
     controller_namespace = 'my_right_arm_controller'
 
