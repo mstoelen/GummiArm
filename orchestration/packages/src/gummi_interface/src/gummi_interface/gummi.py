@@ -120,7 +120,8 @@ class Gummi:
                       0.0,
                       self.elbowCocont,
                       0.0,
-                      self.wristCocont]
+                      self.wristCocont,
+                      0.0]
         self.jointStatePub.publish(msg)
 
         self.lastJointAngles = dict(zip(msg.name, msg.position))
