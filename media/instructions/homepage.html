@@ -1,0 +1,131 @@
+<!DOCTYPE html >
+
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Building a GummiArm</title>
+        <style>
+            table{
+                border-collapse: collapse; /* Les bordures du tableau seront collées (plus joli) */
+            }
+            td,th{
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <h1>Presentation and general points</h1>
+
+        <p>
+            Thinking about building one? Keep reading! The GummiArm is fully <strong>open source</strong>, and we encourage both <strong>replications</strong> and <strong>improvements</strong>. 
+        </p>
+        <p style="text-align:center;"><img src="media/homepage/gummi_general_layout.png", alt = "General layout of the GummiArm", title = "Design view of the GummiArm", height= 591,  width= 1200></p>
+
+        <p>
+            The arm is actuated by Dynamixel servos from <em> Robotis Inc </em> (Irvine, CA, USA), see figure above (v2.2.0). There are 5 agonist-antagonist joints, each with 2 Dynamixel servos pulling on tendons that work against each other. For example the biceps and triceps actuating on the elbow joint. 2 joints are directly driven by servos, and 1 servo is included in the forearm to drive a hand. 
+        </p>
+        <p style="text-align:center;"><img src="media/homepage/gummi_old_parts.png", alt = "Sum up of all printed parts used to build the arm", title = "Overview of printable pieces", height= 591,  width= 1200></p>
+
+        <p>
+            The arm structure is made of PLA plastic, and is printable on hobby-grade <strong> 3D printers </strong>. See all parts for arm above (v2.2.0). The first prototype was printed on a <em> BQ </em> (Madrid, Spain) Prusa i3 Hephestos printer with 20% infill (for most of parts). The full set of parts is available in the repository as <em> FreeCAD files </em> (.FCStd). You can get FreeCAD here: <a href="http://www.freecadweb.org/" title="Click to get FreeCAD">FreeCAD</a>
+        </p>
+        <p style="text-align:center;"><img src="media/homepage/gummi_in_assembly.jpg", alt = "Picture of a mounted GummiArm", title = " A first version of the GummiArm", height= 591,  width= 1200></p>
+
+        <h2> Cost to build it </h2>
+
+          <p>
+            So how much cost building the GummiArm? Since most of its part are 3D printed, this soft robot arm is quiet cheap and if you break it during experiments or other projects you can easily print damaged parts.  
+          </p>
+
+          <table>
+
+            <thead> <!-- En-tête du tableau -->
+              <tr>
+                <th>     Material     </th>
+                <th>    Quantity   </th>
+                <th>    Price per unit  </th>
+                <th>    Total price  </th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>Dynamixel MX-106</td>
+                    <td> 6 </td>
+                    <td> 493.9 $</td>
+                    <td> 2963.4 $</td>
+                </tr>
+
+                <tr>
+                    <td>Dynamixel MX-64</td>
+                    <td> 2 </td>
+                    <td> 299.90 $</td>
+                    <td> 599.8 $</td>
+                </tr>
+
+                <tr>
+                    <td>Dynamixel MX-28</td>
+                    <td> 1 </td>
+                    <td> 219.9 $</td>
+                    <td> 219.9 $</td>
+                </tr>
+
+                <tr>
+                    <td>Dynamixel AX-18A</td>
+                    <td> 4 </td>
+                    <td> 94.9 $</td>
+                    <td> 379.6 $</td>
+                </tr>
+
+                <tr>
+                    <td> Dynamixel AX-12A</td>
+                    <td> 6 </td>
+                    <td> 44.5 $</td>
+                    <td> 267 $</td>
+                </tr>
+
+                <tr>
+                    <td>Screws and bolts</td>
+                    <td> </td>
+                    <td> </td>
+                    <td>104.8 $</td>
+                </tr>
+
+                <tr>
+                    <td> Slewing bearing 140 mm</td>
+                    <td> 2 </td>
+                    <td> 19.95 $</td>
+                    <td> 39.9 $</td>
+                </tr>
+
+                <tr>
+                    <td> Slewing bearing 140 mm</td>
+                    <td> 1 </td>
+                    <td> 19.95 $</td>
+                    <td> 19.95 $</td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td>TOTAL</td>
+                    <td></td>
+                    <td></td>
+                    <td>4594.35 $</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </body>
+</html>
