@@ -416,7 +416,6 @@ class JointTrajectoryActionController():
             rospy.loginfo(msg)
             res = FollowJointTrajectoryResult()
             res.error_code=FollowJointTrajectoryResult.SUCCESSFUL
-            rospy.loginfo(msg)
             goal.set_succeeded(result=res, text=msg) # this must be called only once.
         else:
             msg = 'Trajectory execution cancelled/aborted... (goalID:{0})!'.format(goal.get_goal_id().id)
