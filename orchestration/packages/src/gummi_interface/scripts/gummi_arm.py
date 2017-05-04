@@ -34,7 +34,7 @@ def main(args):
     rospy.loginfo("GummiArm is live!")
 
     while not rospy.is_shutdown():
-        if gummi.teleop == 0 and gummi.velocity_control == 1:
+        if gummi.teleop == 0 and gummi.velocity_control == 0:
             gummi.doUpdate()
 
         gummi.publishJointState()
