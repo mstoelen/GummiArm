@@ -15,10 +15,10 @@ def main(args):
 
     gummi = Gummi()
 
-    print('WARNING: Moving joints sequentially to equilibrium positions.')
+    rospy.logwarn('Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
 
-    print('WARNING: Moving to resting pose, hold arm!')
+    rospy.logwarn('Moving to resting pose, hold arm!')
     rospy.sleep(1)
 
     gummi.goRestingPose(True)
@@ -31,7 +31,7 @@ def main(args):
     #    r.sleep()
 
     gummi.setCollisionResponses(False, False, False, False, False)
-    print("GummiArm is live!")
+    rospy.loginfo("GummiArm is live!")
 
     while not rospy.is_shutdown():
         if gummi.teleop == 0 and gummi.velocity_control == 1:
