@@ -13,9 +13,12 @@ class Gummi:
 
     def __init__(self):
         self.teleop = rospy.get_param("~teleop", 1)
-        print("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
+        if self.teleop:
+            rospy.logwarn("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
 
         self.velocity_control = rospy.get_param("~velocity_control", 1)
+        if self.velocity_control:
+            rospy.logwarn("Expecting velocity control ('velocity_control' parameter in gummi.yaml file): " + str(self.velocity_control) + ".")
 
         self.pi = 3.1416
         self.initVariables()
@@ -192,7 +195,7 @@ class Gummi:
 
             self.publishJointState()
         else:
-            print("WARNING: Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
+            rospy.logwarn("Asked to servo to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
 
     def goTo(self, positions, now):
         if self.teleop == 0:
@@ -206,7 +209,7 @@ class Gummi:
             self.handDOF1.servoTo(positions[7])
             self.publishJointState()
         else:
-            print("WARNING: Asked to go to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
+            rospy.logwarn("Asked to go to pose, but ignoring as in teleop mode. Check gummi.yaml file.")
 
     def goRestingPose(self, now):
         self.shoulderYaw.goTo(0, self.shoulderYawCocont, now)
