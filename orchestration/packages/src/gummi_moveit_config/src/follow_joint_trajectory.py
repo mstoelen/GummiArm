@@ -362,7 +362,7 @@ class JointTrajectoryActionController():
 
             # first point in trajectories calculated by OMPL is current position with duration of 0 seconds, skip it
             if durations[seg] == 0:
-                rospy.loginfo('skipping segment %d with duration of 0 seconds' % seg)
+                rospy.loginfo('Skipping segment %d with duration of 0 seconds' % seg)
                 continue
 
             joint_positions = {}
@@ -398,7 +398,7 @@ class JointTrajectoryActionController():
         rospy.sleep(self.goal_time_constraint)
 
         for i, joint in enumerate(self.joint_names):
-            rospy.logdebug('desired pos was %f, actual pos is %f, error is %f' % (trajectory[-1].positions[i], self.joint_states[joint], self.joint_states[joint] - trajectory[-1].positions[i]))
+            rospy.logdebug('Desired pos was %f, actual pos is %f, error is %f' % (trajectory[-1].positions[i], self.joint_states[joint], self.joint_states[joint] - trajectory[-1].positions[i]))
 
         # Checks that we have ended inside the goal constraints
         for (joint, pos_error, pos_constraint) in zip(self.joint_names, self.feedback.error.positions, self.goal_constraints):
@@ -416,10 +416,11 @@ class JointTrajectoryActionController():
             rospy.loginfo(msg)
             res = FollowJointTrajectoryResult()
             res.error_code=FollowJointTrajectoryResult.SUCCESSFUL
+            rospy.loginfo(msg)
             goal.set_succeeded(result=res, text=msg) # this must be called only once.
         else:
             msg = 'Trajectory execution cancelled/aborted... (goalID:{0})!'.format(goal.get_goal_id().id)
-            rospy.loginfo(msg)
+            rospy.logwarn(msg)
             goal.set_canceled(text=msg)
 
 
