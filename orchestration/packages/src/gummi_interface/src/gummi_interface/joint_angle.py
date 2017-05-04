@@ -43,7 +43,7 @@ class JointAngle:
                 #print("WARNING: Encoder oddity, exactly same angle " + str(angle) + " and goal " + str(msg.goal_pos)  + " for " + self.name + ", ignoring.")
             else:
                 self.encoderAngles.appendleft(angle)
-                self.encoderVelocities.appendleft(angle)
+                self.encoderVelocities.appendleft(velocity)
 
                 if len(self.encoderAngles) > 3:
                     self.encoderAngles.pop()
