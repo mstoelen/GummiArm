@@ -84,7 +84,7 @@ class JointTrajectoryActionController():
         '''
 
         self.update_rate = 1000  # only used here: "while traj.header.stamp > time:"
-        self.update_feedback_rate = 50  # only used here: "update_feedback"
+        self.update_feedback_rate = 100  # only used here: "update_feedback"
         self.trajectory = []
 
         self.controller_namespace = controller_namespace
@@ -99,14 +99,15 @@ class JointTrajectoryActionController():
         self.jointStatePub = rospy.Publisher("/gummi/joint_commands", JointState,  queue_size=10)
 
         # Reads GummiArm's current joint_states
-        self.subscribe = rospy.Subscriber('/gummi/joint_states', JointState, self.read_joint_states)
+        self.subscribe = rospy.Subscriber('joint_states', JointState, self.read_joint_states)
 
 
     def read_joint_states(self, msg):
         self.joint_states_rdy = True
 
         # Not sure if Gummi is publishing the same joints as joint names...
-        self.joint_states = dict(zip(msg.name, msg.position))
+        self.joint_positions = dict(zip(msg.name, msg.position))
+        self.joint_velocities = dict(zip(msg.name, msg.velocity))
         self.joint_cocontractions = dict(zip(msg.name, msg.effort))
 
 
@@ -151,8 +152,8 @@ class JointTrajectoryActionController():
         self.min_velocity = rospy.get_param(self.controller_namespace + '/joint_trajectory_action_node/min_velocity', 0.1)
 
         for joint in self.joint_names:
-            self.goal_constraints.append(rospy.get_param(ns + '/' + joint + '/goal', -1.0))
-            self.trajectory_constraints.append(rospy.get_param(ns + '/' + joint + '/trajectory', -1.0))
+            self.goal_constraints.append(rospy.get_param(ns + '/' + joint + '/goal', 0.1))#-1.0))
+            self.trajectory_constraints.append(rospy.get_param(ns + '/' + joint + '/trajectory', 0.1))#-1.0))
 
         # Message containing current state for all controlled joints
         # control_msgs/FollowJointTrajectoryFeedback
@@ -166,7 +167,7 @@ class JointTrajectoryActionController():
         self.feedback.error.positions = [0.0] * self.num_joints
         self.feedback.error.velocities = [0.0] * self.num_joints
 
-        self.goal_status = GoalStatus()  # for the update_feedback
+        self.running = False
 
         return True
 
@@ -185,23 +186,26 @@ class JointTrajectoryActionController():
         self.action_server.start()
 
         # Not sure if this FollowJointTrajectoryActionFeedback will be really necessary in the near future...
-        # Thread(target=self.update_feedback).start()  # This thread is responsible for publishing the FollowJointTrajectoryFeedback
+        Thread(target=self.update_feedback).start()  # This thread is responsible for publishing the FollowJointTrajectoryFeedback
 
+    def update_feedback(self):
+        rate = rospy.Rate(self.update_feedback_rate)
 
-    # def update_feedback(self):
-    #     '''
-    #
-    #     '''
-    #
-    #     rate = rospy.Rate(self.update_feedback_rate)
-    #     msg = FollowJointTrajectoryActionFeedback()
-    #     msg.feedback = self.feedback
-    #     msg.status = self.goal_status
-    #     while not rospy.is_shutdown():
-    #         msg.header.stamp = rospy.Time.now()
-    #         self.action_server.publish_feedback(msg.status,msg.feedback)
-    #         rate.sleep()
+        while not rospy.is_shutdown():
+            if self.running:
+                self.feedback.header.stamp = rospy.Time.now()
 
+                # Publish current joint state
+                if self.joint_states_rdy:
+                    for i, joint in enumerate(self.joint_names):
+                        self.feedback.actual.positions[i] = self.joint_positions[joint]
+                        self.feedback.actual.velocities[i] = abs(self.joint_velocities[joint])
+                        self.feedback.error.positions[i] = self.feedback.actual.positions[i] - self.feedback.desired.positions[i]
+                        self.feedback.error.velocities[i] = self.feedback.actual.velocities[i] - self.feedback.desired.velocities[i]
+
+                    self.action_server.publish_feedback(self.current_goal.get_goal_status(),self.feedback)
+                # rospy.loginfo("GOAL_STATUS:{0}\n FEEDBACK:{1}".format(self.current_goal.get_goal_status(),self.feedback))
+            rate.sleep()
 
     def cancel(self, goal):
         rospy.loginfo('Cancelling goalID:{0}'.format(goal.get_goal_id().id))
@@ -240,6 +244,8 @@ class JointTrajectoryActionController():
             rospy.sleep(0.1)
 
         traj = goal.get_goal().trajectory
+
+        self.current_goal = goal
 
         num_points = len(traj.points)
 
@@ -370,7 +376,7 @@ class JointTrajectoryActionController():
 
             for j,joint in enumerate(self.joint_names):
 
-                start_position = self.joint_states[joint]
+                start_position = self.joint_positions[joint]
                 if seg != 0:
                     start_position = trajectory[seg - 1].positions[j]
 
@@ -391,14 +397,14 @@ class JointTrajectoryActionController():
                     msg = 'Unsatisfied position constraint for %s, trajectory point %d, %f is larger than %f' % \
                            (joint, seg, self.feedback.error.positions[j], self.trajectory_constraints[j])
                     rospy.logwarn(msg)
-                    self.action_server.set_aborted(result=res, text=msg)
+                    goal.set_aborted(result=res, text=msg)
                     return
 
         # let motors roll for specified amount of time
         rospy.sleep(self.goal_time_constraint)
 
         for i, joint in enumerate(self.joint_names):
-            rospy.logdebug('Desired pos was %f, actual pos is %f, error is %f' % (trajectory[-1].positions[i], self.joint_states[joint], self.joint_states[joint] - trajectory[-1].positions[i]))
+            rospy.logdebug('Desired pos was %f, actual pos is %f, error is %f' % (trajectory[-1].positions[i], self.joint_positions[joint], self.joint_positions[joint] - trajectory[-1].positions[i]))
 
         # Checks that we have ended inside the goal constraints
         for (joint, pos_error, pos_constraint) in zip(self.joint_names, self.feedback.error.positions, self.goal_constraints):
@@ -408,7 +414,7 @@ class JointTrajectoryActionController():
                 msg = 'Aborting because %s joint wound up outside the goal constraints, %f is larger than %f' % \
                       (joint, pos_error, pos_constraint)
                 rospy.logwarn(msg)
-                self.action_server.set_aborted(result=res, text=msg)
+                goal.set_aborted(result=res, text=msg)
                 break
 
         if self.running:
