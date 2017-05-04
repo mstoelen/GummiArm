@@ -50,7 +50,8 @@ class Gummi:
         self.headYaw = DirectDrive("head_yaw", 1.5*self.pi)
         self.handDOF1 = DirectDrive("hand_dof1", 1.5*self.pi)
 
-        self.lastJointAngles = dict(zip(self.jointNames, self.getJointAngles()))
+        self.lastPositions = dict(zip(self.jointNames, self.getJointAngles()))
+        self.lastVelocities = dict(zip(self.jointNames, self.getJointVelocities()))
 
     def initPublishers(self):
         self.jointStatePub = rospy.Publisher("gummi/joint_states", JointState,  queue_size=10)
@@ -60,7 +61,7 @@ class Gummi:
 
     def cmdCallback(self, msg):
         if self.teleop == 1 or self.velocity_control == 1:
-            self.setVelocity(msg.velocity) #TODO: CHECK NAMES
+            self.setVelocity(msg)  # Names will be checked inside servoTo
             self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
             self.doVelocityUpdate()
         else:
@@ -126,7 +127,8 @@ class Gummi:
                       0.0]
         self.jointStatePub.publish(msg)
 
-        self.lastJointAngles = dict(zip(msg.name, msg.position))
+        self.lastPositions = dict(zip(msg.name, msg.position))
+        self.lastVelocities = dict(zip(msg.name, msg.velocity))
 
     def getJointAngles(self):
         angles = list()
@@ -152,15 +154,18 @@ class Gummi:
         velocities.append(self.handDOF1.getJointVelocity())
         return velocities
 
-    def setVelocity(self, velocities):
-        self.shoulderYawVel = velocities[0]
-        self.shoulderRollVel = velocities[1]
-        self.shoulderPitchVel = velocities[2]
-        self.upperarmRollVel = velocities[3]
-        self.elbowVel = velocities[4]
-        self.forearmRollVel = velocities[5]
-        self.wristVel = velocities[6]
-        self.handDOF1Vel = velocities[7]
+    def setVelocity(self, msg):
+        for joint_name, joint_velocity in zip(msg.name, msg.velocity):
+            self.lastVelocities[joint_name] = joint_velocity
+
+        self.shoulderYawVel = self.lastVelocities['shoulder_yaw']
+        self.shoulderRollVel = self.lastVelocities['shoulder_roll']
+        self.shoulderPitchVel = self.lastVelocities['shoulder_pitch']
+        self.upperarmRollVel = self.lastVelocities['upperarm_roll']
+        self.elbowVel = self.lastVelocities['elbow']
+        self.forearmRollVel = self.lastVelocities['forearm_roll']
+        self.wristVel = self.lastVelocities['wrist_pitch']
+        self.handDOF1Vel = self.lastVelocities['hand_dof1']
 
     def setCocontraction(self, shoulderYaw, shoulderRoll, shoulderPitch, elbow, wrist):
         self.shoulderYawCocont = shoulderYaw
@@ -173,16 +178,16 @@ class Gummi:
         if self.teleop == 0:
 
             for joint_name, joint_angle in zip(msg.name, msg.position):
-                self.lastJointAngles[joint_name] = joint_angle
+                self.lastPositions[joint_name] = joint_angle
 
-            self.shoulderYaw.servoTo(self.lastJointAngles['shoulder_yaw'], self.shoulderYawCocont)
-            self.shoulderRoll.servoTo(self.lastJointAngles['shoulder_roll'], self.shoulderRollCocont)
-            self.shoulderPitch.servoTo(self.lastJointAngles['shoulder_pitch'], self.shoulderPitchCocont)
-            self.upperarmRoll.servoTo(self.lastJointAngles['upperarm_roll'])
-            self.elbow.servoTo(self.lastJointAngles['elbow'], self.elbowCocont)
-            self.forearmRoll.servoTo(self.lastJointAngles['forearm_roll'])
-            self.wrist.servoTo(self.lastJointAngles['wrist_pitch'], self.wristCocont)
-            self.handDOF1.servoTo(self.lastJointAngles['hand_dof1'])
+            self.shoulderYaw.servoTo(self.lastPositions['shoulder_yaw'], self.shoulderYawCocont)
+            self.shoulderRoll.servoTo(self.lastPositions['shoulder_roll'], self.shoulderRollCocont)
+            self.shoulderPitch.servoTo(self.lastPositions['shoulder_pitch'], self.shoulderPitchCocont)
+            self.upperarmRoll.servoTo(self.lastPositions['upperarm_roll'])
+            self.elbow.servoTo(self.lastPositions['elbow'], self.elbowCocont)
+            self.forearmRoll.servoTo(self.lastPositions['forearm_roll'])
+            self.wrist.servoTo(self.lastPositions['wrist_pitch'], self.wristCocont)
+            self.handDOF1.servoTo(self.lastPositions['hand_dof1'])
 
 
             self.publishJointState()
