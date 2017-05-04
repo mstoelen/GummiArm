@@ -26,7 +26,7 @@
   <!-- <node name="redirect" pkg="topic_tools" type="relay" args="/gummi/joint_states joint_states" output="screen"/> -->
 
   <!-- It will be necessary to use the transform until the hand is not modelled inside Moveit! -->
-  <node name="redirect" pkg="topic_tools" type="transform" args="/gummi/joint_states joint_states sensor_msgs/JointState 'sensor_msgs.msg.JointState(header=m.header,name=m.name[:-1],position=m.position[:-1],effort=m.effort)' --import sensor_msgs" output="screen"/>
+  <node name="redirect" pkg="topic_tools" type="transform" args="/gummi/joint_states joint_states sensor_msgs/JointState 'sensor_msgs.msg.JointState(header=m.header,name=m.name[:-1],position=m.position[:-1],velocity=m.velocity[:-1],effort=m.effort)' --import sensor_msgs" output="screen"/>
 
   <!--<remap from="/gummi/joint_states" to="/joint_states"/> -->
 
