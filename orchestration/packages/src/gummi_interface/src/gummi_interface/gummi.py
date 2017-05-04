@@ -59,7 +59,7 @@ class Gummi:
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        if self.teleop == 1 or self.velocity_control:
+        if self.teleop == 1 or self.velocity_control == 1:
             self.setVelocity(msg.velocity) #TODO: CHECK NAMES
             self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
             self.doVelocityUpdate()

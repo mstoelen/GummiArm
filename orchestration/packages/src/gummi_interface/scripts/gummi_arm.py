@@ -11,13 +11,13 @@ from gummi_interface.gummi import Gummi
 def main(args):
 
     rospy.init_node('GummiArm', anonymous=True)
-    r = rospy.Rate(60)  
+    r = rospy.Rate(60)
 
     gummi = Gummi()
 
     print('WARNING: Moving joints sequentially to equilibrium positions.')
     gummi.doGradualStartup()
-    
+
     print('WARNING: Moving to resting pose, hold arm!')
     rospy.sleep(1)
 
@@ -34,11 +34,11 @@ def main(args):
     print("GummiArm is live!")
 
     while not rospy.is_shutdown():
-        if gummi.teleop == 0:
+        if gummi.teleop == 0 or self.velocity_control == 1:
             gummi.doUpdate()
 
         gummi.publishJointState()
         r.sleep()
-  
+
 if __name__ == '__main__':
     main(sys.argv)
