@@ -24,12 +24,18 @@ class JointAngle:
     def initVariables(self):
         self.encoderAngles = deque()
         self.encoderAngle = 0
+
+        self.encoderVelocities = deque()
+        self.encoderVelocity = 0
+
         self.dAngle = 0
         self.dVelocity = 0
+
         self.lastAngle = 0
 
     def encoderCallback(self, msg):
         angle = msg.current_pos * self.sign
+        velocity = msg.velocity * self.sign
         self.msgTime = rospy.Time(msg.header.stamp.secs, msg.header.stamp.nsecs)
         if abs(angle) <=  math.pi * 4:
             if self.encoderFlag and msg.goal_pos == angle:
@@ -37,10 +43,13 @@ class JointAngle:
                 #print("WARNING: Encoder oddity, exactly same angle " + str(angle) + " and goal " + str(msg.goal_pos)  + " for " + self.name + ", ignoring.")
             else:
                 self.encoderAngles.appendleft(angle)
+                self.encoderVelocities.appendleft(angle)
 
                 if len(self.encoderAngles) > 3:
                     self.encoderAngles.pop()
-                    self.encoderAngle = np.median(self.encoderAngles) 
+                    self.encoderVelocities.pop()
+                    self.encoderAngle = np.median(self.encoderAngles)
+                    self.encoderVelocity = np.median(self.encoderVelocities)
         else:
             pass
             #print("WARNING: Recieved value of " + str(angle) + " for " + self.name  + ", ignoring.")
@@ -68,6 +77,9 @@ class JointAngle:
 
     def getEncoder(self):
         return self.encoderAngle
+
+    def getEncoderVelocity(self):
+        return self.encoderVelocity
 
     def setDesiredVelocity(self, dVelocity):
         self.dVelocity = dVelocity

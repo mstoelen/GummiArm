@@ -89,7 +89,7 @@ class Antagonist:
             self.velocity = False
             self.closedLoop = True
             self.feedForward = False
-            self.eqModel.dCocontraction = dCocontraction  
+            self.eqModel.dCocontraction = dCocontraction
             self.angle.setDesired(dAngle)
             self.cocontractionReflex.clear()
             self.cocontractionReflex.setBaseContribution(dCocontraction)
@@ -144,7 +144,7 @@ class Antagonist:
         self.feedForward = False
         self.angle.setDesiredVelocity(dVelocity * self.signJoint)
         self.angle.doVelocityIncrement()
-        self.eqModel.dCocontraction = dCocontraction  
+        self.eqModel.dCocontraction = dCocontraction
         self.cocontractionReflex.clear()
         self.cocontractionReflex.setBaseContribution(dCocontraction)
         self.feedbackReflex.removeExcitation()
@@ -177,7 +177,7 @@ class Antagonist:
 
                     if self.isOverloaded():
                         self.collisionReflex.updateExcitation(1.0)
-                        
+
                     if self.collisionReflex.getContribution() > 0.5:
                         if self.collisionReflex.getContribution() > 0.9:
                             self.inverseModelCollision.setCocontraction(self.eqModel.getCocontractionForAlphas())
@@ -215,16 +215,16 @@ class Antagonist:
                 self.feedbackReflex.doDiscount()
                 if self.isFeedbackDue():
                     self.feedbackReflex.removeExcitation()
-                    
+
                 self.cocontractionReflex.doDiscount()
                 cocontReflex = self.cocontractionReflex.getContribution()
                 sumCocontraction = cocontReflex
                 if sumCocontraction > self.eqModel.maxCocontraction:
                     sumCocontraction = self.eqModel.maxCocontraction
-                    
+
                 self.inverseModel.setCocontraction(sumCocontraction)
                 self.eqModel.cCocontraction = sumCocontraction
-                
+
                 if self.feedForward:
                     if not self.inverseModel.generateOk():
                         print("Warning: Outside ballistic calibration data for joint " + self.name + ", not using model-based feedforward.")
@@ -232,13 +232,13 @@ class Antagonist:
                         self.eqModel.dEquilibrium = self.inverseModel.getEquilibriumPoint()
                     self.ballistic = 1
                     self.feedForward = False
-                    
+
         self.generateError()
 
         if self.closedLoop:
             if self.feedbackReflex.getContribution() < 0.5:
                 self.ballistic = 0
-                self.doClosedLoop()      
+                self.doClosedLoop()
                 self.eqModel.dEquilibrium = self.eqModel.dEquilibrium + self.deltaEqFeedback
 
     def generateForwardError(self):
@@ -281,7 +281,7 @@ class Antagonist:
     def generateError(self):
         encoderAngle = self.angle.getEncoder()
         dAngle = self.angle.getDesired()
-        
+
         error = dAngle - encoderAngle
 
         self.errors.appendleft(error)
@@ -293,7 +293,7 @@ class Antagonist:
 
         errorChange = self.errorLast - error
         self.errorLast = error
-        
+
         prop_term = error * self.pGain
         vel_term = errorChange * self.vGain
         int_term = np.sum(self.errors) * self.iGain
@@ -313,6 +313,9 @@ class Antagonist:
 
     def getJointAngle(self):
         return self.angle.getEncoder()
+
+    def getJointVelocity(self):
+        return self.angle.getEncoderVelocity()
 
     def getName(self):
         return self.name
