@@ -381,7 +381,7 @@ class JointTrajectoryActionController():
                 joint_velocities[joint]=desired_velocities
 
             # the commands will always obey the joint name order
-            self.sendCommand2Gummi(joint_positions)
+            self.sendCommand2Gummi(joint_positions, joint_velocities)
 
             # Verifies trajectory constraints
             for j, joint in enumerate(self.joint_names):
