@@ -42,14 +42,17 @@ class DirectDrive:
     def doUpdate(self):
         if self.velocity:
             self.angle.doVelocityIncrement()
-            
+
         if self.noCommandYet:
             self.angle.setDesired(self.encoderAngle)
-            
+
         self.publishCommand()
 
     def getJointAngle(self):
         return self.angle.getEncoder()
+
+    def getJointVelocity(self):
+        return self.angle.getEncoderVelocity()
 
     def setTorqueLimit(self, limit):
         service_name = self.name + "_controller/set_torque_limit"
