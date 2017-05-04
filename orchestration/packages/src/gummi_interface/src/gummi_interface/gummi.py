@@ -23,14 +23,14 @@ class Gummi:
 
     def initVariables(self):
         self.jointNames = ("shoulder_yaw", "shoulder_roll", "shoulder_pitch", "upperarm_roll", "elbow", "forearm_roll", "wrist_pitch", "hand_dof1")
-        self.shoulderRollVel = 0
-        self.shoulderPitchVel = 0
-        self.shoulderYawVel = 0
-        self.upperarmRollVel = 0
-        self.elbowVel = 0
-        self.forearmRollVel = 0
-        self.wristVel = 0
-        self.handDOF1Vel = 0
+        self.shoulderRollVel = None
+        self.shoulderPitchVel = None
+        self.shoulderYawVel = None
+        self.upperarmRollVel = None
+        self.elbowVel = None
+        self.forearmRollVel = None
+        self.wristVel = None
+        self.handDOF1Vel = None
         self.shoulderRollCocont = 0.3
         self.shoulderPitchCocont = 0.3
         self.shoulderYawCocont = 0.3
@@ -113,7 +113,7 @@ class Gummi:
         msg.header.stamp = rospy.Time.now()
         msg.name = self.jointNames
         msg.position = self.getJointAngles()
-        # msg.velocity =
+        msg.velocity = self.getJointVelocities()
         msg.effort = [self.shoulderYawCocont,
                       self.shoulderRollCocont,
                       self.shoulderPitchCocont,
@@ -137,6 +137,18 @@ class Gummi:
         angles.append(self.wrist.getJointAngle())
         angles.append(self.handDOF1.getJointAngle())
         return angles
+
+    def getJointVelocities(self):
+        velocities = list()
+        velocities.append(self.shoulderYaw.getJointVelocity())
+        velocities.append(self.shoulderRoll.getJointVelocity())
+        velocities.append(self.shoulderPitch.getJointVelocity())
+        velocities.append(self.upperarmRoll.getJointVelocity())
+        velocities.append(self.elbow.getJointVelocity())
+        velocities.append(self.forearmRoll.getJointVelocity())
+        velocities.append(self.wrist.getJointVelocity())
+        velocities.append(self.handDOF1.getJointVelocity())
+        return velocities
 
     def setVelocity(self, velocities):
         self.shoulderYawVel = velocities[0]
