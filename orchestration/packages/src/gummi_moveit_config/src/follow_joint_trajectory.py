@@ -134,10 +134,10 @@ class JointTrajectoryActionController():
 
         self.jointStatePub.publish(msg)
 
-	rospy.sleep(0.05)
+        rospy.sleep(0.05)
 
-        rospy.loginfo("Commands original:{0}".format(joints))
-        rospy.loginfo("Commands published:{0}".format(dict(zip(msg.name,msg.position))))
+        # rospy.loginfo("Commands original:{0}".format(positions))
+        # rospy.loginfo("Commands published:{0}".format(dict(zip(msg.name,msg.position))))
 
         return 0
 
