@@ -110,9 +110,8 @@ class JointTrajectoryActionController():
         self.joint_cocontractions = dict(zip(msg.name, msg.effort))
 
 
-    def sendCommand2Gummi(self, joints):
+    def sendCommand2Gummi(self, positions, velocities):
         '''
-        current_position should have joint values for:
         - shoulder_yaw
         - shoulder_roll
         - shoulder_pitch
@@ -125,12 +124,12 @@ class JointTrajectoryActionController():
         msg = JointState()
         msg.header.stamp = rospy.Time.now()
 
-        # joint angles ['shoulder_yaw', 'shoulder_roll', 'shoulder_pitch', 'upperarm_roll', 'elbow', 'forearm_roll', 'wrist_pitch']
+        # msg.name should be read from the parameter server instead of hardcoded below
         msg.name = ['shoulder_yaw', 'shoulder_roll', 'shoulder_pitch', 'upperarm_roll', 'elbow', 'forearm_roll', 'wrist_pitch']
-        msg.position = [joints[name] for name in msg.name]
+        msg.position = [positions[name] for name in msg.name]
+        msg.velocity = [velocities[name] for name in msg.name]
 
         # cocontraction
-        # msg.effort = [30]*len(joints)  # for now this will be hardcoded
         msg.effort = [self.joint_cocontractions[name] for name in msg.name]
 
         self.jointStatePub.publish(msg)
@@ -337,7 +336,7 @@ class JointTrajectoryActionController():
 
             trajectory.append(seg)
 
-        # Clearly, according the the lines below, future goals can be received and they will
+        # Clearly, according to the lines below, future goals can be received and they will
         # wait here until it's their time to start (according to self.update_rate).
         rospy.loginfo('Trajectory start requested at %.3lf, waiting...', traj.header.stamp.to_sec())
         rate = rospy.Rate(self.update_rate)
@@ -366,7 +365,8 @@ class JointTrajectoryActionController():
                 rospy.loginfo('skipping segment %d with duration of 0 seconds' % seg)
                 continue
 
-            joint_values = {}
+            joint_positions = {}
+            joint_velocities = {}
 
             for j,joint in enumerate(self.joint_names):
 
@@ -375,10 +375,13 @@ class JointTrajectoryActionController():
                     start_position = trajectory[seg - 1].positions[j]
 
                 desired_position = trajectory[seg].positions[j]
-                joint_values[joint]=desired_position
+                joint_positions[joint]=desired_position
+
+                desired_velocities = trajectory[seg].velocities[j]
+                joint_velocities[joint]=desired_velocities
 
             # the commands will always obey the joint name order
-            self.sendCommand2Gummi(joint_values)
+            self.sendCommand2Gummi(joint_positions)
 
             # Verifies trajectory constraints
             for j, joint in enumerate(self.joint_names):

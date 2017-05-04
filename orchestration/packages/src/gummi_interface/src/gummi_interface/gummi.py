@@ -15,6 +15,8 @@ class Gummi:
         self.teleop = rospy.get_param("~teleop", 1)
         print("Expecting teleoperation ('teleop' parameter in gummi.yaml file): " + str(self.teleop) + ".")
 
+        self.velocity_control = rospy.get_param("~velocity_control", 1)
+
         self.pi = 3.1416
         self.initVariables()
         self.initJoints()
@@ -57,7 +59,7 @@ class Gummi:
         rospy.Subscriber('gummi/joint_commands', JointState, self.cmdCallback)
 
     def cmdCallback(self, msg):
-        if self.teleop == 1:
+        if self.teleop == 1 or self.velocity_control:
             self.setVelocity(msg.velocity) #TODO: CHECK NAMES
             self.setCocontraction(msg.effort[0], msg.effort[1], msg.effort[2], msg.effort[4], msg.effort[6])
             self.doVelocityUpdate()
@@ -181,7 +183,6 @@ class Gummi:
             self.forearmRoll.servoTo(self.lastJointAngles['forearm_roll'])
             self.wrist.servoTo(self.lastJointAngles['wrist_pitch'], self.wristCocont)
             self.handDOF1.servoTo(self.lastJointAngles['hand_dof1'])
-
 
 
             self.publishJointState()
