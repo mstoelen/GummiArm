@@ -83,15 +83,20 @@ class JointTrajectoryActionController():
 
         '''
 
-        self.update_rate = 1000  # only used here: "while traj.header.stamp > time:"
-        self.update_feedback_rate = 100  # only used here: "update_feedback"
+        self.update_rate = 1000  # loop to wait until it's time to start the trajectory
+        self.update_feedback_rate = 100  # frequency FollowJointTrajectoryFeedback is published
+
         self.trajectory = []
 
         self.controller_namespace = controller_namespace
 
         self.joint_names = joint_names
 
-        self.joint_states_rdy = False  # indicates it is not ready for reading
+        self.joint_states_rdy = False  # Indicates it is not ready for reading
+                                       # i.e., the current joint_state was not received yet.
+                                       # This could be implemented by initializing self.joint_states_rdy
+                                       # with None or False, but it would not be as easy to read as using
+                                       # this extra variable.
 
         self.num_joints = len(self.joint_names)
 
@@ -113,20 +118,13 @@ class JointTrajectoryActionController():
 
     def sendCommand2Gummi(self, positions, velocities):
         '''
-        - shoulder_yaw
-        - shoulder_roll
-        - shoulder_pitch
-        - upperarm_roll
-        - elbow
-        - forearm_roll
-        - wrist_pitch
+        gummi_interface/gummi.py will read and execute the commands sent from here
         '''
 
         msg = JointState()
         msg.header.stamp = rospy.Time.now()
 
-        # msg.name should be read from the parameter server instead of hardcoded below
-        msg.name = ['shoulder_yaw', 'shoulder_roll', 'shoulder_pitch', 'upperarm_roll', 'elbow', 'forearm_roll', 'wrist_pitch']
+        msg.name = self.joint_names  # received during instantiation
         msg.position = [positions[name] for name in msg.name]
         msg.velocity = [velocities[name] for name in msg.name]
 
@@ -137,23 +135,24 @@ class JointTrajectoryActionController():
 
         rospy.sleep(0.05)
 
-        # rospy.loginfo("Commands original:{0}".format(positions))
-        # rospy.loginfo("Commands published:{0}".format(dict(zip(msg.name,msg.position))))
-
         return 0
 
 
     def initialize(self):
         ns = self.controller_namespace + '/joint_trajectory_action_node/constraints'
+
+        # rospy.get_param will try to fetch the information from the parameter server,
+        # but if the parameter is not available, it will use the default value.
+
+        # let motors roll for specified amount of time
         self.goal_time_constraint = rospy.get_param(ns + '/goal_time', 0.0)
-        self.stopped_velocity_tolerance = rospy.get_param(ns + '/stopped_velocity_tolerance', 0.01)
+
         self.goal_constraints = []
         self.trajectory_constraints = []
-        self.min_velocity = rospy.get_param(self.controller_namespace + '/joint_trajectory_action_node/min_velocity', 0.1)
 
         for joint in self.joint_names:
-            self.goal_constraints.append(rospy.get_param(ns + '/' + joint + '/goal', 0.1))#-1.0))
-            self.trajectory_constraints.append(rospy.get_param(ns + '/' + joint + '/trajectory', 0.1))#-1.0))
+            self.goal_constraints.append(rospy.get_param(ns + '/' + joint + '/goal', -1.0))
+            self.trajectory_constraints.append(rospy.get_param(ns + '/' + joint + '/trajectory', -1.0))
 
         # Message containing current state for all controlled joints
         # control_msgs/FollowJointTrajectoryFeedback
@@ -167,9 +166,9 @@ class JointTrajectoryActionController():
         self.feedback.error.positions = [0.0] * self.num_joints
         self.feedback.error.velocities = [0.0] * self.num_joints
 
-        self.running = False
+        self.running = dict()
 
-        return True
+        return 0
 
 
     def start(self):
@@ -185,14 +184,15 @@ class JointTrajectoryActionController():
 
         self.action_server.start()
 
-        # Not sure if this FollowJointTrajectoryActionFeedback will be really necessary in the near future...
-        Thread(target=self.update_feedback).start()  # This thread is responsible for publishing the FollowJointTrajectoryFeedback
+        # This thread is responsible for publishing the FollowJointTrajectoryFeedback
+        Thread(target=self.update_feedback).start()
+
 
     def update_feedback(self):
         rate = rospy.Rate(self.update_feedback_rate)
 
         while not rospy.is_shutdown():
-            if self.running:
+            if any(self.running.values()):
                 self.feedback.header.stamp = rospy.Time.now()
 
                 # Publish current joint state
@@ -204,19 +204,17 @@ class JointTrajectoryActionController():
                         self.feedback.error.velocities[i] = self.feedback.actual.velocities[i] - self.feedback.desired.velocities[i]
 
                     self.action_server.publish_feedback(self.current_goal.get_goal_status(),self.feedback)
-                # rospy.loginfo("GOAL_STATUS:{0}\n FEEDBACK:{1}".format(self.current_goal.get_goal_status(),self.feedback))
+            # if not self.running, the while loop, and therefore the thread, will be kept alive but under control.
             rate.sleep()
 
     def cancel(self, goal):
-        rospy.loginfo('Cancelling goalID:{0}'.format(goal.get_goal_id().id))
+        cancellingID = goal.get_goal_id().id
+
+        self.running.pop(cancellingID)
+
+        rospy.loginfo('Cancelling goalID:{0}'.format(cancellingID))
 
         goal.set_cancel_requested()
-
-        self.cancellingID = goal.get_goal_id().id
-        self.running = False # This line will, basically, kill the update_state
-                             # and, thefore, the thread that was running it.
-                             # However, if this ROS node goes down, it will kill
-                             # the update_state anyway.
 
 
     def process_follow_trajectory(self, goal):
@@ -224,22 +222,25 @@ class JointTrajectoryActionController():
 
         '''
 
-        self.running = True
+        goal_id = goal.get_goal_id().id
 
-        rospy.loginfo('Processing goalID: {0}'.format(goal.get_goal_id().id))
+        rospy.loginfo('Processing goalID: {0}'.format(goal_id))
 
         # Using this thread I'm able to react and cancel a trajectory before it is completed.
         goal.set_accepted()  # maybe this signal should be positioned just before
                              # the place where the trajectory is actually sent to the
                              # controller.
-        Thread(target=self.process_trajectory, args=(goal,)).start()
+
+        self.running[goal_id] = True
+
+        Thread(target=self.process_trajectory, args=(goal,goal_id)).start()
 
 
-    def process_trajectory(self, goal):
+    def process_trajectory(self, goal, goal_id):
 
         while not self.joint_states_rdy and not rospy.is_shutdown():
             rospy.logwarn("Waiting for joint_states...")
-            if not self.running:
+            if not self.running[goal_id]:
                 return  # it was cancelled...
             rospy.sleep(0.1)
 
@@ -261,7 +262,7 @@ class JointTrajectoryActionController():
             rospy.logerr(' self.joint_names={%s}' % (set(self.joint_names)))
             rospy.logerr(' traj.joint_names={%s}' % (set(traj.joint_names)))
             goal.set_aborted(result=res, text=msg)
-            self.running = False
+            self.running[goal_id] = False
             return
 
         # make sure trajectory is not empty
@@ -269,7 +270,7 @@ class JointTrajectoryActionController():
             msg = 'Incoming trajectory is empty'
             rospy.logerr(msg)
             goal.set_aborted(text=msg)
-            self.running = False
+            self.running[goal_id] = False
             return
 
         rospy.loginfo('Number of points:{0}'.format(num_points))
@@ -290,11 +291,11 @@ class JointTrajectoryActionController():
 
         if not traj.points[0].positions:
             res = FollowJointTrajectoryResult()
-            res.error_code=FollowJointTrajectoryResult.INVALID_GOAL
+            res.error_code = FollowJointTrajectoryResult.INVALID_GOAL
             msg = 'First point of trajectory has no positions'
             rospy.logerr(msg)
             goal.set_aborted(result=res, text=msg)
-            self.running = False
+            self.running[goal_id] = False
             return
 
         trajectory = []
@@ -322,7 +323,7 @@ class JointTrajectoryActionController():
                 msg = 'Command point %d has %d elements for the velocities' % (i, len(traj.points[i].velocities))
                 rospy.logerr(msg)
                 goal.set_aborted(result=res, text=msg)
-                self.running = False
+                self.running[goal_id] = False
                 return
 
             if len(traj.points[i].positions) != self.num_joints:
@@ -331,7 +332,7 @@ class JointTrajectoryActionController():
                 msg = 'Command point %d has %d elements for the positions' % (i, len(traj.points[i].positions))
                 rospy.logerr(msg)
                 goal.set_aborted(result=res, text=msg)
-                self.running = False
+                self.running[goal_id] = False
                 return
 
             for j in range(self.num_joints):
@@ -360,7 +361,7 @@ class JointTrajectoryActionController():
 
         # And the trajectory execution is sliced by segments.
         for seg in range(len(trajectory)):
-            if not self.running:
+            if not self.running[goal_id]:
                 # stop the trajectory execution
                 break
             rospy.loginfo('Current segment is %d time left %f cur time %f' % (seg, durations[seg] - (time.to_sec() - trajectory[seg].start_time), time.to_sec()))
@@ -386,8 +387,13 @@ class JointTrajectoryActionController():
                 desired_velocities = trajectory[seg].velocities[j]
                 joint_velocities[joint]=desired_velocities
 
-            # the commands will always obey the joint name order
+            #
+            # The commands sent to the robot using sendCommand2Gummi
+            # will always obey the joint name order.
             self.sendCommand2Gummi(joint_positions, joint_velocities)
+            #
+            #
+
 
             # Verifies trajectory constraints
             for j, joint in enumerate(self.joint_names):
@@ -398,6 +404,7 @@ class JointTrajectoryActionController():
                            (joint, seg, self.feedback.error.positions[j], self.trajectory_constraints[j])
                     rospy.logwarn(msg)
                     goal.set_aborted(result=res, text=msg)
+                    self.running[goal_id] = False
                     return
 
         # let motors roll for specified amount of time
@@ -415,10 +422,12 @@ class JointTrajectoryActionController():
                       (joint, pos_error, pos_constraint)
                 rospy.logwarn(msg)
                 goal.set_aborted(result=res, text=msg)
+                self.running[goal_id] = False
                 break
 
-        if self.running:
-            msg = 'Trajectory execution successfully completed (goalID:{0})!'.format(goal.get_goal_id().id)
+        if self.running[goal_id]:
+            _ = self.running.pop(goal_id)
+            msg = 'Trajectory execution successfully completed (goalID:{0})!'.format(goal_id)
             rospy.loginfo(msg)
             res = FollowJointTrajectoryResult()
             res.error_code=FollowJointTrajectoryResult.SUCCESSFUL
@@ -440,7 +449,7 @@ if __name__ == '__main__':
 
     # The controllers below must match the ones from Moveit!
     controllers = ['shoulder_yaw','shoulder_roll','shoulder_pitch','upperarm_roll','elbow','forearm_roll','wrist_pitch']
-    controller_namespace = 'my_right_arm_controller'
+    controller_namespace = 'gummi_right_arm_controller'
 
     rospy.init_node('joint_trajectory_action_node', anonymous=False)
     # 'anonymous=False' because if there's another node like this running, something
@@ -448,7 +457,7 @@ if __name__ == '__main__':
 
     joint_trajectory_action_controller = JointTrajectoryActionController(controller_namespace, controllers)
 
-    if joint_trajectory_action_controller.initialize():
+    if not joint_trajectory_action_controller.initialize():
         joint_trajectory_action_controller.start()
 
     rospy.spin()
