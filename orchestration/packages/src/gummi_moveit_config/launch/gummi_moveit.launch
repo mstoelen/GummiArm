@@ -4,7 +4,7 @@
   <!--  this solves the error messages Moveit! was generating when the arm is not in a very stable position -->
   <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.1" />
 
-  <node name="my_right_arm_controller" pkg="gummi_moveit_config" type="follow_joint_trajectory.py" output="screen"/>
+  <node name="gummi_right_arm_controller" pkg="gummi_moveit_config" type="follow_joint_trajectory.py" output="screen"/>
 
   <!-- By default, we do not start a database (it can be large) -->
   <arg name="db" default="false" />
