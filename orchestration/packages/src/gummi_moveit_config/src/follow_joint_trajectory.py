@@ -154,6 +154,9 @@ class JointTrajectoryActionController():
             self.goal_constraints.append(rospy.get_param(ns + '/' + joint + '/goal', -1.0))
             self.trajectory_constraints.append(rospy.get_param(ns + '/' + joint + '/trajectory', -1.0))
 
+        rospy.loginfo("Goal constrains: " + ",".join([ji+"="+str(ci) for ji,ci in zip(self.joint_names,self.goal_constraints)]))
+        rospy.loginfo("Trajectory constrains: " + ",".join([ji+"="+str(ci) for ji,ci in zip(self.joint_names,self.trajectory_constraints)]))
+        
         # Message containing current state for all controlled joints
         # control_msgs/FollowJointTrajectoryFeedback
         self.feedback = FollowJointTrajectoryFeedback()
