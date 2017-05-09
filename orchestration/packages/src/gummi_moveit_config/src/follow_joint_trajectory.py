@@ -156,7 +156,7 @@ class JointTrajectoryActionController():
 
         rospy.loginfo("Goal constrains: " + ",".join([ji+"="+str(ci) for ji,ci in zip(self.joint_names,self.goal_constraints)]))
         rospy.loginfo("Trajectory constrains: " + ",".join([ji+"="+str(ci) for ji,ci in zip(self.joint_names,self.trajectory_constraints)]))
-        
+
         # Message containing current state for all controlled joints
         # control_msgs/FollowJointTrajectoryFeedback
         self.feedback = FollowJointTrajectoryFeedback()
@@ -426,7 +426,7 @@ class JointTrajectoryActionController():
                 rospy.logwarn(msg)
                 goal.set_aborted(result=res, text=msg)
                 self.running[goal_id] = False
-                break
+                return
 
         if self.running[goal_id]:
             _ = self.running.pop(goal_id)
