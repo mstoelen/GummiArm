@@ -1,0 +1,7 @@
+<launch>
+    <!-- Publish some coordinates to /target topic and start the nodes -->
+    <!-- node pkg="rostopic" type="rostopic" name="rostopic" args="pub /target geometry_msgs/PointStamped '[0, 0, /kinect]' '[2.0, 0.1, 0.2]'"/> -->
+    <node name="my_tf_broadcaster" pkg="gummi_door" type="fixed_tf_broadcaster.py" output="screen" />
+    <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
+    <node name="grab_handle" pkg="gummi_door" type="grab_handle.py" output="screen" />
+</launch>
