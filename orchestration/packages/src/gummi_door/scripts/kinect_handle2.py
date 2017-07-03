@@ -58,7 +58,7 @@ class image_converter:
         img = cv2.GaussianBlur(img,(5,5),0)
         thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
         cv2.imshow('thresh', thresh)
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        image, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         #contours = contours[0]
         for cnt in contours:
             if len(cnt) > 10:	

@@ -1,0 +1,8 @@
+prefix=/home/joe/repos/GummiArm/orchestration/packages/install
+
+Name: gummi_interface
+Description: Description of gummi_interface
+Version: 0.0.0
+Cflags: -I/home/joe/repos/GummiArm/orchestration/packages/install/include
+Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/joe/repos/GummiArm/orchestration/packages/install
+
+Name: gummi_trigger
+Description: Description of gummi_trigger
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
+Requires: 

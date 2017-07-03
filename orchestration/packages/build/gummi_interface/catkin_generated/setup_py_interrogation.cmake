@@ -1,0 +1,6 @@
+set(gummi_interface_SETUP_PY_VERSION "0.0.0")
+set(gummi_interface_SETUP_PY_SCRIPTS "")
+set(gummi_interface_SETUP_PY_PACKAGES "gummi_interface")
+set(gummi_interface_SETUP_PY_PACKAGE_DIRS "src/gummi_interface")
+set(gummi_interface_SETUP_PY_MODULES "")
+set(gummi_interface_SETUP_PY_MODULE_DIRS "")
