@@ -124,8 +124,6 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_trigger/cmake_install.cmake")
   include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/cmake_install.cmake")
   include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_dynamixel/cmake_install.cmake")
-  include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_teleop/cmake_install.cmake")
-  include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_ikfast_right_plugin/cmake_install.cmake")
 
 endif()
 

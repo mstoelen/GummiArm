@@ -1,2 +1,2 @@
-gummi_description:gummi_door:gummi_dynamixel:gummi_hand_shake_demo:gummi_ikfast_right_plugin:gummi_interface:gummi_moveit_config:gummi_teleop:gummi_trigger
+gummi_description:gummi_door:gummi_dynamixel:gummi_hand_shake_demo:gummi_interface:gummi_moveit_config:gummi_trigger
 -DCATKIN_DEVEL_PREFIX=/home/joe/repos/GummiArm/orchestration/packages/devel -DCMAKE_INSTALL_PREFIX=/home/joe/repos/GummiArm/orchestration/packages/install -G Unix Makefiles

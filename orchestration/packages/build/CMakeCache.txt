@@ -455,7 +455,7 @@ kdl_conversions_DIR:PATH=/opt/ros/kinetic/share/kdl_conversions/cmake
 kdl_parser_DIR:PATH=/opt/ros/kinetic/share/kdl_parser/cmake
 
 //Path to a library.
-lib:FILEPATH=/opt/ros/kinetic/lib/libtf2.so
+lib:FILEPATH=/opt/ros/kinetic/lib/libxmlrpcpp.so
 
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/kinetic/share/message_filters/cmake
@@ -596,8 +596,6 @@ BLAS_acml_LIBRARY-ADVANCED:INTERNAL=1
 BLAS_acml_mp_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: BLAS_blas_LIBRARY
 BLAS_blas_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_blas_WORKS
-BLAS_blas_WORKS-ADVANCED:INTERNAL=1
 //Have function sgemm_
 BLAS_blas_WORKS:INTERNAL=1
 //ADVANCED property for variable: BLAS_complib.sgimath_LIBRARY
@@ -717,7 +715,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=11
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -781,8 +779,6 @@ LAPACK_Accelerate_LIBRARY-ADVANCED:INTERNAL=1
 LAPACK_goto2_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: LAPACK_lapack_LIBRARY
 LAPACK_lapack_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: LAPACK_lapack_WORKS
-LAPACK_lapack_WORKS-ADVANCED:INTERNAL=1
 //Have function cheev_
 LAPACK_lapack_WORKS:INTERNAL=1
 //ADVANCED property for variable: LAPACK_vecLib_LIBRARY

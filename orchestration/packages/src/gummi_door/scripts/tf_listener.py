@@ -34,7 +34,7 @@ class transformer():
         self.x = self.true_target.point.x
         self.y = self.true_target.point.y
         self.z = self.true_target.point.z
-        print ((self.x, self.y, self.z))
+        #print ((self.x, self.y, self.z))
         self.pub.publish(self.true_target)
 
 if __name__ == '__main__':

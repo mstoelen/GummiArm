@@ -1,9 +1,0 @@
-<launch>	
-  <param name="robot_description" command="cat $(find gummi_description)/gummi.urdf" />
-  <param name="robot_description_semantic" command="cat $(find gummi_moveit_config)/config/gummi.srdf" />	
-  <node name="teleop" pkg="gummi_teleop" type="gummi_teleop_node" output="screen">	
-  	<remap from="teleop/joint_states" to="gummi/joint_states"/>
-	<remap from="teleop/joint_commands" to="gummi/joint_commands"/>	
-	<rosparam file="$(find gummi_teleop)/config/teleop.yaml" command="load" />					  
-  </node>
-</launch>

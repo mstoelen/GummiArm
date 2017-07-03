@@ -1,1 +1,0 @@
-rosrun moveit_ikfast create_ikfast_moveit_plugin.py gummi right gummi_ikfast_right_plugin /home/mstoelen/bitbucket/gummi-repo/sw/config/ros/src/gummi_ikfast_right_plugin/src/gummi_right_ikfast_solver.cpp

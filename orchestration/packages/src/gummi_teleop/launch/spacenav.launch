@@ -1,6 +1,0 @@
-<launch>
-  <node name="spacenav" pkg="spacenav_node" type="spacenav_node" output="screen">	
-  	<remap from="/spacenav/twist" to="/teleop/cmd_vel"/>
-	<remap from="/spacenav/joy" to="/teleop/buttons"/>	
-  </node>
-</launch>

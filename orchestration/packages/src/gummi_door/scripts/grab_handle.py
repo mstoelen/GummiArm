@@ -56,6 +56,7 @@ class door_handle_planning(object):
         self.pub = rospy.Publisher("/gripped", Bool, queue_size=10)
         #print("running")
         moveit_commander.roscpp_initialize(sys.argv)
+        self.gummi = Gummi()
         self.x = 0
         self.y = 0
         self.z = 0
@@ -76,12 +77,12 @@ class door_handle_planning(object):
         #print ("============ Printing robot state")
         #print ((self.robot.get_current_state()))
         #print ("============")
-        self.planning()
+        #self.planning()
 
     def callback(self, data):
-        self.x = rospy.loginfo(self.data.point.x)
-        self.y = rospy.loginfo(self.data.point.y)
-        self.z = rospy.loginfo(self.data.point.z)
+        x = rospy.loginfo(data.point.x)
+        y = rospy.loginfo(data.point.y)
+        z = rospy.loginfo(data.point.z)
         rospy.sleep(5)
         #print("running")
 
@@ -94,38 +95,54 @@ class door_handle_planning(object):
         else:
             return False
 
-    def planning(self):
-        door_planning = door_handle_planning()
-        gummi = Gummi()
-        gripped = False
-        rest = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
-        ready = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
-        move_down = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
-        gummi.handClose.servoTo(1) # adjust this value roughtrial and error
-        # will need to adjust hand open amount and orientation here before reaching
+def planning(door_handle_planning):
 
-        #rospy.spin()
-        #self.callback(self.data)
-        #print ("============ Generating plan 1")
-        self.pose_target = geometry_msgs.msg.Pose()
-        self.pose_target.orientation.w = 1.0
-        self.pose_target.position.x = self.x
-        self.pose_target.position.y = -self.y
-        self.pose_target.position.z = self.z
-        self.group.set_pose_target(self.pose_target)
-        self.plan1 = self.group.plan()
-        #print ("============ Waiting while RVIZ displays plan1...")
-        rospy.sleep(5)
-        # Uncomment below line when working with a real robot
-        # self.group.go(wait=True)
-        rospy.spin()
-        moveit_commander.roscpp_shutdown()
-        #print ("============ STOPPING")
-        # need to move hand down until contact is made here (using elbow joint?)
-        if door_planning.haveTouch():
-            gummi.handClose.servoTo(2) # adjust this value roughtrial and error
-            gripped = True
-            self.pub.publish(gripped)
+    door_planning = door_handle_planning()
+
+    gripped = False
+    #rest = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
+    #ready = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
+    #move_down = (0.0, -0.34770231192074535, 0.03579288505066496, 0.0030679615757712823, -0.7465373167710121, -1.55, -0.0051132692929521375)
+    # gummi.handClose.servoTo(1) # adjust this value roughtrial and error
+    # will need to adjust hand open amount and orientation here before reaching
+    x, y, z = door_handle_planning.callback
+    #rospy.spin()
+    #self.callback(self.data)
+    print ("============ Generating plan 1")
+    pose_target = geometry_msgs.msg.Pose()
+    pose_target.orientation.w = 1.0
+    pose_target.position.x = x
+    pose_target.position.y = -y
+    pose_target.position.z = z
+    door_handle_planning.group.set_pose_target(pose_target)
+    print("running")
+    plan1 = door_handle_planning.group.plan()
+    #print ("============ Waiting while RVIZ displays plan1...")
+    rospy.sleep(5)
+    print ("============ Visualizing plan1")
+    display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+
+    display_trajectory.trajectory_start = door_handle_planning.robot.get_current_state()
+    display_trajectory.trajectory.append(plan1)
+    door_handle_planning.display_trajectory_publisher.publish(display_trajectory);
+    print ("============ Waiting while plan1 is visualized (again)...")
+    rospy.sleep(1)
+
+    door_handle_planning.group.go(wait=True)
+
+    door_handle_planning.group.clear_pose_targets()
+
+    door_handle_planning.group_variable_values = door_handle_planning.group.get_current_joint_values()
+    # Uncomment below line when working with a real robot
+    # self.group.go(wait=True)
+    rospy.spin()
+    #moveit_commander.roscpp_shutdown()
+    #print ("============ STOPPING")
+    # need to move hand down until contact is made here (using elbow joint?)
+    if door_planning.haveTouch():
+        door_handle_planning.gummi.handClose.servoTo(2) # adjust this value roughtrial and error
+        gripped = True
+        door_handle_planning.pub.publish(gripped)
 
 
 if __name__ == '__main__':
@@ -133,7 +150,7 @@ if __name__ == '__main__':
         try:
             rospy.init_node('target_plan', anonymous=True)
             #print("running")
-            door_handle_planning()
+            planning(door_handle_planning)
 
         except rospy.ROSInterruptException:
             pass

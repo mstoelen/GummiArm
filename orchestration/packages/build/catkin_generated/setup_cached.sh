@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/joe/repos/GummiArm/orchestration/packages/devel:$CMAKE_PREFIX_PATH"
 export PWD="/home/joe/repos/GummiArm/orchestration/packages/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/joe/repos/GummiArm/orchestration/packages/devel/share/common-lisp"
-export ROS_PACKAGE_PATH="/home/joe/repos/GummiArm/orchestration/packages/src:$ROS_PACKAGE_PATH"
