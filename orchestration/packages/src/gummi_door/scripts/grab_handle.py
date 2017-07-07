@@ -26,7 +26,7 @@ class door_handle_planning(object):
         #print("running")
         moveit_commander.roscpp_initialize(sys.argv)
 
-        self.gummi = Gummi()
+        #self.gummi = Gummi()
         self.x = 0
         self.y = 0
         self.z = 0
@@ -38,7 +38,6 @@ class door_handle_planning(object):
                                             '/move_group/display_planned_path',
                                             moveit_msgs.msg.DisplayTrajectory,
                                             queue_size=20)
-        self.main
 
 
     def callback(self, data):

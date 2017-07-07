@@ -4,10 +4,6 @@ import sys
 import rospy
 import cv2
 import numpy as np
-<<<<<<< HEAD
-=======
-import math
->>>>>>> 22d720dd8eeb38a1c91a615621f1b924b9509575
 from sensor_msgs.msg import CameraInfo
 from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import Image
@@ -44,9 +40,9 @@ class image_converter:
         self.target = PointStamped()
         #self.target.header.stamp.secs = rospy.Time()
         self.target.header.frame_id = "kinect"
-        self.target.point.x = self.x
+        self.target.point.x = self.z
         self.target.point.y = self.y
-        self.target.point.z = self.z
+        self.target.point.z = self.x
         self.pub.publish(self.target)
         cv2.waitKey(100)
 

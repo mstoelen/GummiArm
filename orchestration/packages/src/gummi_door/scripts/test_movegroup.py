@@ -46,15 +46,10 @@ pose_target.orientation.w = 0.0
 #pose_target.position.x = 0.48
 #pose_target.position.y = 0.0
 #pose_target.position.z = -0.23
-<<<<<<< HEAD
 pose_target.position.x = 0.10
 pose_target.position.y = -0.10
 pose_target.position.z = 0.40
-=======
-pose_target.position.x = 0.20
-pose_target.position.y = -0.10
-pose_target.position.z = -0.20
->>>>>>> 22d720dd8eeb38a1c91a615621f1b924b9509575
+
 
 group.set_pose_target(pose_target)
 
