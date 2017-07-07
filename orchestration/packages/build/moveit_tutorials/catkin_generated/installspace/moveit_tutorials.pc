@@ -1,0 +1,8 @@
+prefix=/home/joe/repos/GummiArm/orchestration/packages/install
+
+Name: moveit_tutorials
+Description: Description of moveit_tutorials
+Version: 0.1.0
+Cflags: -I/usr/include/eigen3
+Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
+Requires: moveit_core moveit_ros_planning_interface interactive_markers

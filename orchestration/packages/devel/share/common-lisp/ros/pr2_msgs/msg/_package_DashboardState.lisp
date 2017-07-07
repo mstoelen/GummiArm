@@ -1,0 +1,18 @@
+(cl:in-package pr2_msgs-msg)
+(cl:export '(MOTORS_HALTED-VAL
+          MOTORS_HALTED
+          MOTORS_HALTED_VALID-VAL
+          MOTORS_HALTED_VALID
+          POWER_BOARD_STATE-VAL
+          POWER_BOARD_STATE
+          POWER_BOARD_STATE_VALID-VAL
+          POWER_BOARD_STATE_VALID
+          POWER_STATE-VAL
+          POWER_STATE
+          POWER_STATE_VALID-VAL
+          POWER_STATE_VALID
+          ACCESS_POINT-VAL
+          ACCESS_POINT
+          ACCESS_POINT_VALID-VAL
+          ACCESS_POINT_VALID
+))

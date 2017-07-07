@@ -1,0 +1,8 @@
+prefix=/home/joe/repos/GummiArm/orchestration/packages/install
+
+Name: pr2_description
+Description: Description of pr2_description
+Version: 1.12.0
+Cflags: 
+Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
+Requires: xacro

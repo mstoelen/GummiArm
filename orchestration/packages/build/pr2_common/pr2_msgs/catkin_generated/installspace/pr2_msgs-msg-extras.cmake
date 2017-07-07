@@ -1,0 +1,2 @@
+set(pr2_msgs_MESSAGE_FILES "msg/AccelerometerState.msg;msg/AccessPoint.msg;msg/BatteryServer2.msg;msg/BatteryServer.msg;msg/BatteryState2.msg;msg/BatteryState.msg;msg/DashboardState.msg;msg/GPUStatus.msg;msg/LaserScannerSignal.msg;msg/LaserTrajCmd.msg;msg/PeriodicCmd.msg;msg/PowerBoardState.msg;msg/PowerState.msg;msg/PressureState.msg")
+set(pr2_msgs_SERVICE_FILES "srv/SetLaserTrajCmd.srv;srv/SetPeriodicCmd.srv")

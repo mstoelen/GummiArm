@@ -1,10 +1,5 @@
 #!/usr/bin/env python
-<<<<<<< HEAD
-=======
-import roslib
-#roslib.load_manifest('learning_tf')
 
->>>>>>> 22d720dd8eeb38a1c91a615621f1b924b9509575
 import rospy
 import tf
 
@@ -20,8 +15,4 @@ if __name__ == '__main__':
                          rospy.Time.now(),
                          "/kinect",
                          "/base_link")
-<<<<<<< HEAD
-=======
-        #print("running")
->>>>>>> 22d720dd8eeb38a1c91a615621f1b924b9509575
         rate.sleep()
