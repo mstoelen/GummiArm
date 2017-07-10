@@ -22,7 +22,7 @@ class door_handle_planning(object):
         #rospy.Subscriber('~touch', UInt16, self.touchCallback)
 
         # will need to subscribe to /joint_positions to move the arm down to contact handle from the target position
-        self.pub = rospy.Publisher("/gripped", Bool, queue_size=10)
+
         #print("running")
         moveit_commander.roscpp_initialize(sys.argv)
 

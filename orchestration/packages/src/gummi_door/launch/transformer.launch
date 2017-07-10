@@ -5,7 +5,6 @@
     <!-- include file="$(find gummi_moveit_config)/launch/move_group.launch" ns="gummi"/> -->
     <node name="my_tf_broadcaster" pkg="gummi_door" type="fixed_tf_broadcaster.py" output="screen" />
     <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
-    <node name="grab_handle" pkg="gummi_door" type="grab_handle.py" output="screen" >
-   </node>
+    <!-- node name="grab_handle" pkg="gummi_door" type="reach.py" output="screen" /> -->
   </group>
 </launch>

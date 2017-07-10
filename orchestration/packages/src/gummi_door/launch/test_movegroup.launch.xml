@@ -1,9 +1,0 @@
-<launch>
-
-<group ns="moveit">
-
-<node name="move" pkg="gummi_moveit" type="test_movegroup.py" output="screen"/> 
-
-</group>
-
-</launch>
