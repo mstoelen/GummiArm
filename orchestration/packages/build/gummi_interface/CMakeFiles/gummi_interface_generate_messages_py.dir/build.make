@@ -43,33 +43,33 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/joe/repos/GummiArm/orchestration/packages/src
+CMAKE_SOURCE_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/joe/repos/GummiArm/orchestration/packages/build
+CMAKE_BINARY_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/build
 
 # Utility rule file for gummi_interface_generate_messages_py.
 
 # Include the progress variables for this target.
 include gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/progress.make
 
-gummi_interface/CMakeFiles/gummi_interface_generate_messages_py: /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
-gummi_interface/CMakeFiles/gummi_interface_generate_messages_py: /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py
+gummi_interface/CMakeFiles/gummi_interface_generate_messages_py: /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
+gummi_interface/CMakeFiles/gummi_interface_generate_messages_py: /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py
 
 
-/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py: /opt/ros/kinetic/lib/genpy/genmsg_py.py
-/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py: /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/joe/repos/GummiArm/orchestration/packages/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python from MSG gummi_interface/Diagnostics"
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg -Igummi_interface:/home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -p gummi_interface -o /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg
+/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py: /opt/ros/kinetic/lib/genpy/genmsg_py.py
+/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py: /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/joe/repos/working/GummiArm/orchestration/packages/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python from MSG gummi_interface/Diagnostics"
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg -Igummi_interface:/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/msg -Istd_msgs:/opt/ros/kinetic/share/std_msgs/cmake/../msg -p gummi_interface -o /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg
 
-/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py: /opt/ros/kinetic/lib/genpy/genmsg_py.py
-/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py: /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/joe/repos/GummiArm/orchestration/packages/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python msg __init__.py for gummi_interface"
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg --initpy
+/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py: /opt/ros/kinetic/lib/genpy/genmsg_py.py
+/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py: /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/joe/repos/working/GummiArm/orchestration/packages/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python msg __init__.py for gummi_interface"
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg --initpy
 
 gummi_interface_generate_messages_py: gummi_interface/CMakeFiles/gummi_interface_generate_messages_py
-gummi_interface_generate_messages_py: /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
-gummi_interface_generate_messages_py: /home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py
+gummi_interface_generate_messages_py: /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/_Diagnostics.py
+gummi_interface_generate_messages_py: /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/msg/__init__.py
 gummi_interface_generate_messages_py: gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/build.make
 
 .PHONY : gummi_interface_generate_messages_py
@@ -80,10 +80,10 @@ gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/build: gummi
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/build
 
 gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/clean:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/gummi_interface_generate_messages_py.dir/cmake_clean.cmake
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/gummi_interface_generate_messages_py.dir/cmake_clean.cmake
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/clean
 
 gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/depend:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/GummiArm/orchestration/packages/src /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/working/GummiArm/orchestration/packages/src /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_generate_messages_py.dir/depend
 

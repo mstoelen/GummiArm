@@ -1,8 +1,8 @@
-prefix=/home/joe/repos/GummiArm/orchestration/packages/install
+prefix=/home/joe/repos/working/GummiArm/orchestration/packages/install
 
 Name: gummi_door
 Description: Description of gummi_door
 Version: 0.2.0
 Cflags: 
-Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
+Libs: -L/home/joe/repos/working/GummiArm/orchestration/packages/install/lib 
 Requires: 

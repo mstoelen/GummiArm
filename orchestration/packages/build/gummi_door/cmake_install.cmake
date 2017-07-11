@@ -1,8 +1,8 @@
-# Install script for directory: /home/joe/repos/GummiArm/orchestration/packages/src/gummi_door
+# Install script for directory: /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/GummiArm/orchestration/packages/install")
+  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/working/GummiArm/orchestration/packages/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,25 +33,25 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_door.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_door.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door/cmake" TYPE FILE FILES
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_doorConfig.cmake"
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_doorConfig-version.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_doorConfig.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_door/catkin_generated/installspace/gummi_doorConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_door/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/package.xml")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_door/launch")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/launch")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_door/config")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_door" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/config")
 endif()
 

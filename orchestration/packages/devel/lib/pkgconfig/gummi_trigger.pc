@@ -1,8 +1,8 @@
-prefix=/home/joe/repos/GummiArm/orchestration/packages/devel
+prefix=/home/joe/repos/working/GummiArm/orchestration/packages/devel
 
 Name: gummi_trigger
 Description: Description of gummi_trigger
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/joe/repos/GummiArm/orchestration/packages/devel/lib 
+Libs: -L/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib 
 Requires: 

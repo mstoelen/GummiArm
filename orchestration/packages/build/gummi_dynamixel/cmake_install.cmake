@@ -1,8 +1,8 @@
-# Install script for directory: /home/joe/repos/GummiArm/orchestration/packages/src/gummi_dynamixel
+# Install script for directory: /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_dynamixel
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/GummiArm/orchestration/packages/install")
+  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/working/GummiArm/orchestration/packages/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,17 +33,17 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixel.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixel.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_dynamixel/cmake" TYPE FILE FILES
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixelConfig.cmake"
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixelConfig-version.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixelConfig.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_dynamixel/catkin_generated/installspace/gummi_dynamixelConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_dynamixel" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_dynamixel/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_dynamixel" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_dynamixel/package.xml")
 endif()
 

@@ -1,8 +1,0 @@
-prefix=/home/joe/repos/GummiArm/orchestration/packages/install
-
-Name: pr2_msgs
-Description: Description of pr2_msgs
-Version: 1.12.0
-Cflags: -I/home/joe/repos/GummiArm/orchestration/packages/install/include
-Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
-Requires: std_msgs geometry_msgs

@@ -67,14 +67,14 @@ set(gummi_interface_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(gummi_interface_SOURCE_PREFIX /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface)
-  set(gummi_interface_DEVEL_PREFIX /home/joe/repos/GummiArm/orchestration/packages/devel)
+  set(gummi_interface_SOURCE_PREFIX /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface)
+  set(gummi_interface_DEVEL_PREFIX /home/joe/repos/working/GummiArm/orchestration/packages/devel)
   set(gummi_interface_INSTALL_PREFIX "")
   set(gummi_interface_PREFIX ${gummi_interface_DEVEL_PREFIX})
 else()
   set(gummi_interface_SOURCE_PREFIX "")
   set(gummi_interface_DEVEL_PREFIX "")
-  set(gummi_interface_INSTALL_PREFIX /home/joe/repos/GummiArm/orchestration/packages/install)
+  set(gummi_interface_INSTALL_PREFIX /home/joe/repos/working/GummiArm/orchestration/packages/install)
   set(gummi_interface_PREFIX ${gummi_interface_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(gummi_interface_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/joe/repos/GummiArm/orchestration/packages/devel/include " STREQUAL " ")
+if(NOT "/home/joe/repos/working/GummiArm/orchestration/packages/devel/include " STREQUAL " ")
   set(gummi_interface_INCLUDE_DIRS "")
-  set(_include_dirs "/home/joe/repos/GummiArm/orchestration/packages/devel/include")
+  set(_include_dirs "/home/joe/repos/working/GummiArm/orchestration/packages/devel/include")
   foreach(idir ${_include_dirs})
     if(IS_ABSOLUTE ${idir} AND IS_DIRECTORY ${idir})
       set(include ${idir})
@@ -103,7 +103,7 @@ if(NOT "/home/joe/repos/GummiArm/orchestration/packages/devel/include " STREQUAL
         message(FATAL_ERROR "Project 'gummi_interface' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  Ask the maintainer 'mstoelen <mstoelen@todo.todo>' to fix it.")
       endif()
     else()
-      message(FATAL_ERROR "Project 'gummi_interface' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/${idir}'.  Ask the maintainer 'mstoelen <mstoelen@todo.todo>' to fix it.")
+      message(FATAL_ERROR "Project 'gummi_interface' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/${idir}'.  Ask the maintainer 'mstoelen <mstoelen@todo.todo>' to fix it.")
     endif()
     _list_append_unique(gummi_interface_INCLUDE_DIRS ${include})
   endforeach()
@@ -122,7 +122,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/joe/repos/GummiArm/orchestration/packages/devel/lib;/home/joe/repos/GummiArm/orchestration/packages/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /home/joe/repos/working/GummiArm/orchestration/packages/devel/lib;/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib;/home/joe/GummiArm/orchestration/packages/devel/lib;/home/joe/repos/GummiArm/orchestration/packages/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

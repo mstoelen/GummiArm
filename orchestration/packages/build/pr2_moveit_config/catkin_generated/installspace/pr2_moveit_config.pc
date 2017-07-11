@@ -1,8 +1,0 @@
-prefix=/home/joe/repos/GummiArm/orchestration/packages/install
-
-Name: pr2_moveit_config
-Description: Description of pr2_moveit_config
-Version: 0.3.0
-Cflags: 
-Libs: -L/home/joe/repos/GummiArm/orchestration/packages/install/lib 
-Requires: 

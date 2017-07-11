@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/joe/repos/GummiArm/orchestration/packages/src
+CMAKE_SOURCE_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/joe/repos/GummiArm/orchestration/packages/build
+CMAKE_BINARY_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/build
 
 # Utility rule file for gummi_interface_genlisp.
 
@@ -63,10 +63,10 @@ gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/build: gummi_interface_ge
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/build
 
 gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/clean:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/gummi_interface_genlisp.dir/cmake_clean.cmake
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/gummi_interface_genlisp.dir/cmake_clean.cmake
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/clean
 
 gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/depend:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/GummiArm/orchestration/packages/src /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/working/GummiArm/orchestration/packages/src /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : gummi_interface/CMakeFiles/gummi_interface_genlisp.dir/depend
 

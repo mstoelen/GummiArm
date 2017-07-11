@@ -1,8 +1,8 @@
-# Install script for directory: /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface
+# Install script for directory: /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/GummiArm/orchestration/packages/install")
+  set(CMAKE_INSTALL_PREFIX "/home/joe/repos/working/GummiArm/orchestration/packages/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,65 +33,65 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  include("/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/safe_execute_install.cmake")
+  include("/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/safe_execute_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/msg" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/msg" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/cmake" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface-msg-paths.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/cmake" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface-msg-paths.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/include/gummi_interface")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/include/gummi_interface")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/share/roseus/ros/gummi_interface")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/share/roseus/ros/gummi_interface")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/share/common-lisp/ros/gummi_interface")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/share/common-lisp/ros/gummi_interface")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/share/gennodejs/ros/gummi_interface")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/share/gennodejs/ros/gummi_interface")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface")
+  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface" REGEX "/\\_\\_init\\_\\_\\.py$" EXCLUDE REGEX "/\\_\\_init\\_\\_\\.pyc$" EXCLUDE)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface" REGEX "/\\_\\_init\\_\\_\\.py$" EXCLUDE REGEX "/\\_\\_init\\_\\_\\.pyc$" EXCLUDE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface" FILES_MATCHING REGEX "/home/joe/repos/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/.+/__init__.pyc?$")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface" FILES_MATCHING REGEX "/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib/python2.7/dist-packages/gummi_interface/.+/__init__.pyc?$")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/cmake" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface-msg-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/cmake" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interface-msg-extras.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface/cmake" TYPE FILE FILES
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interfaceConfig.cmake"
-    "/home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interfaceConfig-version.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interfaceConfig.cmake"
+    "/home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/catkin_generated/installspace/gummi_interfaceConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface" TYPE FILE FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gummi_interface" TYPE FILE FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/package.xml")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/gummi_interface" TYPE PROGRAM FILES "/home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/scripts/gummi_arm")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/gummi_interface" TYPE PROGRAM FILES "/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/scripts/gummi_arm")
 endif()
 

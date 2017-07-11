@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/joe/repos/GummiArm/orchestration/packages/src
+CMAKE_SOURCE_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/joe/repos/GummiArm/orchestration/packages/build
+CMAKE_BINARY_DIR = /home/joe/repos/working/GummiArm/orchestration/packages/build
 
 # Utility rule file for _gummi_interface_generate_messages_check_deps_Diagnostics.
 
@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/joe/repos/GummiArm/orchestration/packages/build
 include gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/progress.make
 
 gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py gummi_interface /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg 
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && ../catkin_generated/env_cached.sh /usr/bin/python /opt/ros/kinetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface/msg/Diagnostics.msg 
 
 _gummi_interface_generate_messages_check_deps_Diagnostics: gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics
 _gummi_interface_generate_messages_check_deps_Diagnostics: gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/build.make
@@ -67,10 +67,10 @@ gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnos
 .PHONY : gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/build
 
 gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/clean:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/cmake_clean.cmake
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface && $(CMAKE_COMMAND) -P CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/cmake_clean.cmake
 .PHONY : gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/clean
 
 gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/depend:
-	cd /home/joe/repos/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/GummiArm/orchestration/packages/src /home/joe/repos/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/joe/repos/working/GummiArm/orchestration/packages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/joe/repos/working/GummiArm/orchestration/packages/src /home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface /home/joe/repos/working/GummiArm/orchestration/packages/build/gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : gummi_interface/CMakeFiles/_gummi_interface_generate_messages_check_deps_Diagnostics.dir/depend
 

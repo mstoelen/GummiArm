@@ -1,2 +1,2 @@
-gummi_description:gummi_door:gummi_dynamixel:gummi_hand_shake_demo:gummi_interface:gummi_moveit_config:gummi_trigger:moveit_tutorials:pr2_common/pr2_common:pr2_common/pr2_dashboard_aggregator:pr2_common/pr2_description:pr2_common/pr2_machine:pr2_common/pr2_msgs:pr2_moveit_config
--DCATKIN_DEVEL_PREFIX=/home/joe/repos/GummiArm/orchestration/packages/devel -DCMAKE_INSTALL_PREFIX=/home/joe/repos/GummiArm/orchestration/packages/install -G Unix Makefiles
+gummi_description:gummi_door:gummi_dynamixel:gummi_hand_shake_demo:gummi_interface:gummi_moveit_config:gummi_trigger
+-DCATKIN_DEVEL_PREFIX=/home/joe/repos/working/GummiArm/orchestration/packages/devel -DCMAKE_INSTALL_PREFIX=/home/joe/repos/working/GummiArm/orchestration/packages/install -G Unix Makefiles
