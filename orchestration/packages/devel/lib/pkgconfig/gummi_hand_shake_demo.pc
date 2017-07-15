@@ -1,0 +1,8 @@
+prefix=/home/joe/repos/working/GummiArm/orchestration/packages/devel
+
+Name: gummi_hand_shake_demo
+Description: Description of gummi_hand_shake_demo
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/joe/repos/working/GummiArm/orchestration/packages/devel/lib 
+Requires: 
