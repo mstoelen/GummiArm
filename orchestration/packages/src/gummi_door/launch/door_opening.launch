@@ -1,0 +1,21 @@
+<launch>
+  <group ns="gummi">
+    <!-- Publish some coordinates to /target topic and start the nodes -->
+    <!-- node pkg="rostopic" type="rostopic" name="rostopic" args="pub /target geometry_msgs/PointStamped '[0, 0, /kinect]' '[2.0, 0.1, 0.2]'"/> -->
+    <node name="my_tf_broadcaster" pkg="gummi_door" type="fixed_tf_broadcaster.py" output="screen" />
+    <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
+    <node name="grab_handle" pkg="gummi_door" type="test_movegroup.py" output="screen" >
+          	<rosparam file="$(find gummi_interface)/config/default/gummi.yaml" command="load"/>
+  	<rosparam file="$(find gummi_interface)/config/default/shoulder_roll.yaml" command="load" ns="shoulder_roll"/>
+	<rosparam file="$(find gummi_interface)/config/default/calibration_shoulder_roll.yaml" command="load" ns="shoulder_roll/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/default/shoulder_pitch.yaml" command="load" ns="shoulder_pitch"/>
+	<rosparam file="$(find gummi_interface)/config/default/calibration_shoulder_pitch.yaml" command="load" ns="shoulder_pitch/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/default/shoulder_yaw.yaml" command="load" ns="shoulder_yaw"/>
+	<rosparam file="$(find gummi_interface)/config/default/calibration_shoulder_yaw.yaml" command="load" ns="shoulder_yaw/calib"/>
+	<rosparam file="$(find gummi_interface)/config/default/elbow.yaml" command="load" ns="elbow"/>	
+	<rosparam file="$(find gummi_interface)/config/default/calibration_elbow.yaml" command="load" ns="elbow/calib"/>
+  	<rosparam file="$(find gummi_interface)/config/default/wrist.yaml" command="load" ns="wrist"/>	
+	<rosparam file="$(find gummi_interface)/config/default/calibration_wrist.yaml" command="load" ns="wrist/calib"/>
+   </node>
+  </group>
+</launch>

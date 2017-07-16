@@ -1,0 +1,14 @@
+digraph G {
+"upperarm" -> "lowerarm_preroll"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"upperarm_preroll" -> "upperarm"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"lowerarm_preroll" -> "lowerarm"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"shoulder" -> "upperarm_preroll"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"shoulder_preroll" -> "shoulder"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"base_link" -> "shoulder_preroll"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"lowerarm" -> "wrist"[label="Broadcaster: /moveit/robot_state_publisher\nAverage rate: 30.302 Hz\nMost recent transform: 1500041709.370 ( 0.027 sec old)\nBuffer length: 4.950 sec\n"];
+"base_link" -> "kinect"[label="Broadcaster: /my_tf_broadcaster\nAverage rate: 10.204 Hz\nMost recent transform: 1500041709.333 ( 0.064 sec old)\nBuffer length: 4.900 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1500041709.397"[ shape=plaintext ] ;
+ }->"base_link";
+}
