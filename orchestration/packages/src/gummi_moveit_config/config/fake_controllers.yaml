@@ -8,3 +8,6 @@ controller_list:
       - elbow
       - forearm_roll
       - wrist_pitch
+  - name: fake_right_gripper_controller
+    joints:
+      []

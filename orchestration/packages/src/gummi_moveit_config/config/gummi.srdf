@@ -20,8 +20,11 @@
         <joint name="wrist_to_coupling" />
         <joint name="coupling_to_tool" />
     </group>
+    <group name="right_gripper">
+        <link name="tool" />
+    </group>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="hand" parent_link="tool" group="right_arm" />
+    <end_effector name="hand" parent_link="tool" group="right_gripper" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="coupling" reason="Never" />
     <disable_collisions link1="base_link" link2="lowerarm" reason="Never" />
