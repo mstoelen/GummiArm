@@ -18,7 +18,7 @@
   </include> -->
   <!-- Users update this to set transform between camera and robot 
   -->
-  <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="$(arg     camera_link_pose) /kinect /base_link 40"/>
+  <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="$(arg     camera_link_pose) /camera_link /base_link 40"/>
   <!-- octomap parameters for moveit -->
   <rosparam command="load" file="$(find gummi_moveit_config)/config/kinect_sensor.yaml"/>
   <!-- Octomap settings common to both sensors -->

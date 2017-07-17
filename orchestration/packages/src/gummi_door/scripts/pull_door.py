@@ -37,7 +37,7 @@ class pulldoor():
         #pulldoor()
         print ("running")
         pi = 3.1416
-        #start = pulldoor.jointsCallback()
+        #start = self.joints
         rest = (0.3732686584,0.7209709703,0.4448544285,0.0322135965,-0.4295146206,-1.1402590523,-0.122718463, 1.5)
         #(0.4653075057,0.6340453923,0.5726861608,0.1135145783,-0.209644041,-1.2169580917,-0.122718463, 1)
         handle_turned = (0.3732686584,0.7209709703,0.4448544285,0.0322135965,-0.4295146206,-1.1402590523,-0.122718463, 1.5)
@@ -78,9 +78,9 @@ class pulldoor():
                 gummi.goTo(door_open, False)
                 r.sleep()
 
-            for i in range(0,100):
-                gummi.goTo(rest, False)
-                r.sleep()
+            #for i in range(0,100):
+                #gummi.goTo(rest, False)
+                #r.sleep()
 
             self.gripped = False
 

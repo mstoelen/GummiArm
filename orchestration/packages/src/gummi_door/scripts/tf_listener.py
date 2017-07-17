@@ -16,13 +16,17 @@ class transformer(object):
 
     def callback(self, msg):
         self.listener.waitForTransform("/base_link", "/kinect", rospy.Time(),
-rospy.Duration(4.0))
-        self.true_target = self.listener.transformPoint("/base_link", msg)
-        self.pub.publish(self.true_target)
-        #print(self.true_target)
-        self.x = self.true_target.point.x
-        self.y = self.true_target.point.y
-        self.z = self.true_target.point.z
+rospy.Duration(8.0))
+        while not rospy.is_shutdown():
+            try:
+                self.true_target = self.listener.transformPoint("/base_link", msg)
+                self.pub.publish(self.true_target)
+                #print(self.true_target)
+                self.x = self.true_target.point.x
+                self.y = self.true_target.point.y
+                self.z = self.true_target.point.z
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                continue
 
 
 if __name__ == '__main__':
