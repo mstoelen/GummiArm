@@ -24,7 +24,7 @@ class planning():
     def callback(self, data):
         self.x = data.point.x
         self.y = data.point.y
-        self.z = data.point.z
+        self.z = data.point.z + 0.1
         return self.x, self.y, self.z
 
     def main(self):
@@ -85,11 +85,16 @@ class planning():
         #group.go(wpose, wait=True)
 
         pose_target = group.get_current_pose()
+        print (pose_target)
         #pose_target = geometry_msgs.msg.Pose()
+        #pose_target.pose.orientation.w = 0.0270944592499
+        #pose_target.pose.orientation.x = -0.950859856807
+        #pose_target.pose.orientation.y = -0.0378472432586
+        #pose_target.pose.orientation.z = -0.306102938845
         pose_target.pose.orientation.w = 1.0
-        pose_target.pose.position.x += 0.2
-        pose_target.pose.position.y += -0.1
-        pose_target.pose.position.z += 0.3
+        pose_target.pose.position.x = self.x
+        pose_target.pose.position.y = -self.y
+        pose_target.pose.position.z = self.z
         print (pose_target)
         #group.set_pose_target(pose_target)
 
