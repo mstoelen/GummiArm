@@ -40,10 +40,14 @@ class image_converter:
         self.target = PointStamped()
         #self.target.header.stamp.secs = rospy.Time()
         self.target.header.frame_id = "/kinect"
-        self.target.point.x = self.z
-        self.target.point.y = self.x
-        self.target.point.z = self.y
-        self.pub.publish(self.target)
+        if np.logical_not(np.isnan(self.z)):
+            self.target.point.x = self.z
+        if np.logical_not(np.isnan(self.x)):
+            self.target.point.y = self.x
+        if np.logical_not(np.isnan(self.z)):
+            self.target.point.z = self.y
+        if self.target.point.x != 0:
+            self.pub.publish(self.target)
         #print (self.target)
         cv2.waitKey(100)
 

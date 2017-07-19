@@ -24,5 +24,6 @@
     <node name="kinect_handle" pkg="gummi_door" type="kinect_handle2.py" output="screen" />
     <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
     <node name="grab_handle" pkg="gummi_door" type="reach.py" output="screen" ns="moveit" />
+    <!-- <node name="gummi" pkg="gummi_door" type="pull_door.py" output="screen" /> -->
 <!-- </group> -->
 </launch>

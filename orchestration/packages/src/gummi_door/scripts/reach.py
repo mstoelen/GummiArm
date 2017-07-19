@@ -3,12 +3,14 @@
 import sys
 import rospy
 import copy
+import numpy as np
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 from std_msgs.msg import UInt16
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PointStamped
+#from geometry_msgs.msg import PoseStamped
 
 
 class planning():
@@ -22,10 +24,18 @@ class planning():
 
 
     def callback(self, data):
+        #target = [data.point.x, data.point.y, data.point.z]
+        #if np.logical_not(np.isnan(target[0])):
+            #self.x = target[2]
+            #self.y = target[1]
+            #self.z = target[0] + 0.1
         self.x = data.point.x
         self.y = data.point.y
         self.z = data.point.z + 0.1
+        #if np.logical_not(np.isnan(self.x)) and np.logical_not(np.isnan(self.y)) and np.logical_not(np.isnan(self.z)):
         return self.x, self.y, self.z
+        #else:
+            #print ("fucking nan")
 
     def main(self):
         rospy.sleep(5)
@@ -37,6 +47,14 @@ class planning():
         #self.x = 0.5
         #self.y = 0.1
         #self.z = 0.1
+        rospy.sleep(2)
+
+        #p = PoseStamped()
+        #p.header.frame_id = robot.get_planning_frame()
+        #p.pose.position.x = 0.
+        #p.pose.position.y = 0.
+        #p.pose.position.z = 0.
+        #scene.add_box("table", p, (0.5, 1.5, 0.6))
 
         #group.setPlanningTime(10)
         display_trajectory_publisher = rospy.Publisher(
@@ -84,14 +102,30 @@ class planning():
 
         #group.go(wpose, wait=True)
 
+        #pose_target0 = group.get_current_pose()
+        #print (pose_target0)
+        ##pose_target = geometry_msgs.msg.Pose()
+
+
+        #pose_target0.pose.position.x = 0.332676687925
+        #pose_target0.pose.position.y = -0.236017840155
+        #pose_target0.pose.position.z = -0.152597506522
+        #pose_target0.pose.orientation.x = -0.995221096981
+        #pose_target0.pose.orientation.y = -0.025444897828
+        #pose_target0.pose.orientation.z = 0.0121344488935
+        #pose_target0.pose.orientation.w = 0.0934894670487
+        ##print (pose_target0)
+
+        #group.go(pose_target0, wait=True)
+
         pose_target = group.get_current_pose()
         print (pose_target)
         #pose_target = geometry_msgs.msg.Pose()
         #pose_target.pose.orientation.w = 0.0270944592499
         #pose_target.pose.orientation.x = -0.950859856807
-        #pose_target.pose.orientation.y = -0.0378472432586
-        #pose_target.pose.orientation.z = -0.306102938845
-        pose_target.pose.orientation.w = 1.0
+        #pose_target.pose.orientation.y = -0.005
+        #pose_target.pose.orientation.z = -0.0009
+        #pose_target.pose.orientation.w = 0.249713560143
         pose_target.pose.position.x = self.x
         pose_target.pose.position.y = -self.y
         pose_target.pose.position.z = self.z
@@ -123,6 +157,16 @@ class planning():
         print (pose_target2)
 
         group.go(pose_target2, wait=True)
+
+        pose_target3 = group.get_current_pose()
+        #pose_target = geometry_msgs.msg.Pose()
+        pose_target3.pose.orientation.w = 1.0
+        pose_target3.pose.position.x = 0.341542142664
+        pose_target3.pose.position.y = -0.129363091922
+        pose_target3.pose.position.z = -0.189303169751
+        print (pose_target3)
+
+        group.go(pose_target3, wait=True)
 
         group.clear_pose_targets()
 
