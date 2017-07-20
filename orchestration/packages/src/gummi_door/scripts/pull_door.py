@@ -14,6 +14,7 @@ from gummi_interface.gummi import Gummi
 
 class pulldoor():
     def __init__(self):
+        self.gummi = Gummi()
         rospy.init_node('gummi', anonymous=True)
         print ("running")
         self.gripped = False
@@ -47,10 +48,10 @@ class pulldoor():
 
         r = rospy.Rate(60)
         rospy.sleep(5)
-        gummi = Gummi()
+        #gummi = Gummi()
 
         while self.gripped is True:
-            gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+            self.gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 
             #print('WARNING: Moving joints sequentially to equilibrium positions.')
             #gummi.doGradualStartup()
@@ -63,19 +64,19 @@ class pulldoor():
             #not sure if this is needed ^^
 
             for i in range(0,100):
-                gummi.goTo(handle_turned, False)
+                self.gummi.goTo(handle_turned, False)
                 r.sleep()
 
             for i in range(0,100):
-                gummi.goTo(pull_door1, False)
+                self.gummi.goTo(pull_door1, False)
                 r.sleep()
 
             for i in range(0,100):
-                gummi.goTo(pull_door2, False)
+                self.gummi.goTo(pull_door2, False)
                 r.sleep()
 
             for i in range(0,100):
-                gummi.goTo(door_open, False)
+                self.gummi.goTo(door_open, False)
                 r.sleep()
 
             #for i in range(0,100):

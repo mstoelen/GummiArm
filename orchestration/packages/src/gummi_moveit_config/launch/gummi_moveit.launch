@@ -1,6 +1,6 @@
 <launch>
 
-<group ns="moveit">
+<!-- <group ns="moveit"> -->
   <!--  this solves the error messages Moveit! was generating when the arm is not in a very stable position -->
   <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.1" />
 
@@ -51,6 +51,6 @@
 
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find gummi_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
-</group>
+<!-- </group> -->
 
 </launch>

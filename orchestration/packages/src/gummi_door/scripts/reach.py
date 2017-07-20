@@ -10,7 +10,8 @@ import geometry_msgs.msg
 from std_msgs.msg import UInt16
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PointStamped
-#from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped
+
 
 
 class planning():
@@ -31,9 +32,10 @@ class planning():
             #self.z = target[0] + 0.1
         self.x = data.point.x
         self.y = data.point.y
-        self.z = data.point.z + 0.1
+        self.z = data.point.z
         #if np.logical_not(np.isnan(self.x)) and np.logical_not(np.isnan(self.y)) and np.logical_not(np.isnan(self.z)):
         return self.x, self.y, self.z
+        print (self.y)
         #else:
             #print ("fucking nan")
 
@@ -48,6 +50,37 @@ class planning():
         #self.y = 0.1
         #self.z = 0.1
         rospy.sleep(2)
+
+        handle_id = "handle"
+        door_id = "door"
+        scene.remove_world_object(handle_id)
+        scene.remove_world_object(door_id)
+        rospy.sleep(1)
+        handle_size = [0.05, 0.2, 0.02]
+        door_size = [0.05, 0.8, 2.0]
+
+        handle_pose = PoseStamped()
+        handle_pose.header.frame_id = "/base_link"
+        handle_pose.pose.position.x = self.x - 0.02
+        handle_pose.pose.position.y = self.y
+        handle_pose.pose.position.z = self.z
+        handle_pose.pose.orientation.w = 1.0
+        scene.add_box(handle_id, handle_pose, handle_size)
+
+        door_pose = PoseStamped()
+        door_pose.header.frame_id = "/base_link"
+        door_pose.pose.position.x = self.x + 0.1
+        door_pose.pose.position.y = self.y - 0.3
+        door_pose.pose.position.z = self.z
+        door_pose.pose.orientation.w = 1.0
+        scene.add_box(door_id, door_pose, door_size)
+
+        #self.setColor(handle_id, 0.8, 0, 0, 1.0)
+        #self.sendColors()
+
+        #collision_object = moveit_msgs.msg.CollisionObject()
+        #collision_object.header.frame_id = "/base_link"
+
 
         #p = PoseStamped()
         #p.header.frame_id = robot.get_planning_frame()
@@ -107,29 +140,46 @@ class planning():
         ##pose_target = geometry_msgs.msg.Pose()
 
 
-        #pose_target0.pose.position.x = 0.332676687925
-        #pose_target0.pose.position.y = -0.236017840155
-        #pose_target0.pose.position.z = -0.152597506522
-        #pose_target0.pose.orientation.x = -0.995221096981
-        #pose_target0.pose.orientation.y = -0.025444897828
-        #pose_target0.pose.orientation.z = 0.0121344488935
-        #pose_target0.pose.orientation.w = 0.0934894670487
-        ##print (pose_target0)
+        #pose_target0.pose.position.x = 0.3
+        #pose_target0.pose.position.y = -0.4
+        #pose_target0.pose.position.z = 0.0
+        #pose_target0.pose.orientation.x = 0.0
+        #pose_target0.pose.orientation.y = 0.0
+        #pose_target0.pose.orientation.z = 0.0
+        #pose_target0.pose.orientation.w = 1.0
+        ##pose_target0.pose.orientation.x = 0.973741798137
+        ##pose_target0.pose.orientation.y = -0.0905325275454
+        ##pose_target0.pose.orientation.z = 0.185394157184
+        ##pose_target0.pose.orientation.w = 0.0962277428784
+        #print (pose_target0)
+
 
         #group.go(pose_target0, wait=True)
 
         pose_target = group.get_current_pose()
         print (pose_target)
+        #pose_target.pose.position.x += 0.2
+        #pose_target.pose.position.y += -0.1
+        #pose_target.pose.position.z += 0.0
         #pose_target = geometry_msgs.msg.Pose()
         #pose_target.pose.orientation.w = 0.0270944592499
-        #pose_target.pose.orientation.x = -0.950859856807
-        #pose_target.pose.orientation.y = -0.005
-        #pose_target.pose.orientation.z = -0.0009
-        #pose_target.pose.orientation.w = 0.249713560143
-        pose_target.pose.position.x = self.x
+        #pose_target.pose.orientation.x = 0.0
+        #pose_target.pose.orientation.y = 0.0
+        #pose_target.pose.orientation.z = 0.0
+        pose_target.pose.orientation.w = 1.0
+        pose_target.pose.position.x = self.x - 0.25
         pose_target.pose.position.y = -self.y
-        pose_target.pose.position.z = self.z
+        pose_target.pose.position.z = self.z + 0.1
+        #self.x = pose_target.pose.position.x + 0.1
+        #pose_target = [self.x, self.y, self.z]
+        #group.set_position_target(pose_target)
+        print (self.y)
         print (pose_target)
+        rospy.sleep(2)
+            #x: -0.98588467338
+    #y: 0.0414697750102
+    #z: 0.0550324007106
+    #w: 0.152588018623
         #group.set_pose_target(pose_target)
 
         #plan3 = group.plan()
@@ -150,7 +200,7 @@ class planning():
 
         pose_target2 = group.get_current_pose()
         #pose_target = geometry_msgs.msg.Pose()
-        pose_target2.pose.orientation.w = 1.0
+        #pose_target2.pose.orientation.w = 1.0
         #pose_target2.pose.position.x += 0.2
         #pose_target2.pose.position.y += 0.1
         pose_target2.pose.position.z += -0.1
@@ -158,12 +208,14 @@ class planning():
 
         group.go(pose_target2, wait=True)
 
+        rospy.sleep(5)
+
         pose_target3 = group.get_current_pose()
         #pose_target = geometry_msgs.msg.Pose()
-        pose_target3.pose.orientation.w = 1.0
+        #pose_target3.pose.orientation.w = 1.0
         pose_target3.pose.position.x = 0.341542142664
-        pose_target3.pose.position.y = -0.129363091922
-        pose_target3.pose.position.z = -0.189303169751
+        pose_target3.pose.position.y = -0.4
+        pose_target3.pose.position.z = 0.0
         print (pose_target3)
 
         group.go(pose_target3, wait=True)
