@@ -11,6 +11,7 @@ from std_msgs.msg import UInt16
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import PoseStamped
+#from gummi_interface.gummi import Gummi
 
 
 
@@ -18,6 +19,8 @@ class planning():
 
     def __init__(self):
         rospy.Subscriber("/true_target", PointStamped, self.callback)
+        rospy.Subscriber("/ready", Bool, self.readyCallback)
+        #self.gummi = Gummi()
         self.pub = rospy.Publisher("/gripped", Bool, queue_size=10)
         self.gripped = False
 
@@ -39,7 +42,12 @@ class planning():
         #else:
             #print ("fucking nan")
 
+    def readyCallback(self, msg):
+        self.ready = msg.data
+
     def main(self):
+        #while self.ready is True:
+        #self.gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
         rospy.sleep(5)
         moveit_commander.roscpp_initialize(sys.argv)
         robot = moveit_commander.RobotCommander()
@@ -166,8 +174,8 @@ class planning():
         #pose_target.pose.orientation.x = 0.0
         #pose_target.pose.orientation.y = 0.0
         #pose_target.pose.orientation.z = 0.0
-        pose_target.pose.orientation.w = 1.0
-        pose_target.pose.position.x = self.x - 0.25
+        #pose_target.pose.orientation.w = 1.0
+        pose_target.pose.position.x = self.x - 0.05
         pose_target.pose.position.y = -self.y
         pose_target.pose.position.z = self.z + 0.1
         #self.x = pose_target.pose.position.x + 0.1
@@ -210,15 +218,19 @@ class planning():
 
         rospy.sleep(5)
 
-        pose_target3 = group.get_current_pose()
-        #pose_target = geometry_msgs.msg.Pose()
-        #pose_target3.pose.orientation.w = 1.0
-        pose_target3.pose.position.x = 0.341542142664
-        pose_target3.pose.position.y = -0.4
-        pose_target3.pose.position.z = 0.0
-        print (pose_target3)
+        self.gripped = True
+        while not rospy.is_shutdown():
+            self.pub.publish(self.gripped)
 
-        group.go(pose_target3, wait=True)
+        #pose_target3 = group.get_current_pose()
+        ##pose_target = geometry_msgs.msg.Pose()
+        ##pose_target3.pose.orientation.w = 1.0
+        #pose_target3.pose.position.x = 0.341542142664
+        #pose_target3.pose.position.y = -0.4
+        #pose_target3.pose.position.z = 0.0
+        #print (pose_target3)
+
+        #group.go(pose_target3, wait=True)
 
         group.clear_pose_targets()
 
@@ -229,9 +241,9 @@ class planning():
         #rospy.spin()
         #moveit_commander.roscpp_shutdown()
         #print ("============ STOPPING")
-        self.gripped = True
-        while not rospy.is_shutdown():
-            self.pub.publish(self.gripped)
+        #self.gripped = True
+        #while not rospy.is_shutdown():
+            #self.pub.publish(self.gripped)
 
         rospy.spin()
 

@@ -1,24 +1,15 @@
 <launch>
 <!-- <group ns="moveit"> -->
-    <remap from="gummi/joint_states" to="/joint_states"/>
-    <arg name="camera_link_pose" default="-0.05 -0.11 0.33 0.0 0.57 0.0"/>
-    <include file="$(find freenect_launch)/launch/freenect.launch"/>
-
-    <!-- <include file="$(find gummi_moveit_config)/launch/gummi_moveit.launch"/>
-    <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi"/>
-    <arg name="rgb_frame_id" value="camera_rgb_optical_frame"/> -->
   
-    <arg name="depth_frame_id" value="camera_depth_optical_frame"/>
-
-    <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="$(arg camera_link_pose) /kinect /base_link 40"/>
-
+    
+    
     <rosparam command="load" file="$(find gummi_moveit_config)/config/kinect_sensor.yaml"/>
-  <!-- <group ns="/moveit/move_group">
+  <group ns="/moveit/move_group">
 
     <param name="octomap_frame" type="string" value="camera_link"/>
     <param name="octomap_resolution" type="double" value="0.04"/>
     <param name="max_range" type="double" value="2.0"/>
-  </group> -->
+  </group>
   
     <!-- Publish some coordinates to /target topic and start the nodes -->
     <!-- node pkg="rostopic" type="rostopic" name="rostopic" args="pub /target geometry_msgs/PointStamped '[0, 0, /kinect]' '[2.0, 0.1, 0.2]'"/> -->
@@ -26,10 +17,11 @@
     <!-- include file="$(find gummi_moveit_config)/launch/move_group.launch" ns="gummi"/> -->
 
     <!-- <node name="my_tf_broadcaster" pkg="gummi_door" type="fixed_tf_broadcaster.py" output="screen" ns="gummi"/> -->  
-    <node name="kinect_handle" pkg="gummi_door" type="kinect_handle2.py" output="screen" />
-    <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
+  <include file="$(find gummi_moveit_config)/launch/gummi_moveit.launch"/>
+  
     <!-- <node name="objects" pkg="gummi_door" type="scene_objects.py" output="screen" /> -->
     <node name="grab_handle" pkg="gummi_door" type="reach.py" output="screen" />
-    <!-- node name="gummi" pkg="gummi_door" type="pull_door.py" output="screen" /> -->
+    
+    
 <!-- </group> -->
 </launch>

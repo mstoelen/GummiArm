@@ -68,7 +68,7 @@ class image_converter:
         for cnt in contours:
             if len(cnt) > 10:	
                 x, y, w, h = cv2.boundingRect(cnt)
-                if (w < 250) and (h < 60) and (w > 60) and (h > 3) and (y > 200) and (y < 350) and (x > 150) and (x < 300):
+                if (w < 250) and (h < 100) and (w > 60) and (h > 3) and (y > 200) and (y < 350) and (x > 150) and (x < 300):
                     good = cnt
                     check = 1
         if check == 0:

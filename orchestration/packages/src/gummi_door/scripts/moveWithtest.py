@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
 import rospy
-import sys
-import csv
-import math
+#import sys
+#import csv
+#import math
 
 from std_msgs.msg import Bool
-from std_msgs.msg import UInt16
-from sensor_msgs.msg import JointState
+#from std_msgs.msg import UInt16
+#from sensor_msgs.msg import JointState
 
 from gummi_interface.gummi import Gummi
 
 
 class pulldoor():
     def __init__(self):
-        rospy.init_node('gummi', anonymous=True)
+        rospy.init_node('pull', anonymous=True)
         print ("running")
         self.gripped = False
         rospy.Subscriber("/gripped", Bool, self.gripCallback)
@@ -47,41 +47,42 @@ class pulldoor():
 
         r = rospy.Rate(60)
         rospy.sleep(5)
-        gummi = Gummi()
 
-        ##while self.gripped is True:
-        gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 
-        print('WARNING: Moving joints sequentially to equilibrium positions.')
-        gummi.doGradualStartup()
+        while self.gripped is True:
+            gummi = Gummi()
+            gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
 
-        print("GummiArm is live!")
+            #print('WARNING: Moving joints sequentially to equilibrium positions.')
+            #gummi.doGradualStartup()
 
-        for i in range(0,400):
-            gummi.goTo(rest, False)
-            r.sleep()
-        #not sure if this is needed ^^
+            #print("GummiArm is live!")
 
-        for i in range(0,500):
-            gummi.elbow.moveWith(-0.002, 0.5)
-            r.sleep()
+            for i in range(0,100):
+                gummi.handDOF1.servoTo(1.5)
+                r.sleep()
 
-            #for i in range(0,100):
-                #gummi.goTo(pull_door1, False)
-                #r.sleep()
+            for i in range(0,500):
+                gummi.elbow.moveWith(-0.002, 0.5)
+                r.sleep()
 
-            #for i in range(0,100):
-                #gummi.goTo(pull_door2, False)
-                #r.sleep()
+                #for i in range(0,100):
+                    #gummi.goTo(pull_door1, False)
+                    #r.sleep()
 
-            #for i in range(0,100):
-                #gummi.goTo(door_open, False)
-                #r.sleep()
+                #for i in range(0,100):
+                    #gummi.goTo(pull_door2, False)
+                    #r.sleep()
 
-        for i in range(0,100):
-            gummi.goTo(rest, False)
-            r.sleep()
+                #for i in range(0,100):
+                    #gummi.goTo(door_open, False)
+                    #r.sleep()
 
+            for i in range(0,100):
+                gummi.goTo(rest, False)
+                r.sleep()
+
+        rospy.spin()
             #self.gripped = False
 
 if __name__ == '__main__':

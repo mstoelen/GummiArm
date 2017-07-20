@@ -1,89 +1,49 @@
 #!/usr/bin/env python
 
 import rospy
-import sys
-import csv
-import math
-
-from std_msgs.msg import Bool
-from std_msgs.msg import UInt16
-from sensor_msgs.msg import JointState
 
 from gummi_interface.gummi import Gummi
 
 
 class pulldoor():
     def __init__(self):
-        self.gummi = Gummi()
+
         rospy.init_node('gummi', anonymous=True)
+        self.gummi = Gummi()
+        self.r = rospy.Rate(60)
         print ("running")
-        self.gripped = False
-        rospy.Subscriber("/gripped", Bool, self.gripCallback)
-        rospy.Subscriber("/joint_states", JointState, self.jointsCallback)
+
+        rospy.logwarn('Moving joints sequentially to equilibrium positions.')
+        self.gummi.doGradualStartup()
+
+        rospy.logwarn('Moving to resting pose, hold arm!')
+        rospy.sleep(1)
+
+        self.gummi.goRestingPose(True)
+        for i in range(0,400):
+            self.gummi.goRestingPose(False)
+            self.r.sleep()
+
+        for i in range(0,100):
+            self.gummi.forearmRoll.servoTo(-1)
+            self.r.sleep()
+
+        self.gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
+
+        self.gummi.setCollisionResponses(False, False, False, False, False)
+        rospy.loginfo("GummiArm is live!")
+
         self.main()
 
 
-    def gripCallback(self, msg):
-        self.gripped = msg.data
-        #print (self.gripped)
-
-    def jointsCallback(self, msg):
-        self.joints = msg.position
-        #print (self.joints)
-        return self.joints
-
-
     def main(self):
+        while not rospy.is_shutdown():
+            if self.gummi.teleop == 0 and self.gummi.velocity_control == 0:
+                self.gummi.doUpdate()
 
-        #pulldoor()
-        print ("running")
-        pi = 3.1416
-        #start = self.joints
-        rest = (0.3732686584,0.7209709703,0.4448544285,0.0322135965,-0.4295146206,-1.1402590523,-0.122718463, 1.5)
-        #(0.4653075057,0.6340453923,0.5726861608,0.1135145783,-0.209644041,-1.2169580917,-0.122718463, 1)
-        handle_turned = (0.3732686584,0.7209709703,0.4448544285,0.0322135965,-0.4295146206,-1.1402590523,-0.122718463, 1.5)
-        pull_door1 = (0.1380582709,0.7976700097,0.4141748127,-0.4740000635,0,-1.135145783,-0.1380582709, 1.5)
-        pull_door2 = (-0.1380582709,0.5317800065,0.6851780853,-0.4034369472,0.3425890426,-1.1300325137,-0.1380582709, 1.5)
-        door_open = (-0.2403236568,0.3016828883,0.4039482741,-0.122718463,0.4346278899,-1.1555988602,-0.419288082, 1.5)
+            self.gummi.publishJointState()
+            self.r.sleep()
 
-        r = rospy.Rate(60)
-        rospy.sleep(5)
-        #gummi = Gummi()
-
-        while self.gripped is True:
-            self.gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
-
-            #print('WARNING: Moving joints sequentially to equilibrium positions.')
-            #gummi.doGradualStartup()
-
-            print("GummiArm is live!")
-
-            #for i in range(0,400):
-                #gummi.goTo(start, False)
-                #r.sleep()
-            #not sure if this is needed ^^
-
-            for i in range(0,100):
-                self.gummi.goTo(handle_turned, False)
-                r.sleep()
-
-            for i in range(0,100):
-                self.gummi.goTo(pull_door1, False)
-                r.sleep()
-
-            for i in range(0,100):
-                self.gummi.goTo(pull_door2, False)
-                r.sleep()
-
-            for i in range(0,100):
-                self.gummi.goTo(door_open, False)
-                r.sleep()
-
-            #for i in range(0,100):
-                #gummi.goTo(rest, False)
-                #r.sleep()
-
-            self.gripped = False
 
 if __name__ == '__main__':
     pulldoor()

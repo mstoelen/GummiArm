@@ -1,0 +1,20 @@
+<launch>	
+  <arg name="clone" default="default"/>	
+  <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi">
+    <arg name="clone" value="$(arg clone)"/>
+  </include>
+  <node name="gummi" pkg="gummi_door" type="pull_door.py" output="screen"/>
+  <include file="$(find freenect_launch)/launch/freenect.launch"/>
+  <arg name="camera_link_pose" default="0.0 -0.11 0.33 0.0 0.57 0.0"/>
+    <!-- <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi"/>
+    <arg name="rgb_frame_id" value="camera_rgb_optical_frame"/> -->
+  
+    <arg name="depth_frame_id" value="camera_depth_optical_frame"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster" args="$(arg camera_link_pose) /kinect /base_link 40"/>
+
+    <node name="kinect_handle" pkg="gummi_door" type="kinect_handle2.py" output="screen" />
+    <node name="tf_listener" pkg="gummi_door" type="tf_listener.py" output="screen" />
+    <remap from="gummi/joint_states" to="/joint_states"/>
+    <node name="gummi2" pkg="gummi_door" type="moveWithtest.py" output="screen" />	
+</launch>
