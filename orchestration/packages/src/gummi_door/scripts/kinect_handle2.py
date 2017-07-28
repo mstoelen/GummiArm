@@ -15,13 +15,17 @@ class image_converter:
         self.pub = rospy.Publisher("target", PointStamped, queue_size=1000)
         rospy.init_node('target', anonymous=True)
         self.bridge = CvBridge()
+        self.handle_cascade = cv2.CascadeClassifier('/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/cascade.xml')
         self.Image_sub = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
         self.Image_sub2 = rospy.Subscriber("/camera/depth/image_rect", Image, self.depth)
         self.cam_info = rospy.Subscriber("/camera/depth/camera_info", CameraInfo, self.fromCameraInfo)
         self.targety = 1
         self.targetx = 1
+        self.x = 1
+        self.y = 1
+        self.w = 1
         self.z = 1
-        self.P = []
+        self.P = [0, 0, 0, 0]
 
     def callback(self, data):
         # gets image from /image_color topic, calls contour to get x, y
@@ -59,24 +63,36 @@ class image_converter:
         # rectangle. Then uses projectPixelTo3dRay to get camera space
         # position of the handle referenced to the middle of the image
         img = cv_image
-        img = cv2.GaussianBlur(img,(5,5),0)
-        thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
-        cv2.imshow('thresh', thresh)
-        image, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        #contours = contours[0]
-        check = 0
-        for cnt in contours:
-            if len(cnt) > 10:	
-                x, y, w, h = cv2.boundingRect(cnt)
-                if (w < 250) and (h < 100) and (w > 60) and (h > 3) and (y > 200) and (y < 350) and (x > 150) and (x < 300):
-                    good = cnt
-                    check = 1
-        if check == 0:
-            return 0, 0, 0, self.cv_image
-        x, y, w, h = cv2.boundingRect(good)
-        cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 125, 8), 2)
-        self.targetx = (x + (w / 2))
-        self.targety = y
+        self.handle = self.handle_cascade.detectMultiScale(img, 40, 200)
+        for (x,y,w,h) in self.handle:
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
+            self.x = x
+            self.y = y
+            self.w = w
+
+
+            #roi_img = img[y:y+h, x:x+w]
+            #roi_color = img[y:y+h, x:x+w]
+        cv2.imshow('img',img)
+        #img = cv_image
+        #img = cv2.GaussianBlur(img,(5,5),0)
+        #thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
+        #cv2.imshow('thresh', thresh)
+        #image, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        ##contours = contours[0]
+        #check = 0
+        #for cnt in contours:
+            #if len(cnt) > 10:	
+                #x, y, w, h = cv2.boundingRect(cnt)
+                #if (w < 250) and (h < 100) and (w > 60) and (h > 3) and (y > 200) and (y < 350) and (x > 150) and (x < 300):
+                    #good = cnt
+                    #check = 1
+        #if check == 0:
+            #return 0, 0, 0, self.cv_image
+        #x, y, w, h = cv2.boundingRect(good)
+        #cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 125, 8), 2)
+        self.targetx = (self.x + (self.w / 2))
+        self.targety = self.y
         self.x, self.y = self.projectPixelTo3dRay(self.targety, self.targetx)
         #print (self.x, self.y, self.z)
         return self.x, self.y, self.z, self.cv_image
