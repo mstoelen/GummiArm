@@ -2,18 +2,17 @@
 
 import sys
 import rospy
-import copy
-import numpy as np
+#import copy
+#import numpy as np
 import moveit_commander
 import moveit_msgs.msg
-import geometry_msgs.msg
-from pull_door import Pulldoor
-from std_msgs.msg import UInt16
+#import geometry_msgs.msg
+#from pull_door import Pulldoor
+#from std_msgs.msg import UInt16
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import PoseStamped
 #from gummi_interface.gummi import Gummi
-
 
 
 class planning():
@@ -26,10 +25,11 @@ class planning():
         self.pub1 = rospy.Publisher("/positioned", Bool, queue_size=10)
         self.gripped = False
         self.positioned = False
+        self.ready = True
         self.main()
 
     def callback(self, data):
-        self.x = data.point.x
+        self.x = data.point.x +0.05
         self.y = data.point.y
         self.z = data.point.z
         return self.x, self.y, self.z
@@ -38,119 +38,117 @@ class planning():
         self.ready = msg.data
 
     def main(self):
-        #while self.ready is True:
-        #self.gummi.setCocontraction(0.6, 0.6, 0.6, 0.6, 0.6)
-        rospy.sleep(5)
-        moveit_commander.roscpp_initialize(sys.argv)
-        robot = moveit_commander.RobotCommander()
-        scene = moveit_commander.PlanningSceneInterface()
-        group = moveit_commander.MoveGroupCommander("right_arm")
 
-        #self.pulldoor = Pulldoor()
-        #self.x = 0.5
-        #self.y = 0.1
-        #self.z = 0.1
-        rospy.sleep(2)
+        if self.ready:
+            rospy.sleep(5)
+            moveit_commander.roscpp_initialize(sys.argv)
+            robot = moveit_commander.RobotCommander()
+            scene = moveit_commander.PlanningSceneInterface()
+            group = moveit_commander.MoveGroupCommander("right_arm")
 
-        handle_id = "handle"
-        door_id = "door"
-        scene.remove_world_object(handle_id)
-        scene.remove_world_object(door_id)
-        rospy.sleep(1)
-        handle_size = [0.05, 0.2, 0.02]
-        door_size = [0.05, 0.8, 2.0]
+            rospy.sleep(2)
 
-        handle_pose = PoseStamped()
-        handle_pose.header.frame_id = "/base_link"
-        handle_pose.pose.position.x = self.x - 0.02
-        handle_pose.pose.position.y = self.y
-        handle_pose.pose.position.z = self.z
-        handle_pose.pose.orientation.w = 1.0
-        scene.add_box(handle_id, handle_pose, handle_size)
+            handle_id = "handle"
+            door_id = "door"
+            scene.remove_world_object(handle_id)
+            scene.remove_world_object(door_id)
+            rospy.sleep(1)
+            handle_size = [0.05, 0.2, 0.02]
+            door_size = [0.05, 0.8, 2.0]
 
-        door_pose = PoseStamped()
-        door_pose.header.frame_id = "/base_link"
-        door_pose.pose.position.x = self.x + 0.1
-        door_pose.pose.position.y = self.y - 0.3
-        door_pose.pose.position.z = self.z
-        door_pose.pose.orientation.w = 1.0
-        scene.add_box(door_id, door_pose, door_size)
+            handle_pose = PoseStamped()
+            handle_pose.header.frame_id = "/base_link"
+            handle_pose.pose.position.x = self.x - 0.06
+            handle_pose.pose.position.y = self.y
+            handle_pose.pose.position.z = self.z
+            handle_pose.pose.orientation.w = 1.0
+            scene.add_box(handle_id, handle_pose, handle_size)
 
+            door_pose = PoseStamped()
+            door_pose.header.frame_id = "/base_link"
+            door_pose.pose.position.x = self.x + 0.025
+            door_pose.pose.position.y = self.y - 0.3
+            door_pose.pose.position.z = self.z
+            door_pose.pose.orientation.w = 1.0
+            scene.add_box(door_id, door_pose, door_size)
 
-        display_trajectory_publisher = rospy.Publisher(
-                                            '/move_group/display_planned_path',
-                                            moveit_msgs.msg.DisplayTrajectory,
-                                            queue_size=20)
-        print ("============ Waiting for RVIZ...")
-        rospy.sleep(2)
-        print ("============ Reference frame: %s" % group.get_planning_frame())
-        print ("============ Reference frame: %s" % group.get_end_effector_link())
-        print ("============ Robot Groups:")
-        print (robot.get_group_names())
-        print "============ Printing robot state"
-        print robot.get_current_state()
-        print ("============ Generating plan 1")
+            display_trajectory_publisher = rospy.Publisher(
+                                                '/move_group/display_planned_path',
+                                                moveit_msgs.msg.DisplayTrajectory,
+                                                queue_size=20)
+            print ("============ Waiting for RVIZ...")
+            rospy.sleep(2)
+            print ("============ Reference frame: %s" % group.get_planning_frame())
+            print ("============ Reference frame: %s" % group.get_end_effector_link())
+            print ("============ Robot Groups:")
+            print (robot.get_group_names())
+            print "============ Printing robot state"
+            print robot.get_current_state()
+            print ("============ Generating plan 1")
 
-        #pose_target0 = group.get_current_pose()
-        #print (pose_target0)
-        ##pose_target = geometry_msgs.msg.Pose()
-        #pose_target0.pose.position.x = 0.3
-        #pose_target0.pose.position.y = -0.4
-        #pose_target0.pose.position.z = 0.0
-        #pose_target0.pose.orientation.x = 0.0
-        #pose_target0.pose.orientation.y = 0.0
-        #pose_target0.pose.orientation.z = 0.0
-        #pose_target0.pose.orientation.w = 1.0
-        ##pose_target0.pose.orientation.x = 0.973741798137
-        ##pose_target0.pose.orientation.y = -0.0905325275454
-        ##pose_target0.pose.orientation.z = 0.185394157184
-        ##pose_target0.pose.orientation.w = 0.0962277428784
-        #print (pose_target0)
-        #group.go(pose_target0, wait=True)
+            #pose_target0 = group.get_current_pose()
+            #print (pose_target0)
+            #pose_target0.pose.position.x = 0.3
+            #pose_target0.pose.position.y = -0.4
+            #pose_target0.pose.position.z = 0.0
+            #pose_target0.pose.orientation.x = 0.0
+            #pose_target0.pose.orientation.y = 0.0
+            #pose_target0.pose.orientation.z = 0.0
+            #pose_target0.pose.orientation.w = 1.0
+            ###pose_target0.pose.orientation.x = 0.973741798137
+            ###pose_target0.pose.orientation.y = -0.0905325275454
+            ###pose_target0.pose.orientation.z = 0.185394157184
+            ###pose_target0.pose.orientation.w = 0.0962277428784
+            #print (pose_target0)
+            #group.go(pose_target0, wait=True)
 
-        pose_target = group.get_current_pose()
-        print (pose_target)
-        pose_target.pose.position.x = self.x - 0.05
-        pose_target.pose.position.y = -self.y
-        pose_target.pose.position.z = self.z + 0.2
-        #print (self.y)
-        print (pose_target)
-        rospy.sleep(2)
+            pose_target = group.get_current_pose()
+            print (pose_target)
+            pose_target.pose.position.x = self.x - 0.05
+            pose_target.pose.position.y = self.y
+            pose_target.pose.position.z = self.z + 0.2
+            #pose_target.pose.orientation.x = 0.0
+            #pose_target.pose.orientation.y = 0.0
+            #pose_target.pose.orientation.z = 0.0
+            pose_target.pose.orientation.w = 1.0
+            print (pose_target)
+            rospy.sleep(2)
 
-        group.go(pose_target, wait=True)
+            print ("============== moving to target position ===============")
+            group.go(pose_target, wait=True)
 
-        rospy.sleep(2)
+            rospy.sleep(2)
+            self.ready = False
+            self.positioned = True
+            self.pub1.publish(self.positioned)
 
-        self.positioned = True
-        self.pub1.publish(self.positioned)
+            #pose_target2 = group.get_current_pose()
+            ###pose_target2.pose.orientation.w = 1.0
+            ###pose_target2.pose.position.x += 0.20
+            ###pose_target2.pose.position.y += 0.1
+            #pose_target2.pose.position.z += -0.2
 
-        pose_target2 = group.get_current_pose()
-        ##pose_target2.pose.orientation.w = 1.0
-        ##pose_target2.pose.position.x += 0.20
-        ##pose_target2.pose.position.y += 0.1
-        pose_target2.pose.position.z += -0.2
+            #rospy.sleep(5)    # may have to tune this value depending how long it takes to rotate forearm
 
-        rospy.sleep(5)    # may have to tune this value depending how long it takes to rotate forearm
+            #group.go(pose_target2, wait=True)
 
-        group.go(pose_target2, wait=True)
+            #rospy.sleep(2)
 
-        rospy.sleep(2)
+            #self.gripped = True
+            ##while not rospy.is_shutdown():
+            #self.pub.publish(self.gripped)
 
-        self.gripped = True
-        #while not rospy.is_shutdown():
-        self.pub.publish(self.gripped)
+            #self.gripped = False  ????????????????
 
-        #self.gripped = False  ????????????????
+            #group.clear_pose_targets()
 
-        group.clear_pose_targets()
-
-        group_variable_values = group.get_current_joint_values()
-        print "============ Joint values: ", group_variable_values
-        moveit_commander.roscpp_shutdown()
-        print ("============ STOPPING")
+            #group_variable_values = group.get_current_joint_values()
+            #print "============ Joint values: ", group_variable_values
+            #moveit_commander.roscpp_shutdown()
+            #print ("============ STOPPING")
 
 
-        rospy.spin()
+            rospy.spin()
 
 
 if __name__ == '__main__':

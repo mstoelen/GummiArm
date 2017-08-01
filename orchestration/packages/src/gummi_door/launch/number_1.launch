@@ -3,9 +3,15 @@
   <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi">
     <arg name="clone" value="$(arg clone)"/>
   </include>
+
+  <remap from="/touch" to="/FSR"/>
+  <node name="arduino_hand" pkg="rosserial_python" type="serial_node.py" output="screen" args="/dev/ttyUSB2"/>
+
   <node name="gummi" pkg="gummi_door" type="pull_door.py" output="screen"/>
+
   <include file="$(find freenect_launch)/launch/freenect.launch"/>
-  <arg name="camera_link_pose" default="0.0 -0.11 0.33 0.0 0.57 0.0"/>
+  
+  <arg name="camera_link_pose" default="0.1 0.11 0.33 0.0 0.57 0.0"/>
     <!-- <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi"/>
     <arg name="rgb_frame_id" value="camera_rgb_optical_frame"/> -->
   

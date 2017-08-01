@@ -164,8 +164,8 @@ class Antagonist:
         currentTime = rospy.get_rostime()
         delay = currentTime - msgTime
 
-        if delay.to_sec() > 0.25:
-            print("Warning: Delay of message larger than 0.25 seconds for encoder " + self.nameEncoder + ", stopping.")
+        if delay.to_sec() > 0.5:
+            print("Warning: Delay of message larger than 0.5 seconds for encoder " + self.nameEncoder + ", stopping.")
         else:
             if self.angle.isBeyondMin() or self.angle.isBeyondMax():
                 self.collisionReflex.removeExcitation()
