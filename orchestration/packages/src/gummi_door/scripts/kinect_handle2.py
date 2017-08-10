@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+import atexit
 import sys
 import rospy
 import cv2
@@ -15,7 +16,7 @@ class image_converter:
         self.pub = rospy.Publisher("target", PointStamped, queue_size=1000)
         rospy.init_node('target', anonymous=True)
         self.bridge = CvBridge()
-        self.handle_cascade = cv2.CascadeClassifier('/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/cascade1.xml')
+        self.handle_cascade = cv2.CascadeClassifier('/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/cascade.xml')
         self.Image_sub = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
         self.Image_sub2 = rospy.Subscriber("/camera/depth/image_rect", Image, self.depth)
         self.cam_info = rospy.Subscriber("/camera/depth/camera_info", CameraInfo, self.fromCameraInfo)
@@ -24,8 +25,13 @@ class image_converter:
         self.x = 1
         self.y = 1
         self.w = 1
+        self.pos_cnt = 0
+        self.neg_cnt = 0
+        self.start = rospy.get_time()
+
         #self.z = 1
-        self.P = [0, 0, 0, 0]
+        self.P = [1, 1, 1, 1]
+        atexit.register(self.endlog)
 
     def callback(self, data):
         # gets image from /image_color topic, calls contour to get x, y
@@ -50,8 +56,8 @@ class image_converter:
             self.target.point.y = self.x3d
         if np.logical_not(np.isnan(self.y3d)):
             self.target.point.z = -self.y3d
-        #if self.target.point.x != 0:
-        self.pub.publish(self.target)
+        if self.target.point.x != 0:
+            self.pub.publish(self.target)
         #print (self.target)
         cv2.waitKey(100)
 
@@ -62,14 +68,14 @@ class image_converter:
         # returning the x and y position of the centre top of the
         # rectangle. Then uses projectPixelTo3dRay to get camera space
         # position of the handle referenced to the middle of the image
-        #img = cv_image
+        img = cv_image
         #self.handle = self.handle_cascade.detectMultiScale(img, 40, 200)
         #for (x,y,w,h) in self.handle:
-            #if (y > 200) and (y < 350) and (x > 150) and (x < 300):
-                #cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
-                #self.x = x
-                #self.y = y
-                #self.w = w
+            ##if (y > 200) and (y < 350) and (x > 150) and (x < 300):
+            #cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
+            #self.x = x
+            #self.y = y
+            #self.w = w
             #else:
                 #self.x = 1
                 #self.y = 1
@@ -79,7 +85,7 @@ class image_converter:
             #roi_img = img[y:y+h, x:x+w]
             #roi_color = img[y:y+h, x:x+w]
         #cv2.imshow('img',img)
-        img = cv_image
+        #img = cv_image
         img = cv2.GaussianBlur(img,(5,5),0)
         thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
         cv2.imshow('thresh', thresh)
@@ -87,24 +93,27 @@ class image_converter:
         #contours = contours[0]
         check = 0
         for cnt in contours:
-            if len(cnt) > 10:	
+            if len(cnt) > 10:
                 x, y, w, h = cv2.boundingRect(cnt)
                 if (w < 250) and (h < 100) and (w > 60) and (h > 3) and (y > 200) and (y < 350) and (x > 150) and (x < 300):
                     good = cnt
                     #print (good)
                     check = 1
-                    if check == 0:
-                        return 0, 0, 0, self.cv_image
-                    self.x, self.y, self.w, self.h = cv2.boundingRect(good)
-                    #print (x, y, w, h)
-                    cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 125, 8), 2)
-                    self.targetx = (self.x + (self.w))
-                    self.targety = self.y
-                    #print (self.targetx, self.targety)
-                    self.x3d, self.y3d = self.projectPixelTo3dRay(self.targety, self.targetx)
-                    #print (self.x, self.y, self.z)
-                    return self.x3d, self.y3d, self.z, self.cv_image
-
+                    self.pos_cnt += 1
+                    print ("pos_cnt =", self.pos_cnt)
+        if check == 0:
+            self.neg_cnt += 1
+            print ("neg_cnt =", self.neg_cnt)
+            return 0, 0, 0, self.cv_image
+        x, y, w, h = cv2.boundingRect(good)
+        #print (x, y, w, h)
+        cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 125, 8), 2)
+        self.targetx = (x + (w / 2))
+        self.targety = y
+        #print (self.targetx, self.targety)
+        self.x3d, self.y3d = self.projectPixelTo3dRay(self.targety, self.targetx)
+        #print (self.x, self.y, self.z)
+        return self.x3d, self.y3d, self.z, self.cv_image
 
     def depth(self, data):
         # returns distance from sensor to target pixel from the depth
@@ -145,6 +154,16 @@ class image_converter:
     def fy(self):
         # returns focal length in y
         return self.P[5]
+
+    def endlog(self):
+        self.end = rospy.get_time()
+        self.elapsed = self.end - self.start
+        self.stats = ("pos_cnt = " + str(self.pos_cnt) + " neg_cnt = " +
+        str(self.neg_cnt) + " elapsed " + str(self.elapsed) + " seconds")
+        print ("===================================================")
+        print ("door handle identification")
+        print (self.stats)
+        print ("===================================================")
 
 
 def main(args):

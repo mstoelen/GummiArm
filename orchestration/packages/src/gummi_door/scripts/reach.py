@@ -26,12 +26,15 @@ class planning():
         self.gripped = False
         self.positioned = False
         self.ready = True
+        self.x_offset = -0.25
+        self.y_offset = 0
+        self.z_offset = 0.25
         self.main()
 
     def callback(self, data):
-        self.x = data.point.x +0.05
-        self.y = data.point.y
-        self.z = data.point.z
+        self.x = data.point.x + self.x_offset
+        self.y = data.point.y + self.y_offset
+        self.z = data.point.z + self.z_offset
         return self.x, self.y, self.z
 
     def readyCallback(self, msg):
@@ -58,17 +61,17 @@ class planning():
 
             handle_pose = PoseStamped()
             handle_pose.header.frame_id = "/base_link"
-            handle_pose.pose.position.x = self.x - 0.06
-            handle_pose.pose.position.y = self.y
-            handle_pose.pose.position.z = self.z
+            handle_pose.pose.position.x = self.x - self.x_offset
+            handle_pose.pose.position.y = self.y - self.y_offset
+            handle_pose.pose.position.z = self.z - self.z_offset
             handle_pose.pose.orientation.w = 1.0
             scene.add_box(handle_id, handle_pose, handle_size)
 
             door_pose = PoseStamped()
             door_pose.header.frame_id = "/base_link"
-            door_pose.pose.position.x = self.x + 0.025
-            door_pose.pose.position.y = self.y - 0.3
-            door_pose.pose.position.z = self.z
+            door_pose.pose.position.x = self.x - self.x_offset + 0.01
+            door_pose.pose.position.y = self.y - self.y_offset - 0.3
+            door_pose.pose.position.z = self.z - self.z_offset
             door_pose.pose.orientation.w = 1.0
             scene.add_box(door_id, door_pose, door_size)
 
@@ -102,11 +105,13 @@ class planning():
             #print (pose_target0)
             #group.go(pose_target0, wait=True)
 
+            self.start = rospy.get_time()
+
             pose_target = group.get_current_pose()
             print (pose_target)
-            pose_target.pose.position.x = self.x - 0.05
+            pose_target.pose.position.x = self.x
             pose_target.pose.position.y = self.y
-            pose_target.pose.position.z = self.z + 0.2
+            pose_target.pose.position.z = self.z
             #pose_target.pose.orientation.x = 0.0
             #pose_target.pose.orientation.y = 0.0
             #pose_target.pose.orientation.z = 0.0
@@ -118,37 +123,42 @@ class planning():
             group.go(pose_target, wait=True)
 
             rospy.sleep(2)
+
+            pose_target2 = group.get_current_pose()
+            ###pose_target2.pose.orientation.w = 1.0
+            pose_target2.pose.position.x += 0.10
+            ###pose_target2.pose.position.y += 0.1
+            #pose_target2.pose.position.z += -0.2
+
+            print (pose_target)
+            rospy.sleep(2)
+            print ("============== moving forward ===============")
+            group.go(pose_target2, wait=True)
+
+            rospy.sleep(2)
+
+            self.end = rospy.get_time()
+
             self.ready = False
             self.positioned = True
             self.pub1.publish(self.positioned)
 
-            #pose_target2 = group.get_current_pose()
-            ###pose_target2.pose.orientation.w = 1.0
-            ###pose_target2.pose.position.x += 0.20
-            ###pose_target2.pose.position.y += 0.1
-            #pose_target2.pose.position.z += -0.2
-
-            #rospy.sleep(5)    # may have to tune this value depending how long it takes to rotate forearm
-
-            #group.go(pose_target2, wait=True)
-
-            #rospy.sleep(2)
-
-            #self.gripped = True
-            ##while not rospy.is_shutdown():
-            #self.pub.publish(self.gripped)
-
-            #self.gripped = False  ????????????????
-
-            #group.clear_pose_targets()
+            group.clear_pose_targets()
 
             #group_variable_values = group.get_current_joint_values()
             #print "============ Joint values: ", group_variable_values
             #moveit_commander.roscpp_shutdown()
             #print ("============ STOPPING")
 
-
             rospy.spin()
+
+    def endlog(self):
+        self.elapsed = self.end - self.start
+        self.stats = ("elapsed " + str(self.elapsed) + " seconds")
+        print ("===================================================")
+        print ("MoveIt! planning and excecution time")
+        print (self.stats)
+        print ("===================================================")
 
 
 if __name__ == '__main__':
