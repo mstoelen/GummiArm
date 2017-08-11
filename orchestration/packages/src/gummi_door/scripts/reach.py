@@ -48,6 +48,7 @@ class planning():
             robot = moveit_commander.RobotCommander()
             scene = moveit_commander.PlanningSceneInterface()
             group = moveit_commander.MoveGroupCommander("right_arm")
+            moveit_commander.set_end_effector_link("hand")
 
             rospy.sleep(2)
 
@@ -104,6 +105,9 @@ class planning():
             ###pose_target0.pose.orientation.w = 0.0962277428784
             #print (pose_target0)
             #group.go(pose_target0, wait=True)
+
+            #pose_target = [self.x, self.y, self.z]
+            #group.set_position_target(pose_target, end_effector_link = "hand")
 
             self.start = rospy.get_time()
 

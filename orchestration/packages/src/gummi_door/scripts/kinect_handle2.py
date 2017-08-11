@@ -68,24 +68,32 @@ class image_converter:
         # returning the x and y position of the centre top of the
         # rectangle. Then uses projectPixelTo3dRay to get camera space
         # position of the handle referenced to the middle of the image
-        img = cv_image
+
+############for HAAR Cascade###############
+        #img = cv_image
         #self.handle = self.handle_cascade.detectMultiScale(img, 40, 200)
         #for (x,y,w,h) in self.handle:
             ##if (y > 200) and (y < 350) and (x > 150) and (x < 300):
             #cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
-            #self.x = x
-            #self.y = y
-            #self.w = w
-            #else:
-                #self.x = 1
-                #self.y = 1
-                #self.w = 1
-
-
-            #roi_img = img[y:y+h, x:x+w]
-            #roi_color = img[y:y+h, x:x+w]
+            ##self.x = x
+            ##self.y = y
+            ##self.w = w
+            ##else:
+                ##self.x = 1
+                ##self.y = 1
+                ##self.w = 1
+        #self.targetx = (x + (w / 2))
+        #self.targety = y
+        ##print (self.targetx, self.targety)
+        #self.x3d, self.y3d = self.projectPixelTo3dRay(self.targety, self.targetx)
+        ##print (self.x, self.y, self.z)
+        #return self.x3d, self.y3d, self.z, self.cv_image
         #cv2.imshow('img',img)
-        #img = cv_image
+############################################
+
+
+###########for contours##############
+        img = cv_image
         img = cv2.GaussianBlur(img,(5,5),0)
         thresh = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 7)
         cv2.imshow('thresh', thresh)
@@ -114,6 +122,7 @@ class image_converter:
         self.x3d, self.y3d = self.projectPixelTo3dRay(self.targety, self.targetx)
         #print (self.x, self.y, self.z)
         return self.x3d, self.y3d, self.z, self.cv_image
+###########################################
 
     def depth(self, data):
         # returns distance from sensor to target pixel from the depth
