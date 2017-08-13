@@ -26,7 +26,7 @@ class planning():
         self.gripped = False
         self.positioned = False
         self.ready = True
-        self.x_offset = -0.25
+        self.x_offset = -0.22
         self.y_offset = 0
         self.z_offset = 0.25
         self.main()
@@ -48,7 +48,7 @@ class planning():
             robot = moveit_commander.RobotCommander()
             scene = moveit_commander.PlanningSceneInterface()
             group = moveit_commander.MoveGroupCommander("right_arm")
-            moveit_commander.set_end_effector_link("hand")
+            #moveit_commander.set_end_effector_link("hand")
 
             rospy.sleep(2)
 
@@ -62,7 +62,7 @@ class planning():
 
             handle_pose = PoseStamped()
             handle_pose.header.frame_id = "/base_link"
-            handle_pose.pose.position.x = self.x - self.x_offset
+            handle_pose.pose.position.x = self.x - self.x_offset - 0.05
             handle_pose.pose.position.y = self.y - self.y_offset
             handle_pose.pose.position.z = self.z - self.z_offset
             handle_pose.pose.orientation.w = 1.0
@@ -70,7 +70,7 @@ class planning():
 
             door_pose = PoseStamped()
             door_pose.header.frame_id = "/base_link"
-            door_pose.pose.position.x = self.x - self.x_offset + 0.01
+            door_pose.pose.position.x = self.x - self.x_offset
             door_pose.pose.position.y = self.y - self.y_offset - 0.3
             door_pose.pose.position.z = self.z - self.z_offset
             door_pose.pose.orientation.w = 1.0
@@ -130,7 +130,7 @@ class planning():
 
             pose_target2 = group.get_current_pose()
             ###pose_target2.pose.orientation.w = 1.0
-            pose_target2.pose.position.x += 0.10
+            pose_target2.pose.position.x += 0.1
             ###pose_target2.pose.position.y += 0.1
             #pose_target2.pose.position.z += -0.2
 
