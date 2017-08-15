@@ -1,18 +1,11 @@
 #!/usr/bin/env python
-
 import sys
 import rospy
-#import copy
-#import numpy as np
 import moveit_commander
 import moveit_msgs.msg
-#import geometry_msgs.msg
-#from pull_door import Pulldoor
-#from std_msgs.msg import UInt16
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import PoseStamped
-#from gummi_interface.gummi import Gummi
 
 
 class planning():
@@ -20,13 +13,12 @@ class planning():
     def __init__(self):
         rospy.Subscriber("/true_target", PointStamped, self.callback)
         rospy.Subscriber("/ready", Bool, self.readyCallback)
-        #self.gummi = Gummi()
         self.pub = rospy.Publisher("/gripped", Bool, queue_size=10)
         self.pub1 = rospy.Publisher("/positioned", Bool, queue_size=10)
         self.gripped = False
         self.positioned = False
         self.ready = True
-        self.x_offset = -0.22
+        self.x_offset = -0.14
         self.y_offset = 0
         self.z_offset = 0.25
         self.main()
@@ -48,7 +40,6 @@ class planning():
             robot = moveit_commander.RobotCommander()
             scene = moveit_commander.PlanningSceneInterface()
             group = moveit_commander.MoveGroupCommander("right_arm")
-            #moveit_commander.set_end_effector_link("hand")
 
             rospy.sleep(2)
 
@@ -90,25 +81,6 @@ class planning():
             print robot.get_current_state()
             print ("============ Generating plan 1")
 
-            #pose_target0 = group.get_current_pose()
-            #print (pose_target0)
-            #pose_target0.pose.position.x = 0.3
-            #pose_target0.pose.position.y = -0.4
-            #pose_target0.pose.position.z = 0.0
-            #pose_target0.pose.orientation.x = 0.0
-            #pose_target0.pose.orientation.y = 0.0
-            #pose_target0.pose.orientation.z = 0.0
-            #pose_target0.pose.orientation.w = 1.0
-            ###pose_target0.pose.orientation.x = 0.973741798137
-            ###pose_target0.pose.orientation.y = -0.0905325275454
-            ###pose_target0.pose.orientation.z = 0.185394157184
-            ###pose_target0.pose.orientation.w = 0.0962277428784
-            #print (pose_target0)
-            #group.go(pose_target0, wait=True)
-
-            #pose_target = [self.x, self.y, self.z]
-            #group.set_position_target(pose_target, end_effector_link = "hand")
-
             self.start = rospy.get_time()
 
             pose_target = group.get_current_pose()
@@ -128,18 +100,18 @@ class planning():
 
             rospy.sleep(2)
 
-            pose_target2 = group.get_current_pose()
-            ###pose_target2.pose.orientation.w = 1.0
-            pose_target2.pose.position.x += 0.1
-            ###pose_target2.pose.position.y += 0.1
-            #pose_target2.pose.position.z += -0.2
+            #pose_target2 = group.get_current_pose()
+            ##pose_target2.pose.orientation.w = 1.0
+            #pose_target2.pose.position.x += 0.1
+            ##pose_target2.pose.position.y += 0.1
+            ##pose_target2.pose.position.z += -0.2
 
-            print (pose_target)
-            rospy.sleep(2)
-            print ("============== moving forward ===============")
-            group.go(pose_target2, wait=True)
+            #print (pose_target)
+            #rospy.sleep(2)
+            #print ("============== moving forward ===============")
+            #group.go(pose_target2, wait=True)
 
-            rospy.sleep(2)
+            #rospy.sleep(2)
 
             self.end = rospy.get_time()
 
@@ -148,11 +120,6 @@ class planning():
             self.pub1.publish(self.positioned)
 
             group.clear_pose_targets()
-
-            #group_variable_values = group.get_current_joint_values()
-            #print "============ Joint values: ", group_variable_values
-            #moveit_commander.roscpp_shutdown()
-            #print ("============ STOPPING")
 
             rospy.spin()
 
@@ -171,6 +138,29 @@ if __name__ == '__main__':
         ne = planning()
     except rospy.ROSInterruptException:
         pass
+
+            #group_variable_values = group.get_current_joint_values()
+            #print "============ Joint values: ", group_variable_values
+            #moveit_commander.roscpp_shutdown()
+            #print ("============ STOPPING")
+
+            #pose_target0 = group.get_current_pose()
+            #print (pose_target0)
+            #pose_target0.pose.position.x = 0.3
+            #pose_target0.pose.position.y = -0.4
+            #pose_target0.pose.position.z = 0.0
+            #pose_target0.pose.orientation.x = 0.0
+            #pose_target0.pose.orientation.y = 0.0
+            #pose_target0.pose.orientation.z = 0.0
+            #pose_target0.pose.orientation.w = 1.0
+            ###pose_target0.pose.orientation.x = 0.973741798137
+            ###pose_target0.pose.orientation.y = -0.0905325275454
+            ###pose_target0.pose.orientation.z = 0.185394157184
+            ###pose_target0.pose.orientation.w = 0.0962277428784
+            #print (pose_target0)
+            #group.go(pose_target0, wait=True)
+
+            #pose_target = [self.x, self.y, self.z]
 
         # Uncomment below line when working with a real robot
         # self.group.go(wait=True)

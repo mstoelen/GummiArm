@@ -17,7 +17,7 @@ class image_converter:
         rospy.init_node('target', anonymous=True)
         self.bridge = CvBridge()
         self.handle_cascade = cv2.CascadeClassifier('/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/cascade_LBP.xml')
-        self.Image_sub = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
+        self.Image_sub = rospy.Subscriber("/camera/rgb/image_color", Image, self.main)
         self.Image_sub2 = rospy.Subscriber("/camera/depth/image_rect", Image, self.depth)
         self.cam_info = rospy.Subscriber("/camera/depth/camera_info", CameraInfo, self.fromCameraInfo)
         self.targety = 1
@@ -28,12 +28,11 @@ class image_converter:
         self.pos_cnt = 0
         self.neg_cnt = 0
         self.start = rospy.get_time()
-
         self.z = 1
         self.P = [1, 1, 1, 1]
         atexit.register(self.endlog)
 
-    def callback(self, data):
+    def main(self, data):
         # gets image from /image_color topic, calls contour to get x, y
         # and the processed cv_image with a rectangle, shows the
         # cv_image with the live x, y and z values displayed on screen
@@ -45,7 +44,7 @@ class image_converter:
         self.str_y = str(self.x3d * -1)
         self.str_z = str(-self.y3d)
         position = "x:{0} y:{1} z:{2}".format(self.str_x, self.str_y, self.str_z)
-        cv2.putText(self.cv_image, position, (10,450), font, 0.5,(255,255,255),1) #cv2.LINE_AA
+        cv2.putText(self.cv_image, position, (10,450), font, 0.5,(255,255,255),1)
         cv2.imshow('Image', self.cv_image)
         self.target = PointStamped()
         #self.target.header.stamp.secs = rospy.Time()
@@ -62,32 +61,23 @@ class image_converter:
         cv2.waitKey(100)
 
     def contour(self, cv_image):
-        # blurs image to remove noise, thresholds image, shows the
-        # threshold image, finds contours, selects the correct contour
-        # for the door handle before drawing a rectangle around it and
-        # returning the x and y position of the centre top of the
-        # rectangle. Then uses projectPixelTo3dRay to get camera space
-        # position of the handle referenced to the middle of the image
 
 ############for HAAR Cascade###############
         img = cv_image
         self.handle = self.handle_cascade.detectMultiScale(img, 1.05, 20)
+        check = 0
         for (x,y,w,h) in self.handle:
             if (y > 100) and (y < 350) and (x > 150) and (x < 400):
+                check = 1
                 cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
                 self.x = x
                 self.y = y
                 self.w = w
                 self.h = h
-            else:
-                self.x = 1
-                self.y = 1
-                self.w = 1
-                self.h = 1
-            if self.x != 1:
                 self.pos_cnt += 1
-            else:
-                self.neg_cnt += 1
+        if check == 0:
+            self.neg_cnt += 1
+            return 0, 0, 0, self.cv_image
         self.targetx = (self.x + (self.w / 2))
         self.targety = self.y + (self.h / 2)
         #print (self.targetx, self.targety)
@@ -133,13 +123,10 @@ class image_converter:
     def depth(self, data):
         # returns distance from sensor to target pixel from the depth
         # image
-        #for i in range(1):
-        #if self.targetx is int:
         depth_image = self.bridge.imgmsg_to_cv2(data, 'passthrough')
         np.clip(depth_image, 0, 2, depth_image)
         self.z = depth_image[self.targety + 10][self.targetx]
         #print(self.z)
-        #if self.z < 1:
         return self.z
 
     def fromCameraInfo(self, data):

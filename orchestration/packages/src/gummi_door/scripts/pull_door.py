@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import rospy
 import atexit
 from std_msgs.msg import Bool
@@ -18,6 +17,7 @@ class Pulldoor():
         self.gripped = False
         self.positioned = False
         self.ready = True
+        self.haveTouch = True
         self.touch_data_palm = 0
         self.start = rospy.get_time()
         self.attempts = 0
@@ -69,47 +69,47 @@ class Pulldoor():
 
                 self.gummi.setCocontraction(0.5, 0.5, 0.5, 0.5, 0.5)
 
-                if self.haveTouch:
+                #if self.haveTouch:
 
-                    print ("=========== closing hand ===========")
+                print ("=========== closing hand ===========")
 
-                    self.close_hand()
-                    rospy.sleep(2)
+                self.close_hand()
+                rospy.sleep(2)
 
-                    print ("=========== turning handle ===========")
+                print ("=========== turning handle ===========")
 
-                    self.turn_handle()
-                    rospy.sleep(2)
+                self.turn_handle()
+                rospy.sleep(2)
 
-                    print ("=========== pulling door open ===========")
+                print ("=========== pulling door open ===========")
 
-                    self.pull_open()
-                    rospy.sleep(2)
+                self.pull_open()
+                rospy.sleep(2)
 
-                    self.success += 1
+                self.success += 1
 
-                    print ("=========== opening hand ===========")
+                print ("=========== opening hand ===========")
 
-                    self.open_hand()
-                    rospy.sleep(2)
+                self.open_hand()
+                rospy.sleep(2)
 
-                    print ("=========== moving to resting pose ===========")
+                print ("=========== moving to resting pose ===========")
 
-                    self.rest()
-                    self.gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.8)
+                self.rest()
+                self.gummi.setCocontraction(0.8, 0.8, 0.8, 0.8, 0.8)
 
-                    self.positioned = False
-                    self.haveTouch = False
+                self.positioned = False
+                self.haveTouch = False
 
-                else:
-                    print ("=========== no touch - trying again ===========")
-                    print ("=========== moving to resting pose ===========")
-                    self.fail += 1
-                    self.rest()
-                    self.gummi.setCocontraction(1, 1, 1, 1, 1)
-                    self.positioned = False
-                    self.ready = True
-                    self.pub1.publish(self.ready)
+                #else:
+                    #print ("=========== no touch - trying again ===========")
+                    #print ("=========== moving to resting pose ===========")
+                    #self.fail += 1
+                    #self.rest()
+                    #self.gummi.setCocontraction(1, 1, 1, 1, 1)
+                    #self.positioned = False
+                    #self.ready = True
+                    #self.pub1.publish(self.ready)
 
     def rest(self):
         self.gummi.goRestingPose(True)
@@ -125,17 +125,18 @@ class Pulldoor():
 
     def move_down(self):
         for i in range(0, 150):
-            self.gummi.elbow.moveWith(-0.002, 0.5)
+            self.gummi.elbow.moveWith(-0.001, 0.5)
             self.gummi.shoulderRoll.moveWith(-0.001, 0.5)
             #self.gummi.shoulderYaw.moveWith(-0.002, 0.5)
             self.r.sleep()
 
     def turn_handle(self):
-        for i in range(0, 100):
-            self.gummi.elbow.moveWith(0.002, 0.5)
+        for i in range(0, 200):
+            self.gummi.elbow.moveWith(-0.004, 0.5)
             self.gummi.shoulderYaw.moveWith(0.002, 0.5)
-            self.gummi.shoulderRoll.moveWith(-0.002, 0.5)
-            self.gummi.forearmRoll.servoTo(-0.3)
+            self.gummi.shoulderPitch.moveWith(-0.003, 0.5)
+            self.gummi.shoulderRoll.moveWith(-0.004, 0.5)
+            self.gummi.forearmRoll.servoTo(-0.8)
             self.r.sleep()
 
     def pull_open(self):
@@ -148,7 +149,7 @@ class Pulldoor():
 
     def close_hand(self):
         for i in range(0, 100):
-            self.gummi.handDOF1.servoTo(2.5)
+            self.gummi.handDOF1.servoTo(3)
             self.r.sleep()
 
     def open_hand(self):
@@ -168,7 +169,7 @@ class Pulldoor():
 
     def turn_arm(self):
         for i in range(0, 100):
-            self.gummi.forearmRoll.servoTo(-1.5)
+            self.gummi.forearmRoll.servoTo(-1.6)
             self.r.sleep()
 
     #def publish_EquilibriumVel(self):
