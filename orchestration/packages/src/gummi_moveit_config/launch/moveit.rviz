@@ -4,7 +4,14 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
+        - /Status1
         - /MotionPlanning1
+        - /MotionPlanning1/Scene Geometry1
+        - /MotionPlanning1/Scene Robot1
+        - /MotionPlanning1/Planning Request1
+        - /MotionPlanning1/Planning Metrics1
+        - /MotionPlanning1/Planned Path1
       Splitter Ratio: 0.742560029
     Tree Height: 332
   - Class: rviz/Help
@@ -136,16 +143,16 @@ Visualization Manager:
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
         Planning Group: right_arm
-        Query Goal State: true
+        Query Goal State: false
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
-        Start State Color: 0; 255; 0
+        Start State Color: 255; 28; 77
       Planning Scene Topic: move_group/monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
         Scene Alpha: 1
-        Scene Color: 50; 230; 50
+        Scene Color: 230; 226; 162
         Scene Display Time: 0.200000003
         Show Scene Geometry: true
         Voxel Coloring: Z-Axis
@@ -251,10 +258,10 @@ Visualization Manager:
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.449796885
+      Pitch: 0.659797013
       Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 2.24994993
+      Yaw: 2.23994374
     Saved: ~
 Window Geometry:
   Displays:

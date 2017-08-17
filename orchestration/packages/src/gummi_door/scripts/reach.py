@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 import sys
 import rospy
+import atexit
 import moveit_commander
 import moveit_msgs.msg
+import tf
+import pickle
 from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import PoseStamped
+from twisted.python.logfile import DailyLogFile
 
 
 class planning():
@@ -13,6 +18,7 @@ class planning():
     def __init__(self):
         rospy.Subscriber("/true_target", PointStamped, self.callback)
         rospy.Subscriber("/ready", Bool, self.readyCallback)
+        rospy.Subscriber("/door_angle", Float32, self.angleCallback)
         self.pub = rospy.Publisher("/gripped", Bool, queue_size=10)
         self.pub1 = rospy.Publisher("/positioned", Bool, queue_size=10)
         self.gripped = False
@@ -21,7 +27,8 @@ class planning():
         self.x_offset = -0.14
         self.y_offset = 0
         self.z_offset = 0.25
-        self.main()
+        self.angle = 1
+        atexit.register(self.endlog)
 
     def callback(self, data):
         self.x = data.point.x + self.x_offset
@@ -31,6 +38,9 @@ class planning():
 
     def readyCallback(self, msg):
         self.ready = msg.data
+
+    def angleCallback(self, msg):
+        self.angle = msg.data
 
     def main(self):
 
@@ -49,22 +59,42 @@ class planning():
             scene.remove_world_object(door_id)
             rospy.sleep(1)
             handle_size = [0.05, 0.2, 0.02]
-            door_size = [0.05, 0.8, 2.0]
+            door_size = [0.05, 1.2, 2.0]
+            door_quat = tf.transformations.quaternion_from_euler(0.0, 0.0, self.angle, axes='rxyz')
+            print(door_quat)
+            #self.y_offset += self.angle / 5
+            print("========================", self.y_offset)
+            ##original_pose = PoseStamped()
+            ##original_pose.header.frame_id = "/base_link"
+            ##original_pose.pose.position.x = self.x - self.x_offset - 0.05
+            ##original_pose.pose.position.y = self.y - self.y_offset
+            ##original_pose.pose.position.z = self.z - self.z_offset
+            ##handle_pose.pose.orientation.x = door_quat[0]
+            ##handle_pose.pose.orientation.y = door_quat[1]
+            ##handle_pose.pose.orientation.z = door_quat[2]
+            ##handle_pose.pose.orientation.w = door_quat[3]
+            ##scene.add_box(handle_id, handle_pose, handle_size)
 
             handle_pose = PoseStamped()
             handle_pose.header.frame_id = "/base_link"
             handle_pose.pose.position.x = self.x - self.x_offset - 0.05
             handle_pose.pose.position.y = self.y - self.y_offset
             handle_pose.pose.position.z = self.z - self.z_offset
-            handle_pose.pose.orientation.w = 1.0
+            handle_pose.pose.orientation.x = door_quat[0]
+            handle_pose.pose.orientation.y = door_quat[1]
+            handle_pose.pose.orientation.z = door_quat[2]
+            handle_pose.pose.orientation.w = door_quat[3]
             scene.add_box(handle_id, handle_pose, handle_size)
 
             door_pose = PoseStamped()
             door_pose.header.frame_id = "/base_link"
             door_pose.pose.position.x = self.x - self.x_offset
-            door_pose.pose.position.y = self.y - self.y_offset - 0.3
+            door_pose.pose.position.y = self.y - self.y_offset
             door_pose.pose.position.z = self.z - self.z_offset
-            door_pose.pose.orientation.w = 1.0
+            door_pose.pose.orientation.x = door_quat[0]
+            door_pose.pose.orientation.y = door_quat[1]
+            door_pose.pose.orientation.z = door_quat[2]
+            door_pose.pose.orientation.w = door_quat[3]
             scene.add_box(door_id, door_pose, door_size)
 
             display_trajectory_publisher = rospy.Publisher(
@@ -83,20 +113,20 @@ class planning():
 
             self.start = rospy.get_time()
 
-            pose_target = group.get_current_pose()
-            print (pose_target)
-            pose_target.pose.position.x = self.x
-            pose_target.pose.position.y = self.y
-            pose_target.pose.position.z = self.z
+            self.pose_target = group.get_current_pose()
+            print (self.pose_target)
+            self.pose_target.pose.position.x = self.x
+            self.pose_target.pose.position.y = self.y
+            self.pose_target.pose.position.z = self.z
             #pose_target.pose.orientation.x = 0.0
             #pose_target.pose.orientation.y = 0.0
             #pose_target.pose.orientation.z = 0.0
-            pose_target.pose.orientation.w = 1.0
-            print (pose_target)
+            self.pose_target.pose.orientation.w = 1.0
+            print (self.pose_target)
             rospy.sleep(2)
 
             print ("============== moving to target position ===============")
-            group.go(pose_target, wait=True)
+            group.go(self.pose_target, wait=True)
 
             rospy.sleep(2)
 
@@ -114,7 +144,7 @@ class planning():
             #rospy.sleep(2)
 
             self.end = rospy.get_time()
-
+            self.pose_final = group.get_current_pose()
             self.ready = False
             self.positioned = True
             self.pub1.publish(self.positioned)
@@ -126,116 +156,40 @@ class planning():
     def endlog(self):
         self.elapsed = self.end - self.start
         self.stats = ("elapsed " + str(self.elapsed) + " seconds")
+        self.calcs()
         print ("===================================================")
         print ("MoveIt! planning and excecution time")
         print (self.stats)
+        print ("Target pose")
+        print (self.pose_target)
+        print ("Final pose")
+        print (self.pose_final)
+        pickle.dump(self.pose_final, open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/save.p", "wb"))
         print ("===================================================")
+        repo = ["===================================================", "\n"
+"MoveIt! planning and excecution time ", str(self.stats), "\n" "Target pose",
+"\n", str(self.pose_target), "\n" "Final pose" "\n", str(self.pose_final), "\n"
+"/true_target (xyz) = ", str(self.x - self.x_offset), " ", str(self.y - self.y_offset),
+ " ", str(self.z - self.z_offset), " ", "\n" "position error (xyz) = ", str(self.error_x),
+ " ", str(self.error_y), " ", str(self.error_z), " ", "\n"
+"==================================================="]
+        report = ''.join(repo)
+        print(report)
+        f = open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/tests.txt", "a+")
+        f.write(report)
+        f.close()
+
+    def calcs(self):
+        self.error_x = self.pose_final.pose.position.x - self.pose_target.pose.position.x
+        self.error_y = self.pose_final.pose.position.y - self.pose_target.pose.position.y
+        self.error_z = self.pose_final.pose.position.z - self.pose_target.pose.position.z
 
 
 if __name__ == '__main__':
     rospy.init_node('target_plan', anonymous=True)
     try:
         ne = planning()
+        ne.main()
     except rospy.ROSInterruptException:
         pass
 
-            #group_variable_values = group.get_current_joint_values()
-            #print "============ Joint values: ", group_variable_values
-            #moveit_commander.roscpp_shutdown()
-            #print ("============ STOPPING")
-
-            #pose_target0 = group.get_current_pose()
-            #print (pose_target0)
-            #pose_target0.pose.position.x = 0.3
-            #pose_target0.pose.position.y = -0.4
-            #pose_target0.pose.position.z = 0.0
-            #pose_target0.pose.orientation.x = 0.0
-            #pose_target0.pose.orientation.y = 0.0
-            #pose_target0.pose.orientation.z = 0.0
-            #pose_target0.pose.orientation.w = 1.0
-            ###pose_target0.pose.orientation.x = 0.973741798137
-            ###pose_target0.pose.orientation.y = -0.0905325275454
-            ###pose_target0.pose.orientation.z = 0.185394157184
-            ###pose_target0.pose.orientation.w = 0.0962277428784
-            #print (pose_target0)
-            #group.go(pose_target0, wait=True)
-
-            #pose_target = [self.x, self.y, self.z]
-
-        # Uncomment below line when working with a real robot
-        # self.group.go(wait=True)
-        #rospy.spin()
-
-        #self.gripped = True
-        #while not rospy.is_shutdown():
-            #self.pub.publish(self.gripped)
-
-        #pose_target3 = group.get_current_pose()
-        ##pose_target = geometry_msgs.msg.Pose()
-        ##pose_target3.pose.orientation.w = 1.0
-        #pose_target3.pose.position.x = 0.341542142664
-        #pose_target3.pose.position.y = -0.4
-        #pose_target3.pose.position.z = 0.0
-        #print (pose_target3)
-
-        #group.go(pose_target3, wait=True)
-
-        #waypoints = []
-
-        ## start with the current pose
-        #waypoints.append(group.get_current_pose().pose)
-
-        ## first orient gripper and move forward (+x)
-        #wpose = geometry_msgs.msg.Pose()
-        #wpose.orientation.w = -0.5
-        #wpose.position.x = self.x
-        #wpose.position.y = self.y
-        #wpose.position.z = self.z
-        #waypoints.append(copy.deepcopy(wpose))
-        #rospy.sleep(1)
-        ## second move down
-        #wpose.position.z -= 0.10
-        #waypoints.append(copy.deepcopy(wpose))
-        #rospy.sleep(1)
-
-        ## third move to the side
-        ##wpose.position.y += 0.05
-        ##waypoints.append(copy.deepcopy(wpose))
-
-        #(plan3, fraction) = group.compute_cartesian_path(
-                                     #waypoints,   # waypoints to follow
-                                     #0.01,        # eef_step
-                                     #0.0)         # jump_threshold
-
-        #print "============ Waiting while RVIZ displays plan3..."
-        #rospy.sleep(5)
-
-        #group.go(wpose, wait=True)
-
-        #group.set_pose_target(pose_target)
-
-        #plan3 = group.plan()
-        #print ("============ Waiting while RVIZ displays plan1...")
-        #rospy.sleep(1)
-        #print ("============ Visualizing plan3")
-        #display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-
-        #display_trajectory.trajectory_start = robot.get_current_state()
-        #display_trajectory.trajectory.append(plan3)
-        #display_trajectory_publisher.publish(display_trajectory)
-        #print ("============ Waiting while plan1 is visualized (again)...")
-        #rospy.sleep(1)
-
-        #pose_target.pose.position.x += 0.2
-            #pose_target.pose.position.y += -0.1
-            #pose_target.pose.position.z += 0.0
-            #pose_target = geometry_msgs.msg.Pose()
-            #pose_target.pose.orientation.w = 0.0270944592499
-            #pose_target.pose.orientation.x = 0.0
-            #pose_target.pose.orientation.y = 0.0
-            #pose_target.pose.orientation.z = 0.0
-            #pose_target.pose.orientation.w = 1.0
-
-                    #self.x = pose_target.pose.position.x + 0.1
-        #pose_target = [self.x, self.y, self.z]
-        #group.set_position_target(pose_target)

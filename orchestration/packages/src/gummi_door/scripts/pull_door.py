@@ -14,21 +14,28 @@ class Pulldoor():
         self.gummi = Gummi()
         self.r = rospy.Rate(60)
         print ("running")
+
         self.gripped = False
         self.positioned = False
         self.ready = True
         self.haveTouch = True
         self.touch_data_palm = 0
+
         self.start = rospy.get_time()
         self.attempts = 0
         self.success = 0
         self.fail = 0
+        self.i = 0
+
         atexit.register(self.endlog)
+
         rospy.Subscriber("/gripped", Bool, self.gripCallback)
         rospy.Subscriber("/positioned", Bool, self.positionedCallback)
         rospy.Subscriber('/FSR', UInt16, self.touchCallback)
+
         self.pub = rospy.Publisher("/Equilibrium", JointState, queue_size=10)
         self.pub1 = rospy.Publisher("/ready", Bool, queue_size=10)
+
         rospy.logwarn('Moving joints sequentially to equilibrium positions.')
         self.gummi.doGradualStartup()
 
@@ -53,6 +60,8 @@ class Pulldoor():
             self.r.sleep()
 
             if self.positioned is True:
+
+                self.report()
 
                 self.attempts += 1
 
@@ -124,16 +133,16 @@ class Pulldoor():
             return False
 
     def move_down(self):
-        for i in range(0, 150):
-            self.gummi.elbow.moveWith(-0.001, 0.5)
-            self.gummi.shoulderRoll.moveWith(-0.001, 0.5)
+        for i in range(0, 300):
+            self.gummi.elbow.moveWith(-0.002, 0.8)
+            self.gummi.shoulderRoll.moveWith(-0.002, 0.8)
             #self.gummi.shoulderYaw.moveWith(-0.002, 0.5)
             self.r.sleep()
 
     def turn_handle(self):
-        for i in range(0, 200):
+        for i in range(0, 150):
             self.gummi.elbow.moveWith(-0.004, 0.5)
-            self.gummi.shoulderYaw.moveWith(0.002, 0.5)
+            self.gummi.shoulderYaw.moveWith(0.003, 0.5)
             self.gummi.shoulderPitch.moveWith(-0.003, 0.5)
             self.gummi.shoulderRoll.moveWith(-0.004, 0.5)
             self.gummi.forearmRoll.servoTo(-0.8)
@@ -170,7 +179,16 @@ class Pulldoor():
     def turn_arm(self):
         for i in range(0, 100):
             self.gummi.forearmRoll.servoTo(-1.6)
+            self.gummi.wrist.servoTo(0.2, True)
             self.r.sleep()
+
+    def report(self):
+        self.i += 1
+        self.result = ["\n" "Test ", str(self.i), " at ", str(rospy.get_time())]
+        self.results = ''.join(self.result)
+        f = open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/results.txt", "a+")
+        f.write(self.results)
+        f.close()
 
     #def publish_EquilibriumVel(self):
         #msg = JointState()
