@@ -33,7 +33,7 @@ class Pulldoor():
         rospy.Subscriber("/positioned", Bool, self.positionedCallback)
         rospy.Subscriber('/FSR', UInt16, self.touchCallback)
 
-        self.pub = rospy.Publisher("/Equilibrium", JointState, queue_size=10)
+        #self.pub = rospy.Publisher("/Equilibrium", JointState, queue_size=10)
         self.pub1 = rospy.Publisher("/ready", Bool, queue_size=10)
 
         rospy.logwarn('Moving joints sequentially to equilibrium positions.')
@@ -133,14 +133,14 @@ class Pulldoor():
             return False
 
     def move_down(self):
-        for i in range(0, 300):
+        for i in range(0, 150):
             self.gummi.elbow.moveWith(-0.002, 0.8)
             self.gummi.shoulderRoll.moveWith(-0.002, 0.8)
             #self.gummi.shoulderYaw.moveWith(-0.002, 0.5)
             self.r.sleep()
 
     def turn_handle(self):
-        for i in range(0, 150):
+        for i in range(0, 200):
             self.gummi.elbow.moveWith(-0.004, 0.5)
             self.gummi.shoulderYaw.moveWith(0.003, 0.5)
             self.gummi.shoulderPitch.moveWith(-0.003, 0.5)
@@ -158,7 +158,7 @@ class Pulldoor():
 
     def close_hand(self):
         for i in range(0, 100):
-            self.gummi.handDOF1.servoTo(3)
+            self.gummi.handDOF1.servoTo(5)
             self.r.sleep()
 
     def open_hand(self):
@@ -186,7 +186,7 @@ class Pulldoor():
         self.i += 1
         self.result = ["\n" "Test ", str(self.i), " at ", str(rospy.get_time())]
         self.results = ''.join(self.result)
-        f = open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/results.txt", "a+")
+        f = open("/home/joe/repos/working/Results/Results.txt", "a+")
         f.write(self.results)
         f.close()
 

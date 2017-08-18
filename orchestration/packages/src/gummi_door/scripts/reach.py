@@ -5,12 +5,12 @@ import atexit
 import moveit_commander
 import moveit_msgs.msg
 import tf
-import pickle
+#import pickle
 from std_msgs.msg import Bool
 from std_msgs.msg import Float32
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import PoseStamped
-from twisted.python.logfile import DailyLogFile
+#from twisted.python.logfile import DailyLogFile
 
 
 class planning():
@@ -31,9 +31,9 @@ class planning():
         atexit.register(self.endlog)
 
     def callback(self, data):
-        self.x = data.point.x + self.x_offset
-        self.y = data.point.y + self.y_offset
-        self.z = data.point.z + self.z_offset
+        self.x = data.point.x
+        self.y = data.point.y
+        self.z = data.point.z
         return self.x, self.y, self.z
 
     def readyCallback(self, msg):
@@ -77,9 +77,9 @@ class planning():
 
             handle_pose = PoseStamped()
             handle_pose.header.frame_id = "/base_link"
-            handle_pose.pose.position.x = self.x - self.x_offset - 0.05
-            handle_pose.pose.position.y = self.y - self.y_offset
-            handle_pose.pose.position.z = self.z - self.z_offset
+            handle_pose.pose.position.x = self.x - 0.1
+            handle_pose.pose.position.y = self.y
+            handle_pose.pose.position.z = self.z
             handle_pose.pose.orientation.x = door_quat[0]
             handle_pose.pose.orientation.y = door_quat[1]
             handle_pose.pose.orientation.z = door_quat[2]
@@ -88,9 +88,9 @@ class planning():
 
             door_pose = PoseStamped()
             door_pose.header.frame_id = "/base_link"
-            door_pose.pose.position.x = self.x - self.x_offset
-            door_pose.pose.position.y = self.y - self.y_offset
-            door_pose.pose.position.z = self.z - self.z_offset
+            door_pose.pose.position.x = self.x
+            door_pose.pose.position.y = self.y
+            door_pose.pose.position.z = self.z
             door_pose.pose.orientation.x = door_quat[0]
             door_pose.pose.orientation.y = door_quat[1]
             door_pose.pose.orientation.z = door_quat[2]
@@ -115,9 +115,9 @@ class planning():
 
             self.pose_target = group.get_current_pose()
             print (self.pose_target)
-            self.pose_target.pose.position.x = self.x
-            self.pose_target.pose.position.y = self.y
-            self.pose_target.pose.position.z = self.z
+            self.pose_target.pose.position.x = self.x + self.x_offset
+            self.pose_target.pose.position.y = self.y + self.y_offset
+            self.pose_target.pose.position.z = self.z + self.z_offset
             #pose_target.pose.orientation.x = 0.0
             #pose_target.pose.orientation.y = 0.0
             #pose_target.pose.orientation.z = 0.0
@@ -128,7 +128,7 @@ class planning():
             print ("============== moving to target position ===============")
             group.go(self.pose_target, wait=True)
 
-            rospy.sleep(2)
+            rospy.sleep(15)
 
             #pose_target2 = group.get_current_pose()
             ##pose_target2.pose.orientation.w = 1.0
@@ -155,7 +155,7 @@ class planning():
 
     def endlog(self):
         self.elapsed = self.end - self.start
-        self.stats = ("elapsed " + str(self.elapsed) + " seconds")
+        self.stats = (str(self.elapsed))
         self.calcs()
         print ("===================================================")
         print ("MoveIt! planning and excecution time")
@@ -164,18 +164,14 @@ class planning():
         print (self.pose_target)
         print ("Final pose")
         print (self.pose_final)
-        pickle.dump(self.pose_final, open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/save.p", "wb"))
+        #pickle.dump(self.pose_final, open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/save.p", "wb"))
         print ("===================================================")
-        repo = ["===================================================", "\n"
-"MoveIt! planning and excecution time ", str(self.stats), "\n" "Target pose",
-"\n", str(self.pose_target), "\n" "Final pose" "\n", str(self.pose_final), "\n"
-"/true_target (xyz) = ", str(self.x - self.x_offset), " ", str(self.y - self.y_offset),
- " ", str(self.z - self.z_offset), " ", "\n" "position error (xyz) = ", str(self.error_x),
- " ", str(self.error_y), " ", str(self.error_z), " ", "\n"
-"==================================================="]
+        repo = ["\n", str(rospy.get_time()), " ", str(self.stats), " ",
+str(self.x), " ", str(self.y), " ", str(self.z), " ", str(self.error_x), " ",
+str(self.error_y), " ", str(self.error_z), " ", str(self.angle)]
         report = ''.join(repo)
         print(report)
-        f = open("/home/joe/repos/working/GummiArm/orchestration/packages/src/gummi_door/scripts/tests.txt", "a+")
+        f = open("/home/joe/repos/working/Results/Tests.txt", "a+")
         f.write(report)
         f.close()
 

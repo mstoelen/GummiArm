@@ -234,7 +234,7 @@
     <parent link="shoulder_preroll"/>
     <child link="shoulder"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.55" upper="1.4" velocity="1.0"/>
+    <limit effort="0" lower="-1.4" upper="2.4" velocity="1.0"/>
   </joint> 
   <joint name="shoulder_pitch" type="revolute">
     <origin rpy="0 -1.57079 0.0" xyz="0.0 0.0 0.129"/>
@@ -255,7 +255,7 @@
     <parent link="upperarm"/>
     <child link="lowerarm_preroll"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="-0.85" upper="0.65" velocity="1.0"/>
+    <limit effort="0" lower="-0.85" upper="0.47" velocity="1.0"/>
   </joint>
   <joint name="forearm_roll" type="revolute">
     <origin rpy="1.57079 0.0 0.0" xyz="0.0 -0.079 0.0"/>
@@ -269,7 +269,7 @@
     <parent link="lowerarm"/>
     <child link="wrist"/>
     <axis xyz="0 1 0"/>
-    <limit effort="0" lower="-0.75" upper="0.75" velocity="1.0"/>
+    <limit effort="0" lower="-0.75" upper="0.5" velocity="1.0"/>
   </joint>
   <joint name="wrist_to_coupling" type="fixed">
     <origin rpy="0.0 0.0 3.14159" xyz="-0.0281 0.0 0.0"/>
