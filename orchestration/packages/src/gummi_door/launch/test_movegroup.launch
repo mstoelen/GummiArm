@@ -1,9 +1,0 @@
-<launch>
-
-
-
-<node name="move" pkg="gummi_door" type="test_movegroup.py" output="screen"/> 
-
-
-
-</launch>

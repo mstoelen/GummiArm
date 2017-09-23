@@ -128,7 +128,7 @@ class planning():
             print ("============== moving to target position ===============")
             group.go(self.pose_target, wait=True)
 
-            rospy.sleep(15)
+            rospy.sleep(10)
 
             #pose_target2 = group.get_current_pose()
             ##pose_target2.pose.orientation.w = 1.0

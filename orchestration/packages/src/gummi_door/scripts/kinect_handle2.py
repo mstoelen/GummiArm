@@ -81,7 +81,7 @@ class image_converter:
         self.handle = self.handle_cascade.detectMultiScale(img, 1.05, 20)
         check = 0
         for (x,y,w,h) in self.handle:
-            if (y > 100) and (y < 350) and (x > 150) and (x < 400):
+            if (y > 100) and (y < 300) and (x > 150) and (x < 400):
                 check = 1
                 cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)
                 self.x = x

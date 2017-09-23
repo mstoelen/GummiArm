@@ -25,7 +25,7 @@ class Pulldoor():
         self.attempts = 0
         self.success = 0
         self.fail = 0
-        self.i = 0
+        self.i = 69
 
         atexit.register(self.endlog)
 
