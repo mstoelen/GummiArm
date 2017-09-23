@@ -1,0 +1,44 @@
+Copyright (c) [2017] [Jonathan Walker]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Instructions for running gummi_door package.
+
+Follow GummiArm setup instructions at: https://github.com/mstoelen/GummiArm/wiki/Installing
+and install the moveit branch with console command $ git branch moveit.
+Connect laptop to GummiArm
+Make sure all tendons have no slack
+Open console 
+$ cd GummiArm/orchestration/packages
+open three new tabs and on each:
+$ source devel/setup.bash
+First tab:
+$ roslaunch gummi_dynamixel manager.launch
+Second tab:
+$ roslaunch gummi_dynamixel controllers.launch
+once complete
+$ roslaunch gummi_door number1.launch
+Will open an OpenCV window, once the doorhandle is acquired (white box around it):
+Third tab:
+$ roslaunch gummi_door transformer.launch
+Will open RVIZ and you will see a representation of the arm, door and handle.
+From here door opening is autonomous.
+Works best from ~60cm distance from handle to centre of GummiArm shoulder yaw joint and perpendicular to the door
+but can work from 50 to 70 cm distance and up to 30 deg from perpendicular either side.
+
