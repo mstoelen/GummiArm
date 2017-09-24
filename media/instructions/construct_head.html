@@ -1,4 +1,4 @@
-<!DOCTYPE html >
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -60,26 +60,52 @@
 </nav>
 </header>
 </head>
-
-
     <body>
+      <h1> Head </h1>
+      <p>
+        Required :
+        <ol>
+            <li>1x 180 mm dynamixel 3 pin cable</li>
+            <li>1x 120mm Dynamixel Hub</li>
+            <li>1x slewing bearing  </li>
+            <li>24x M2x8mm screws</li>
+            <li>24x M2 washers</li>
+            <li>20x M2 nuts</li>
+            <li>15x M3x20mm screws</li>
+            <li>30x M3 washers</li>
+            <li>15x M3 nuts</li>
+            <li>2x M6x12 mm screws</li>
+            <li>2x M6 washers</li>
+        </ol>
+      </p>
 
-        <h1>Presentation and general points</h1>
+      <p>
+        1. Fit FilaFlex orange parts in kinect shelf (see Figure 1). <br/>
+        2. Fix servo 101 with 16 M2 x 8 mm screws and corresponding washers (Figure 2) <br/>
+        3. Screw the kinect and the shelf together through the slewing bearing, with M3 screws (Figure 3) <br/>
+        4. Screw the slewing bearing to your structure 9M3 screws) and fix (with M6 x 12 mm) the rotating head part to your structure once you have screwed the encoder with it. And finally fix a Dynamixel hub to the last part. (Figure 4)
+      </p>
 
-        <p>
-            Thinking about building one? Keep reading! The GummiArm is fully <strong>open source</strong>, and we encourage both <strong>replications</strong> and <strong>improvements</strong>. 
-        </p>
-        <p style="text-align:center;"><img src="media/homepage/gummi_general_layout.png", alt = "General layout of the GummiArm", title = "Design view of the GummiArm" width="810" height="735"></p>
+        <figure>
+          <p> <img src="media/building/head/kinect_support.JPG" height="380" width="380" />
+          <figcaption>Step 1</figcaption>
+        </figure> 
+         
+        <figure>
+          <p> <img src="media/building/head/full_neck.JPG"/ height="380" width="380" />
+          <figcaption>Step 2</figcaption>
+        </figure> 
 
-        <p>
-            The arm is actuated by Dynamixel servos from <em> Robotis Inc </em> (Irvine, CA, USA), see figure above (v2.2.0). There are 5 agonist-antagonist joints, each with 2 Dynamixel servos pulling on tendons that work against each other. For example the biceps and triceps actuating on the elbow joint. 2 joints are directly driven by servos, and 1 servo is included in the forearm to drive a hand. 
-        </p>
-        <p style="text-align:center;"><img src="media/homepage/gummi_old_parts.png", alt = "Sum up of all printed parts used to build the arm", title = "Overview of printable pieces" width="810" height="735"></p>
+        <figure>
+          <p><img   src="media/building/head/pre_assembly_head.JPG"/ height="380" width="380" />
+          <figcaption>Step 3</figcaption>
+        </figure> 
 
-        <p>
-            The arm structure is made of PLA plastic, and is printable on hobby-grade <strong> 3D printers </strong>. See all parts for arm above (v2.2.0). The first prototype was printed on a <em> BQ </em> (Madrid, Spain) Prusa i3 Hephestos printer with 20% infill (for most of parts). The full set of parts is available in the repository as <em> FreeCAD files </em> (.FCStd). You can get FreeCAD here: <a href="http://www.freecadweb.org/" title="Click to get FreeCAD">FreeCAD</a>
-        </p>
-        <p style="text-align:center;"><img src="media/homepage/gummi_in_assembly.jpg", alt = "Picture of a mounted GummiArm", title = " A first version of the GummiArm" width="810" height="735"></p>
-
+        <figure>
+          <p> <img   src="media/building/head/mounted_head.JPG"/ height="380" width="380" />
+          <figcaption>Step 4</figcaption>
+        </figure> 
+         
     </body>
+
 </html>
