@@ -1,0 +1,194 @@
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+figure {
+  float: left;
+  width: 40%;
+  text-align: center;
+  font-style: italic;
+  font-size: smaller;
+  margin: 0.5em;
+  padding: 0.5em;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+}
+body {
+  color: black;
+  background-color: white;
+  margin: auto;
+  width: 65%;
+  //border: 1px solid red;
+  padding: 10px;
+  font-size: 120%;
+  line-height: 30px; 
+  text-justify: inter-word;
+  text-align: justify;
+}
+header {
+  width: 100%;
+  padding-top: 200px;
+  padding-bottom:5px;
+  background-image:url('./wikiheader.png');  
+  margin-bottom: 1px;
+  margin-top: 1px;
+  background-repeat: no-repeat;
+  text-align: center;
+  background-size:100% 100%;
+  text-justify: inter-word;
+  text-justify: inter-word;
+}
+h1 {
+  font-weight: bold;
+  font-size: xx-large;
+  text-align: left;
+  margin: 5% 1%;
+  padding: 0;
+}
+h2 {
+  font-weight: bold;
+  font-size: x-large;
+  text-align: left;
+  margin: 10px 0;
+  padding: 0;
+}
+h3 {
+  font-weight: bold;
+  font-size: large;
+  text-align: left;
+  margin: 10px 0;
+  padding: 0;
+}
+table{
+  table-layout: fixed;
+  width: 100%;
+  height: 400pt;
+  text-align: left; 
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+th, tr, td{
+  font-weight: normal;
+  border: 1px solid black;
+}
+
+
+
+span.dropBottom,
+span.dropRight {
+  display: block;
+  box-shadow: inset 2px 0px 0px #FF9;
+  position: absolute;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+}
+
+span.dropBottom {
+  box-shadow: inset 0px 2px 0px #FF9;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+}
+
+
+nav {
+  display: table;
+  margin: 0px 0px;
+  box-shadow: 0px 2px 0px #023333;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul ul {
+  opacity: 0;
+  position: absolute;
+  top: 160%;
+  visibility: hidden;
+  transition: all .4s ease;
+  -webkit-transition: all .4s ease;
+}
+
+ul ul ul {
+  top: 0%;
+  left: 160%;
+}
+
+ul ul li:hover > ul {
+  top: 0%;
+  left: 100%;
+  opacity: 1;
+  visibility: visible;
+}
+
+ul li:hover > ul {
+  opacity: 1;
+  top: 100%;
+  visibility: visible;
+}
+
+ul li {
+  float: left;
+  position: relative;
+}
+
+ul ul li { float: none; }
+
+ul li {
+  background-color: #333;
+  cursor: pointer;
+}
+
+ul a {
+  text-decoration: none;
+  display: block;
+  color: #FFF;
+  padding: 10px 15px;
+  width: 7em;
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  text-shadow: 0px -1px 0px rgba(0,0,0,.2);
+}
+
+ul li:hover { background-color: #8A0808; }
+
+ul li a:hover { background-color: #8A0808; }
+
+
+footer
+{
+    border-top: 2px solid #aaaaaa;
+}
+
+footer p, footer ul
+{ 
+  font-size: 0.8em;
+}
+
+footer h1
+{
+  font-size: 0.8em;
+}
+
+#logo_sponsors
+{
+  margin:auto;
+  text-align:center;
+  border-bottom: 2px solid #aaaaaa;
+}
+
+#logo_fondation
+{
+  display: inline-block;
+  margin:10px 30px;
+  height:120px;
+}

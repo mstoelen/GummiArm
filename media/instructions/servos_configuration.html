@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="author" content="Brice Denoun">
+  <title>GummiArm Instructions</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="./css/style.css">
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+  <header>
+<nav>
+  <ul>
+    <li><a href="./homepage.html">Overview</a>
+        <ul>
+            <li><a href="./cost.html">How much does it cost ?</a></li>
+        </ul>
+    </li>
+    <li><a href="./plastic_overview.html">Plastic</a>
+      <ul>
+          <li><a href="./head.html">Head</a></li>
+          <li><a href="./lower_shoulder.html">Lower shoulder</a></li>
+          <li><a href="./upper_shoulder.html">Upper shoulder</a></li>
+          <li><a href="./upper_arm.html">Upper arm</a></li>
+          <li><a href="./lower_arm.html">Lower arm</a></li>
+        </ul>
+    </li>
+    <li><a href="./servos_overview.html">Servos</a>
+        <ul>
+          <li><a href="./servos_configuration.html">Configuration</a></li>
+        </ul>
+    </li>
+    <li><a href="./required_overview.html">Equipment</a>
+        <ul>
+            <li><a href="./toolbox.html">Toolbox</a></li>
+            <li><a href="./screw_and_bolts.html">Screws and bolts</a></li>
+            <li><a href="./non_plastic_part.html">Non plastic parts</a></li>
+            <li><a href="./optional_equipment.html">Optional equipements</a></li>
+        </ul>
+    </li>
+    <li><a href="#">Instructions</a>
+        <ul>
+          <li><a href="./construct_head.html">Head</a></li>
+          <li><a href="./construct_lower_shoulder.html">Lower shoulder</a></li>
+          <li><a href="./construct_upper_shoulder.html">Upper shoulder</a></li>
+          <li><a href="./construct_lower_arm.html">Lower arm</a></li>
+          <li><a href="./construct_upper_arm.html">Upper arm</a></li>
+        </ul>
+    </li>
+  </ul>
+</nav>
+</header>
+</head>
+
+  <body>
+
+    <h1> Configuration and preparation </h1>
+
+      <p>
+        Before using servos, we need to configure them. All the code provided on the github assume that the servos have the good ID and the appropriate baudrate to communicate with ROS. We recommand you here to have some post-it to note the ID of each servos once configured (or you can write the number beyond it !). To configure them properly we are using <em>herborist</em> from python Pyplot package (you can get herborist <a href="https://poppy-project.github.io/pypot/index.html" title="Click to go on Pyplot page">here</a>). First take the isolating plastic part (download <a href="https://github.com/mstoelen/GummiArm/blob/master/printables/tools/just_a_plate.FCStd" title="Click to download the part">here</a>), and fix on it a Dynamixel AX/MX 3 Pin Bus Hub with 4 screws. Link via the usb Hub the SMPS2Dynamixel with the motor and the motor directly connected to the USB2Dynamixel (plugged to your computer or USB HUB) like on the left picture. Once you switch on the power supplier set to the good parameters, you just need to run <em>herborist</em>. By default, motors' baudrate is 57600 , so we recommand you to search with 1M et 57600 baudrate to find your servo. Once you entered the good ID and selected the good baudrate juste click on <em>Update EEPROM</em>. Please note that all servos are powered thanks to a power supplier settled at 12V and 0.1A. It's highly recommended to follow these values not to burn out the servo.
+      </p>
+
+      <p style="text-align:center;"><img src="media/servos/device.JPG", alt = "Recommended installation", title = "Equipment to configure servos", width="810" height="735"></p>
+
+      <p>It's highly recommendend to have a good look at the following pictures to arrange bolts the same way in order to fix servos to plastic parts.</p>
+
+      <figure>
+        <p><img src="media/servos/s101right.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 8 and 101 (right side)</figcaption>
+      </figure>   
+
+      <figure>
+        <p><img src="media/servos/s101left.JPG"/ height="400" width="400" />
+        <figcaption>Bolts configuration for servo 8 and 101 (left side)</figcaption>
+      </figure>   
+
+      <figure>
+        <p><img src="media/servos/s4.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 4</figcaption>
+      </figure>   
+
+      <figure>
+        <p><img src="media/servos/s5.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 5</figcaption>
+      </figure> 
+
+      <figure>
+        <p> <img src="media/servos/s6.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 6</figcaption>
+      </figure> 
+
+      <figure>
+        <p> <img src="media/servos/s7.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 7</figcaption>
+      </figure> 
+
+      <figure>
+        <p> <img src="media/servos/s1right.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 1, servo 11 and 15 (right side)</figcaption>
+      </figure>
+
+      <figure>
+        <p> <img src="media/servos/s1left.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 1, servo 11 and 15 (left side)</figcaption>
+      </figure>
+
+      <figure>
+        <p> <img src="media/servos/s1top.JPG" height="400" width="400" />
+        <figcaption>Bolts configuration for servo 1, servo 11 and 15 (top side)</figcaption>
+      </figure>       
+
+
+  </body>
+
+</html>
