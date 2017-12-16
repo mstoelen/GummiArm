@@ -216,5 +216,24 @@ class Gummi:
         self.shoulderPitch.setCollisionResponse(shoulderPitch)
         self.elbow.setCollisionResponse(elbow)
         self.wrist.setCollisionResponse(wrist)
+
+    def doZeroEquilibriumPose(self):
+        self.shoulderYaw.moveTo(0.0, self.shoulderYawCocont)
+        rospy.sleep(1)
+        self.shoulderRoll.moveTo(0.0, self.shoulderRollCocont)
+        rospy.sleep(1)
+        self.shoulderPitch.moveTo(0.0, self.shoulderPitchCocont)
+        rospy.sleep(1)
+        self.upperarmRoll.servoTo(0)
+        rospy.sleep(1)
+        self.elbow.moveTo(0.0, self.elbowCocont)
+        rospy.sleep(1)
+        self.forearmRoll.servoTo(0)
+        rospy.sleep(1)
+        self.wrist.moveTo(0, self.wristCocont)
+        rospy.sleep(1)
+        self.handDOF1.servoTo(0.0)
+        rospy.sleep(1)
+        self.headYaw.servoTo(0)
     
         
