@@ -1,4 +1,7 @@
 # GummiArm
+
+**Note:** This repository will be archived. The new repositories for the GummiArm Community Edition are being setup under the GummiArmCE organization: https://github.com/GummiArmCE
+
 Repository for the GummiArm robot project: http://mstoelen.github.io/GummiArm/
 
 Documentation in the wiki: https://github.com/mstoelen/GummiArm/wiki
