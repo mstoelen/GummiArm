@@ -1,0 +1,7 @@
+<launch>	
+  <arg name="clone" default="default"/>	
+  <include file="$(find gummi_interface)/launch/load_config.launch" ns="gummi">
+    <arg name="clone" value="$(arg clone)"/>
+  </include>
+  <node name="gummi_configure" pkg="gummi_interface" type="gummi_configure_antagonist.py" output="screen"/>	
+</launch>
