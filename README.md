@@ -1,6 +1,6 @@
 # GummiArm
 
-**Note:** This repository will be archived. Tested last on ROS Kinetic Kame. The new repositories for the GummiArm Community Edition are being setup under the GummiArmCE organization: https://github.com/GummiArmCE
+**Note:** This repository was archived on 24/04/2019. Last tested last on ROS Kinetic Kame. Checkout the new GummiArm Community Edition here: https://github.com/GummiArmCE
 
 Repository for the GummiArm robot project: http://mstoelen.github.io/GummiArm/
 
